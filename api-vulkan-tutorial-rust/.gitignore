@@ -1,0 +1,8 @@
+debug/
+target/
+
+*.code-workspace
+
+**/*.rs.bk
+
+*.pdb
