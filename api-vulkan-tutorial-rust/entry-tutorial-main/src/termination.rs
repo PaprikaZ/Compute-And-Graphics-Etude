@@ -11,6 +11,8 @@ pub enum TerminationProcessMain {
     InitializationVulkanEntryCreateFail(Box<dyn std::error::Error + Send + Sync + 'static>),
     InitializationVulkanInstanceCreateFail(VulkanErrorCode),
     InitializationVulkanValidationLayerNotSupport,
+    InitializationVulkanEnumeratePhysicalDeviceFail(VulkanErrorCode),
+    InitializationVulkanDevicePhysicalAllQueueFamilyGraphicNotSupport,
 }
 
 impl TerminationProcessMain {
@@ -23,6 +25,8 @@ impl TerminationProcessMain {
             Self::InitializationVulkanEntryCreateFail(_) => 4u8,
             Self::InitializationVulkanInstanceCreateFail(_) => 5u8,
             Self::InitializationVulkanValidationLayerNotSupport => 6u8,
+            Self::InitializationVulkanEnumeratePhysicalDeviceFail(_) => 7u8,
+            Self::InitializationVulkanDevicePhysicalAllQueueFamilyGraphicNotSupport => 8u8,
         }
     }
 }

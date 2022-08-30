@@ -20,6 +20,7 @@ use ::vulkan::prelude::version1_2::*;
 use crate::termination::TerminationProcessMain;
 use crate::application::main::Application;
 use crate::application::vulkan_instance_share::ApplicationVulkanInstanceShare;
+use crate::application::vulkan_instance_device_physical::ApplicationVulkanInstanceDevicePhysical;
 
 
 pub struct ApplicationVulkanInstanceValidationWi {}
@@ -46,10 +47,16 @@ impl ApplicationVulkanInstanceValidationWi {
                 Err(error) => return Err(error),
                 Ok(instance) => instance,
             };
+        let vulkan_physical_device =
+            match ApplicationVulkanInstancePhysicalDevice::pick(&vulkan_instance) {
+                Err(error) => return Err(error),
+                Ok(physical_device) => physical_device,
+            };
         Ok(Application {
             vulkan_entry: vulkan_entry,
             vulkan_instance: vulkan_instance,
             vulkan_debug_messenger: None,
+            vulkan_device_physical: vulkan_physical_device,
         })
     }
 

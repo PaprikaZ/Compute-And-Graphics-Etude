@@ -2,6 +2,7 @@ pub use ::vulkanalia::loader::LIBRARY as VULKAN_LIBRARY_FILE_NAME;
 pub use ::vulkanalia::loader::LibloadingLoader as VulkanLibraryLoader;
 pub use ::vulkanalia::window;
 pub use ::vulkanalia::vk;
+pub use ::vulkanalia::vk::Bool32 as VulkanBool32;
 pub use ::vulkanalia::vk::Handle as VulkanHandler;
 pub use ::vulkanalia::vk::HasBuilder as VulkanBuilderHas;
 pub use ::vulkanalia::vk::ApplicationInfo as VulkanApplicationInfomation;
@@ -16,7 +17,8 @@ pub use ::vulkanalia::vk::DebugUtilsMessengerCreateInfoEXTBuilder as VulkanExten
 pub use ::vulkanalia::vk::DebugUtilsMessageSeverityFlagsEXT as VulkanExtensionDebugUtilityMessageSeverityFlagS;
 pub use ::vulkanalia::vk::DebugUtilsMessageTypeFlagsEXT as VulkanExtensionDebugUtilityMessageTypeFlagS;
 pub use ::vulkanalia::vk::DebugUtilsMessengerCallbackDataEXT as VulkanExtensionDebugUtilityMessengerCallbackData;
-pub use ::vulkanalia::vk::Bool32 as VulkanBool32;
+pub use ::vulkanalia::vk::PhysicalDevice as VulkanDevicePhysical;
+pub use ::vulkanalia::vk::QueueFlags as VulkanQueueFlagS;
 
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
@@ -92,5 +94,16 @@ pub struct VulkanErrorCode(i32);
 impl VulkanErrorCode {
     pub fn new(code: i32) -> Self {
         Self(code)
+    }
+}
+
+pub struct VulkanQueueFamilyIndexGraphic(u32);
+
+impl VulkanQueueFamilyIndexGraphic {
+    pub fn new(queue_index: u32) -> Self {
+        Self(queue_index)
+    }
+    pub fn as_raw(&self) -> u32 {
+        self.0
     }
 }
