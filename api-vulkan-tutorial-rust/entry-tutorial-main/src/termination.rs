@@ -10,6 +10,7 @@ pub enum TerminationProcessMain {
     InitializationVulkanLibraryLoadingFail(LibraryLoadingError),
     InitializationVulkanEntryCreateFail(Box<dyn std::error::Error + Send + Sync + 'static>),
     InitializationVulkanInstanceCreateFail(VulkanErrorCode),
+    InitializationVulkanValidationLayerNotSupport,
 }
 
 impl TerminationProcessMain {
@@ -21,6 +22,7 @@ impl TerminationProcessMain {
             Self::InitializationVulkanLibraryLoadingFail(_) => 3u8,
             Self::InitializationVulkanEntryCreateFail(_) => 4u8,
             Self::InitializationVulkanInstanceCreateFail(_) => 5u8,
+            Self::InitializationVulkanValidationLayerNotSupport => 6u8,
         }
     }
 }
