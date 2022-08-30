@@ -3,6 +3,7 @@ use ::window_uniform::prelude::*;
 use ::vulkan::VulkanExtensionName;
 use ::vulkan::VulkanExtensionDebugUtilityMessenger;
 use ::vulkan::prelude::version1_2::*;
+use ::vulkan::VulkanPhysicalDevice;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_instance_validation_wi::ApplicationVulkanInstanceValidationWi;
@@ -13,6 +14,7 @@ pub struct Application {
     pub vulkan_entry: VulkanEntry,
     pub vulkan_instance: VulkanInstance,
     pub vulkan_debug_messenger: Option<VulkanExtensionDebugUtilityMessenger>,
+    pub vulkan_physical_device: VulkanPhysicalDevice,
 }
 
 impl Application {
