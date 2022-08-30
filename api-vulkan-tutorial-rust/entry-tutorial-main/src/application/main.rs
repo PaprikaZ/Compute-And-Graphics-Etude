@@ -1,9 +1,12 @@
+use vulkan::VulkanExtensionDebugUtility;
 use ::window_uniform::prelude::*;
 use ::vulkan::VulkanExtensionName;
 use ::vulkan::VulkanExtensionDebugUtilityMessenger;
 use ::vulkan::prelude::version1_2::*;
 
 use crate::termination::TerminationProcessMain;
+use crate::application::vulkan_instance_validation_wi::ApplicationVulkanInstanceValidationWi;
+use crate::application::vulkan_instance_validation_wo::ApplicationVulkanInstanceValidationWo;
 
 
 pub struct Application {
@@ -18,8 +21,8 @@ impl Application {
      -> Result<Self, TerminationProcessMain>
     {
         match optional_validation_layer {
-            None => Self::create_validation_wo(window),
-            Some(validation_layer) => Self::create_validation_wi(window, validation_layer),
+            None => ApplicationVulkanInstanceValidationWo::create(window),
+            Some(validation_layer) => ApplicationVulkanInstanceValidationWi::create(window, validation_layer),
         }
     }
 
@@ -28,6 +31,9 @@ impl Application {
     }
 
     pub unsafe fn destroy(&mut self) -> () {
+        if Option::is_some(&self.vulkan_debug_messenger) {
+            self.vulkan_instance.destroy_debug_utils_messenger_ext(self.vulkan_debug_messenger.unwrap(), None);
+        };
         self.vulkan_instance.destroy_instance(None);
     }
 }

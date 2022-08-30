@@ -19,12 +19,15 @@ use ::vulkan::prelude::version1_2::*;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::main::Application;
+use crate::application::vulkan_instance_share::ApplicationVulkanInstanceShare;
 
 
-impl Application {
-    pub unsafe fn create_validation_wi(
+pub struct ApplicationVulkanInstanceValidationWi {}
+
+impl ApplicationVulkanInstanceValidationWi {
+    pub unsafe fn create(
         window: &WindowUniformWindow, vulkan_validation_layer: &VulkanExtensionName)
-     -> Result<Self, TerminationProcessMain>
+     -> Result<Application, TerminationProcessMain>
     {
         let vulkan_library_loader =
             match VulkanLibraryLoader::new(VULKAN_LIBRARY_FILE_NAME) {
@@ -37,26 +40,25 @@ impl Application {
                 Ok(entry) => entry,
             };
         let create_vulkan_instance_result =
-            Application::create_vulkan_instance_validation_wi(window, &vulkan_entry, vulkan_validation_layer);
-
+            Self::create_vulkan_instance(window, &vulkan_entry, vulkan_validation_layer);
         let vulkan_instance =
             match create_vulkan_instance_result {
                 Err(error) => return Err(error),
                 Ok(instance) => instance,
             };
-        Ok(Self {
+        Ok(Application {
             vulkan_entry: vulkan_entry,
             vulkan_instance: vulkan_instance,
             vulkan_debug_messenger: None,
         })
     }
 
-    unsafe fn create_vulkan_instance_validation_wi(
+    unsafe fn create_vulkan_instance(
         window: &WindowUniformWindow, vulkan_entry: &VulkanEntry, vulkan_validation_layer: &VulkanExtensionName)
      -> Result<VulkanInstance, TerminationProcessMain>
     {
-        let vulkan_application_information = Self::create_vulkan_instance_application_information();
-
+        let vulkan_application_information =
+            ApplicationVulkanInstanceShare::create_vulkan_instance_application_information();
         let available_vulkan_layer_s =
             match vulkan_entry.enumerate_instance_layer_properties() {
                 Err(error) => {
@@ -68,34 +70,28 @@ impl Application {
             .iter()
             .map(|l| l.layer_name)
             .collect::<HashSet<_>>();
-
         let vulkan_validation_layer_s =
             match available_vulkan_layer_s.contains(&vulkan_validation_layer) {
                 false => return Err(TerminationProcessMain::InitializationVulkanValidationLayerNotSupport),
                 true => vec![vulkan_validation_layer.as_ptr()],
             };
-
         let vulkan_application_extension_s = {
-            let mut extension_s = Self::create_vulkan_instance_application_extension_s(window);
+            let mut extension_s = ApplicationVulkanInstanceShare::create_vulkan_instance_application_extension_s(window);
             extension_s.push(VULKAN_EXTENSION_DEBUG_UTILITY.name.as_ptr());
             extension_s
         };
-
         let vulkan_instance_create_information =
             VulkanInstanceCreateInformation::builder()
             .application_info(&vulkan_application_information)
             .enabled_layer_names(&vulkan_validation_layer_s)
             .enabled_extension_names(&vulkan_application_extension_s);
-
         let mut vulkan_debug_messenger_create_information =
             VulkanExtensionDebugUtilityMessengerCreateInformation::builder()
             .message_severity(VulkanExtensionDebugUtilityMessageSeverityFlagS::all())
             .message_type(VulkanExtensionDebugUtilityMessageTypeFlagS::all())
             .user_callback(Some(vulkan_debug_callback));
-
         let vulkan_instance_create_information =
             vulkan_instance_create_information.push_next(&mut vulkan_debug_messenger_create_information);
-
         let vulkan_instance =
             match vulkan_entry.create_instance(&vulkan_instance_create_information, None) {
                 Err(error) => {
@@ -104,7 +100,6 @@ impl Application {
                 } ,
                 Ok(instance) => instance,
             };
-
         Ok(vulkan_instance)
     }
 }

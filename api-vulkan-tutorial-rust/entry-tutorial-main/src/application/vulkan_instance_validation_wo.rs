@@ -7,10 +7,13 @@ use ::vulkan::prelude::version1_2::*;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::main::Application;
+use crate::application::vulkan_instance_share::ApplicationVulkanInstanceShare;
 
 
-impl Application {
-    pub unsafe fn create_validation_wo(window: &WindowUniformWindow) -> Result<Self, TerminationProcessMain> {
+pub struct ApplicationVulkanInstanceValidationWo {}
+
+impl ApplicationVulkanInstanceValidationWo {
+    pub unsafe fn create(window: &WindowUniformWindow) -> Result<Application, TerminationProcessMain> {
         let vulkan_library_loader =
             match VulkanLibraryLoader::new(VULKAN_LIBRARY_FILE_NAME) {
                 Err(error) => return Err(TerminationProcessMain::InitializationVulkanLibraryLoadingFail(error)),
@@ -22,21 +25,23 @@ impl Application {
                 Ok(entry) => entry,
             };
         let vulkan_instance =
-            match Application::create_vulkan_instance_validation_wo(window, &vulkan_entry) {
+            match Self::create_vulkan_instance(window, &vulkan_entry) {
                 Err(error) => return Err(error),
                 Ok(instance) => instance,
             };
-        Ok(Self {
+        Ok(Application {
             vulkan_entry: vulkan_entry,
             vulkan_instance: vulkan_instance,
             vulkan_debug_messenger: None,
         })
     }
 
-    unsafe fn create_vulkan_instance_validation_wo(
+    unsafe fn create_vulkan_instance(
         window: &WindowUniformWindow, vulkan_entry: &VulkanEntry) -> Result<VulkanInstance, TerminationProcessMain> {
-        let vulkan_application_information = Self::create_vulkan_instance_application_information();
-        let vulkan_application_extension_s = Self::create_vulkan_instance_application_extension_s(window);
+        let vulkan_application_information =
+            ApplicationVulkanInstanceShare::create_vulkan_instance_application_information();
+        let vulkan_application_extension_s =
+            ApplicationVulkanInstanceShare::create_vulkan_instance_application_extension_s(window);
         let vulkan_instance_create_information =
             VulkanInstanceCreateInformation::builder()
             .application_info(&vulkan_application_information)
