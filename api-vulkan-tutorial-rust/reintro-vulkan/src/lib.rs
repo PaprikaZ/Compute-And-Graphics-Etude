@@ -96,3 +96,14 @@ impl VulkanErrorCode {
         Self(code)
     }
 }
+
+pub struct VulkanQueueFamilyIndexGraphic(u32);
+
+impl VulkanQueueFamilyIndexGraphic {
+    pub fn new(queue_index: u32) -> Self {
+        Self(queue_index)
+    }
+    pub fn as_raw(&self) -> u32 {
+        self.0
+    }
+}
