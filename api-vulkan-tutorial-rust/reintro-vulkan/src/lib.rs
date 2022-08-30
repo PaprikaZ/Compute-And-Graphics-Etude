@@ -17,7 +17,7 @@ pub use ::vulkanalia::vk::DebugUtilsMessengerCreateInfoEXTBuilder as VulkanExten
 pub use ::vulkanalia::vk::DebugUtilsMessageSeverityFlagsEXT as VulkanExtensionDebugUtilityMessageSeverityFlagS;
 pub use ::vulkanalia::vk::DebugUtilsMessageTypeFlagsEXT as VulkanExtensionDebugUtilityMessageTypeFlagS;
 pub use ::vulkanalia::vk::DebugUtilsMessengerCallbackDataEXT as VulkanExtensionDebugUtilityMessengerCallbackData;
-pub use ::vulkanalia::vk::PhysicalDevice as VulkanPhysicalDevice;
+pub use ::vulkanalia::vk::PhysicalDevice as VulkanDevicePhysical;
 pub use ::vulkanalia::vk::QueueFlags as VulkanQueueFlagS;
 
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;

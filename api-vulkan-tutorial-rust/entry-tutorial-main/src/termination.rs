@@ -12,7 +12,7 @@ pub enum TerminationProcessMain {
     InitializationVulkanInstanceCreateFail(VulkanErrorCode),
     InitializationVulkanValidationLayerNotSupport,
     InitializationVulkanEnumeratePhysicalDeviceFail(VulkanErrorCode),
-    InitializationVulkanPhysicalDeviceAllQueueFamilyGraphicNotSupport,
+    InitializationVulkanDevicePhysicalAllQueueFamilyGraphicNotSupport,
 }
 
 impl TerminationProcessMain {
@@ -26,7 +26,7 @@ impl TerminationProcessMain {
             Self::InitializationVulkanInstanceCreateFail(_) => 5u8,
             Self::InitializationVulkanValidationLayerNotSupport => 6u8,
             Self::InitializationVulkanEnumeratePhysicalDeviceFail(_) => 7u8,
-            Self::InitializationVulkanPhysicalDeviceAllQueueFamilyGraphicNotSupport => 8u8,
+            Self::InitializationVulkanDevicePhysicalAllQueueFamilyGraphicNotSupport => 8u8,
         }
     }
 }

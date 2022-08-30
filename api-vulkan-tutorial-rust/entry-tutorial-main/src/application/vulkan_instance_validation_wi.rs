@@ -20,7 +20,7 @@ use ::vulkan::prelude::version1_2::*;
 use crate::termination::TerminationProcessMain;
 use crate::application::main::Application;
 use crate::application::vulkan_instance_share::ApplicationVulkanInstanceShare;
-use crate::application::vulkan_instance_physical_device::ApplicationVulkanInstancePhysicalDevice;
+use crate::application::vulkan_instance_device_physical::ApplicationVulkanInstanceDevicePhysical;
 
 
 pub struct ApplicationVulkanInstanceValidationWi {}
@@ -56,7 +56,7 @@ impl ApplicationVulkanInstanceValidationWi {
             vulkan_entry: vulkan_entry,
             vulkan_instance: vulkan_instance,
             vulkan_debug_messenger: None,
-            vulkan_physical_device: vulkan_physical_device,
+            vulkan_device_physical: vulkan_physical_device,
         })
     }
 
