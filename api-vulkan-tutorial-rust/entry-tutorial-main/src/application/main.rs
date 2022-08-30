@@ -1,3 +1,4 @@
+use vulkan::VulkanExtensionDebugUtility;
 use ::window_uniform::prelude::*;
 use ::vulkan::VulkanExtensionName;
 use ::vulkan::VulkanExtensionDebugUtilityMessenger;
@@ -28,6 +29,9 @@ impl Application {
     }
 
     pub unsafe fn destroy(&mut self) -> () {
+        if Option::is_some(&self.vulkan_debug_messenger) {
+            self.vulkan_instance.destroy_debug_utils_messenger_ext(self.vulkan_debug_messenger.unwrap(), None);
+        };
         self.vulkan_instance.destroy_instance(None);
     }
 }
