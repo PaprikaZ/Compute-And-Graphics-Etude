@@ -1,2 +1,2 @@
 [workspace]
-members = ["reintro-window-uniform", "reintro-vulkan", "entry-tutorial-main"]
+members = ["reintro-console-log", "reintro-window-uniform", "reintro-vulkan", "entry-tutorial-main"]
