@@ -2,6 +2,7 @@ pub use ::vulkanalia::loader::LIBRARY as VULKAN_LIBRARY_FILE_NAME;
 pub use ::vulkanalia::loader::LibloadingLoader as VulkanLibraryLoader;
 pub use ::vulkanalia::window;
 pub use ::vulkanalia::vk;
+pub use ::vulkanalia::vk::Bool32 as VulkanBool32;
 pub use ::vulkanalia::vk::Handle as VulkanHandler;
 pub use ::vulkanalia::vk::HasBuilder as VulkanBuilderHas;
 pub use ::vulkanalia::vk::ApplicationInfo as VulkanApplicationInfomation;
@@ -16,7 +17,8 @@ pub use ::vulkanalia::vk::DebugUtilsMessengerCreateInfoEXTBuilder as VulkanExten
 pub use ::vulkanalia::vk::DebugUtilsMessageSeverityFlagsEXT as VulkanExtensionDebugUtilityMessageSeverityFlagS;
 pub use ::vulkanalia::vk::DebugUtilsMessageTypeFlagsEXT as VulkanExtensionDebugUtilityMessageTypeFlagS;
 pub use ::vulkanalia::vk::DebugUtilsMessengerCallbackDataEXT as VulkanExtensionDebugUtilityMessengerCallbackData;
-pub use ::vulkanalia::vk::Bool32 as VulkanBool32;
+pub use ::vulkanalia::vk::PhysicalDevice as VulkanPhysicalDevice;
+pub use ::vulkanalia::vk::QueueFlags as VulkanQueueFlagS;
 
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
