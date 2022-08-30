@@ -1,7 +1,8 @@
+mod config;
 mod window;
 mod termination;
-mod initialization;
 mod application;
+mod initialization;
 mod composition;
 
 use crate::termination::TerminationProcessMain;
