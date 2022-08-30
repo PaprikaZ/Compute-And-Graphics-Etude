@@ -12,14 +12,12 @@ impl InitializationLoggerConsole {
 
     pub fn initialize(&mut self) -> Result<(), TerminationProcessMain> {
         match self.be_initialized {
-            true => {
+            true => Err(TerminationProcessMain::InitializationLoggerConsoleFail),
+            false => {
                 pretty_env_logger::init();
                 self.be_initialized = true;
                 Ok(())
             },
-            false => {
-                Err(TerminationProcessMain::InitializationLoggerConsoleFail)
-            }
         }
     }
 }
