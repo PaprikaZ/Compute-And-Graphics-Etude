@@ -1,4 +1,4 @@
 pub mod main;
-pub mod share;
-pub mod validation_wo;
-pub mod validation_wi;
+pub mod vulkan_instance_share;
+pub mod vulkan_instance_validation_wo;
+pub mod vulkan_instance_validation_wi;

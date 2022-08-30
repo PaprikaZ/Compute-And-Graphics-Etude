@@ -3,10 +3,10 @@ use ::vulkan::VulkanBuilderHas;
 use ::vulkan::VulkanApplicationInfomation;
 use ::vulkan::VulkanApplicationInformationBuilder;
 
-use crate::application::main::Application;
 
+pub struct ApplicationVulkanInstanceShare {}
 
-impl Application {
+impl ApplicationVulkanInstanceShare {
     pub fn create_vulkan_instance_application_information() -> VulkanApplicationInformationBuilder<'static> {
         VulkanApplicationInfomation::builder()
         .application_name(b"Vulkan Tutorial Rust\0")
