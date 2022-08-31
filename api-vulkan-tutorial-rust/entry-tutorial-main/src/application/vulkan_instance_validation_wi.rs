@@ -67,8 +67,11 @@ impl ApplicationVulkanInstanceValidationWi {
             };
         let create_vulkan_logical_device_result =
             ApplicationVulkanInstanceDeviceLogical::create(
-                &vulkan_instance, vulkan_physical_device, vulkan_graphic_queue_family_index);
-        let (vulkan_logical_device, vulkan_graphic_queue) =
+                &vulkan_instance,
+                vulkan_physical_device,
+                vulkan_graphic_queue_family_index,
+                vulkan_surface_queue_family_index);
+        let (vulkan_logical_device, vulkan_graphic_queue, vulkan_present_queue) =
             match create_vulkan_logical_device_result {
                 Err(error) => return Err(error),
                 Ok(device_and_queue) => device_and_queue,
