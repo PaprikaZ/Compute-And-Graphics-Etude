@@ -1,4 +1,5 @@
 use ::window_uniform::prelude::*;
+use ::vulkan::VulkanWindow;
 use ::vulkan::VulkanBuilderHas;
 use ::vulkan::VulkanApplicationInfomation;
 use ::vulkan::VulkanApplicationInformationBuilder;
@@ -17,7 +18,7 @@ impl ApplicationVulkanInstanceShare {
     }
 
     pub fn create_vulkan_instance_application_extension_s(window: &WindowUniformWindow) -> Vec<*const i8> {
-        ::vulkan::window::get_required_instance_extensions(window)
+        VulkanWindow::get_required_instance_extensions(window)
         .iter()
         .map(|e| e.as_ptr())
         .collect::<Vec<_>>()

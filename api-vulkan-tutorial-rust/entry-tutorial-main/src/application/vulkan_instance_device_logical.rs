@@ -1,3 +1,6 @@
+use std::collections::HashSet;
+
+use vulkan::VulkanQueueFamilyIndexSurface;
 use ::vulkan::prelude::version1_2::*;
 use ::vulkan::VulkanInstance;
 use ::vulkan::VulkanDevicePhysical;
@@ -16,20 +19,29 @@ impl ApplicationVulkanInstanceDeviceLogical {
     pub unsafe fn create(
         vulkan_instance: &VulkanInstance,
         vulkan_physical_device: VulkanDevicePhysical,
-        vulkan_graphic_queue_family_index: VulkanQueueFamilyIndexGraphic)
-     -> Result<(VulkanDeviceLogical, VulkanQueue), TerminationProcessMain>
+        vulkan_graphic_queue_family_index: VulkanQueueFamilyIndexGraphic,
+        vulkan_surface_queue_family_index: VulkanQueueFamilyIndexSurface)
+     -> Result<(VulkanDeviceLogical, VulkanQueue, VulkanQueue), TerminationProcessMain>
     {
+        let mut vulkan_queue_family_index_unique_set = HashSet::new();
+        vulkan_queue_family_index_unique_set.insert(vulkan_graphic_queue_family_index.as_raw());
+        vulkan_queue_family_index_unique_set.insert(vulkan_surface_queue_family_index.as_raw());
+
         let vulkan_graphic_queue_priority_s = &[1.0];
-        let vulkan_graphic_queue_create_information =
-            VulkanDeviceLogicalQueueCreateInformation::builder()
-            .queue_family_index(vulkan_graphic_queue_family_index.as_raw())
-            .queue_priorities(vulkan_graphic_queue_priority_s);
+        let vulkan_graphic_queue_create_information_s =
+            vulkan_queue_family_index_unique_set
+            .iter()
+            .map(|i| {
+                VulkanDeviceLogicalQueueCreateInformation::builder()
+                .queue_family_index(*i)
+                .queue_priorities(vulkan_graphic_queue_priority_s)
+            })
+            .collect::<Vec<_>>();
         let vulkan_device_layer_s: Vec<*const i8> = vec![];
         let vulkan_physical_device_feature_s = VulkanDevicePhysicalFeatureS::builder();
-        let vulkan_graphic_queue_create_information_s = &[vulkan_graphic_queue_create_information];
         let vulkan_logical_device_create_information =
             VulkanDeviceLogicalCreateInformation::builder()
-            .queue_create_infos(vulkan_graphic_queue_create_information_s)
+            .queue_create_infos(&vulkan_graphic_queue_create_information_s)
             .enabled_layer_names(&vulkan_device_layer_s)
             .enabled_features(&vulkan_physical_device_feature_s);
         let create_vulkan_logical_device_result =
@@ -44,6 +56,8 @@ impl ApplicationVulkanInstanceDeviceLogical {
             };
         let vulkan_graphic_queue =
             vulkan_logical_device.get_device_queue(vulkan_graphic_queue_family_index.as_raw(), 0);
-        Ok((vulkan_logical_device, vulkan_graphic_queue))
+        let vulkan_present_queue =
+            vulkan_logical_device.get_device_queue(vulkan_surface_queue_family_index.as_raw(), 0);
+        Ok((vulkan_logical_device, vulkan_graphic_queue, vulkan_present_queue))
     }
 }

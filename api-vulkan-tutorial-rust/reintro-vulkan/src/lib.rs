@@ -1,6 +1,6 @@
 pub use ::vulkanalia::loader::LIBRARY as VULKAN_LIBRARY_FILE_NAME;
 pub use ::vulkanalia::loader::LibloadingLoader as VulkanLibraryLoader;
-pub use ::vulkanalia::window;
+pub use ::vulkanalia::window as VulkanWindow;
 pub use ::vulkanalia::vk;
 pub use ::vulkanalia::vk::Bool32 as VulkanBool32;
 pub use ::vulkanalia::vk::Handle as VulkanHandler;
@@ -26,6 +26,12 @@ pub use ::vulkanalia::vk::DeviceQueueCreateInfo as VulkanDeviceLogicalQueueCreat
 pub use ::vulkanalia::vk::DeviceQueueCreateInfoBuilder as VulkanDeviceLogicalQueueCreateInformationBuilder;
 pub use ::vulkanalia::vk::PhysicalDeviceFeatures as VulkanDevicePhysicalFeatureS;
 pub use ::vulkanalia::vk::PhysicalDeviceFeaturesBuilder as VulkanDevicePhysicalFeatureSBuilder;
+
+pub use ::vulkanalia::vk::KhrSurfaceExtension as VulkanSurfaceExtensionKhr;
+pub use ::vulkanalia::vk::SurfaceKHR as VulkanSurfaceKhr;
+pub use ::vulkanalia::vk::Win32SurfaceCreateInfoKHR as VulkanSurfaceCreateInformationKhr;
+pub use ::vulkanalia::vk::Win32SurfaceCreateInfoKHRBuilder as VulkanSurfaceCreateInformationBuilderKhr;
+pub use ::vulkanalia::vk::KhrWin32SurfaceExtension as VulkanSurfaceExtensionWin32;
 
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
@@ -110,6 +116,19 @@ impl VulkanQueueFamilyIndexGraphic {
     pub fn new(queue_index: u32) -> Self {
         Self(queue_index)
     }
+
+    pub fn as_raw(&self) -> u32 {
+        self.0
+    }
+}
+
+pub struct VulkanQueueFamilyIndexSurface(u32);
+
+impl VulkanQueueFamilyIndexSurface {
+    pub fn new(queue_index: u32) -> Self {
+        Self(queue_index)
+    }
+
     pub fn as_raw(&self) -> u32 {
         self.0
     }

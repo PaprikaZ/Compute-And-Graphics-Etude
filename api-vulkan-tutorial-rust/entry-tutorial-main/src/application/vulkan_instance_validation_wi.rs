@@ -13,6 +13,7 @@ use ::vulkan::VulkanExtensionDebugUtilityMessengerCreateInformation;
 use ::vulkan::VulkanExtensionDebugUtilityMessageSeverityFlagS;
 use ::vulkan::VulkanExtensionDebugUtilityMessageTypeFlagS;
 use ::vulkan::VulkanExtensionDebugUtilityMessengerCallbackData;
+use ::vulkan::VulkanWindow;
 use ::vulkan::VulkanBool32;
 use ::vulkan::VULKAN_EXTENSION_DEBUG_UTILITY;
 use ::vulkan::prelude::version1_2::*;
@@ -48,15 +49,29 @@ impl ApplicationVulkanInstanceValidationWi {
                 Err(error) => return Err(error),
                 Ok(instance) => instance,
             };
-        let (vulkan_physical_device, vulkan_graphic_queue_family_index) =
-            match ApplicationVulkanInstanceDevicePhysical::pick(&vulkan_instance) {
+        let create_vulkan_surface_result = VulkanWindow::create_surface(&vulkan_instance, window);
+        let vulkan_surface =
+            match create_vulkan_surface_result {
+                Err(error) => {
+                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                    return Err(TerminationProcessMain::InitializationVulkanSurfaceCreateFail(vulkan_error_code));
+                },
+                Ok(surface) => surface,
+            };
+        let (vulkan_physical_device,
+             vulkan_graphic_queue_family_index,
+             vulkan_surface_queue_family_index) =
+            match ApplicationVulkanInstanceDevicePhysical::pick(&vulkan_instance, vulkan_surface) {
                 Err(error) => return Err(error),
                 Ok(device_and_queue_index) => device_and_queue_index,
             };
         let create_vulkan_logical_device_result =
             ApplicationVulkanInstanceDeviceLogical::create(
-                &vulkan_instance, vulkan_physical_device, vulkan_graphic_queue_family_index);
-        let (vulkan_logical_device, vulkan_graphic_queue) =
+                &vulkan_instance,
+                vulkan_physical_device,
+                vulkan_graphic_queue_family_index,
+                vulkan_surface_queue_family_index);
+        let (vulkan_logical_device, vulkan_graphic_queue, vulkan_present_queue) =
             match create_vulkan_logical_device_result {
                 Err(error) => return Err(error),
                 Ok(device_and_queue) => device_and_queue,
@@ -68,6 +83,8 @@ impl ApplicationVulkanInstanceValidationWi {
             vulkan_device_physical: vulkan_physical_device,
             vulkan_device_logical: vulkan_logical_device,
             vulkan_queue_graphic: vulkan_graphic_queue,
+            vulkan_surface: vulkan_surface,
+            vulkan_queue_present: vulkan_present_queue,
         })
     }
 
