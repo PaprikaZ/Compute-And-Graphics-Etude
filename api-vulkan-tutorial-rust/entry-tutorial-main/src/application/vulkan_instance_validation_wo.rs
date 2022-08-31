@@ -29,10 +29,10 @@ impl ApplicationVulkanInstanceValidationWo {
                 Err(error) => return Err(error),
                 Ok(instance) => instance,
             };
-        let vulkan_physical_device =
-            match ApplicationVulkanInstancePhysicalDevice::pick(&vulkan_instance) {
+        let (vulkan_physical_device, vulkan_graphic_queue_family_index) =
+            match ApplicationVulkanInstanceDevicePhysical::pick(&vulkan_instance) {
                 Err(error) => return Err(error),
-                Ok(physical_device) => physical_device,
+                Ok(device_and_queue_index) => device_and_queue_index,
             };
         Ok(Application {
             vulkan_entry: vulkan_entry,

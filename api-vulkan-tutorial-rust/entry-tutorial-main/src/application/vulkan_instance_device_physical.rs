@@ -13,7 +13,7 @@ pub struct ApplicationVulkanInstanceDevicePhysical {}
 
 impl ApplicationVulkanInstanceDevicePhysical {
     pub unsafe fn pick(vulkan_instance: &VulkanInstance)
-     -> Result<VulkanDevicePhysical, TerminationProcessMain>
+     -> Result<(VulkanDevicePhysical, VulkanQueueFamilyIndexGraphic), TerminationProcessMain>
     {
         let vulkan_physical_device_s =
             match vulkan_instance.enumerate_physical_devices() {
@@ -31,9 +31,9 @@ impl ApplicationVulkanInstanceDevicePhysical {
                         "Physical device (`{}`) skipping: missing graphic queue family",
                         physical_device_property_s.device_name);
                 },
-                Ok(()) => {
+                Ok(graphic_queue_index) => {
                     console_log_info!("Physical device (`{}`) selected", physical_device_property_s.device_name);
-                    return Ok(vulkan_physical_device);
+                    return Ok((vulkan_physical_device, graphic_queue_index));
                 }
             };
         }
@@ -43,7 +43,7 @@ impl ApplicationVulkanInstanceDevicePhysical {
     unsafe fn check(
         vulkan_instance: &VulkanInstance,
         vulkan_physical_device: VulkanDevicePhysical)
-     -> Result<(), ()>
+     -> Result<VulkanQueueFamilyIndexGraphic, ()>
     {
         let vulkan_physical_device_queue_family_property_s =
             vulkan_instance.get_physical_device_queue_family_properties(vulkan_physical_device);
@@ -51,10 +51,10 @@ impl ApplicationVulkanInstanceDevicePhysical {
             vulkan_physical_device_queue_family_property_s
             .iter()
             .position(|p| p.queue_flags.contains(VulkanQueueFlagS::GRAPHICS))
-            .map(|i| i as u32);
+            .map(|i| VulkanQueueFamilyIndexGraphic::new(i as u32));
         match optional_graphic_queue_family_index {
             None => Err(()),
-            Some(_graphic_queue_index) => Ok(()),
+            Some(graphic_queue_index) => Ok(graphic_queue_index),
         }
     }
 }
