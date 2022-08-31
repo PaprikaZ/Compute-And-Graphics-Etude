@@ -65,6 +65,8 @@ impl ApplicationVulkanInstanceValidationWo {
             vulkan_device_physical: vulkan_physical_device,
             vulkan_device_logical: vulkan_logical_device,
             vulkan_queue_graphic: vulkan_graphic_queue,
+            vulkan_surface: vulkan_surface,
+            vulkan_queue_present: vulkan_present_queue,
         })
     }
 
