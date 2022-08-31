@@ -9,6 +9,7 @@ use crate::termination::TerminationProcessMain;
 use crate::application::main::Application;
 use crate::application::vulkan_instance_share::ApplicationVulkanInstanceShare;
 use crate::application::vulkan_instance_device_physical::ApplicationVulkanInstanceDevicePhysical;
+use crate::application::vulkan_instance_device_logical::ApplicationVulkanInstanceDeviceLogical;
 
 pub struct ApplicationVulkanInstanceValidationWo {}
 
@@ -34,11 +35,21 @@ impl ApplicationVulkanInstanceValidationWo {
                 Err(error) => return Err(error),
                 Ok(device_and_queue_index) => device_and_queue_index,
             };
+        let create_vulkan_logical_device_result =
+            ApplicationVulkanInstanceDeviceLogical::create(
+                &vulkan_instance, vulkan_physical_device, vulkan_graphic_queue_family_index);
+        let (vulkan_logical_device, vulkan_graphic_queue) =
+            match create_vulkan_logical_device_result {
+                Err(error) => return Err(error),
+                Ok(device_and_queue) => device_and_queue,
+            };
         Ok(Application {
             vulkan_entry: vulkan_entry,
             vulkan_instance: vulkan_instance,
             vulkan_debug_messenger: None,
             vulkan_device_physical: vulkan_physical_device,
+            vulkan_device_logical: vulkan_logical_device,
+            vulkan_queue_graphic: vulkan_graphic_queue,
         })
     }
 
