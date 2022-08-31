@@ -18,7 +18,14 @@ pub use ::vulkanalia::vk::DebugUtilsMessageSeverityFlagsEXT as VulkanExtensionDe
 pub use ::vulkanalia::vk::DebugUtilsMessageTypeFlagsEXT as VulkanExtensionDebugUtilityMessageTypeFlagS;
 pub use ::vulkanalia::vk::DebugUtilsMessengerCallbackDataEXT as VulkanExtensionDebugUtilityMessengerCallbackData;
 pub use ::vulkanalia::vk::PhysicalDevice as VulkanDevicePhysical;
+pub use ::vulkanalia::vk::Queue as VulkanQueue;
 pub use ::vulkanalia::vk::QueueFlags as VulkanQueueFlagS;
+pub use ::vulkanalia::vk::DeviceCreateInfo as VulkanDeviceLogicalCreateInformation;
+pub use ::vulkanalia::vk::DeviceCreateInfoBuilder as VulkanDeviceLogicalCreateInformationBuilder;
+pub use ::vulkanalia::vk::DeviceQueueCreateInfo as VulkanDeviceLogicalQueueCreateInformation;
+pub use ::vulkanalia::vk::DeviceQueueCreateInfoBuilder as VulkanDeviceLogicalQueueCreateInformationBuilder;
+pub use ::vulkanalia::vk::PhysicalDeviceFeatures as VulkanDevicePhysicalFeatureS;
+pub use ::vulkanalia::vk::PhysicalDeviceFeaturesBuilder as VulkanDevicePhysicalFeatureSBuilder;
 
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
@@ -63,7 +70,7 @@ pub mod prelude {
     pub mod version1_0 {
         pub use ::vulkanalia::vk::Handle as VulkanHandler;
         pub use ::vulkanalia::vk::HasBuilder as VulkanBuilderHas;
-        pub use ::vulkanalia::Device as VulkanDevice;
+        pub use ::vulkanalia::Device as VulkanDeviceLogical;
         pub use ::vulkanalia::Entry as VulkanEntry;
         pub use ::vulkanalia::Instance as VulkanInstance;
         pub use ::vulkanalia::VkResult as VulkanResult;
