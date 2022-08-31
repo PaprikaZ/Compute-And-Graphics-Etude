@@ -3,6 +3,7 @@ use ::vulkan::VULKAN_LIBRARY_FILE_NAME;
 use ::vulkan::VulkanErrorCode;
 use ::vulkan::VulkanLibraryLoader;
 use ::vulkan::VulkanInstanceCreateInformation;
+use ::vulkan::VulkanWindow;
 use ::vulkan::prelude::version1_2::*;
 
 use crate::termination::TerminationProcessMain;
@@ -30,8 +31,19 @@ impl ApplicationVulkanInstanceValidationWo {
                 Err(error) => return Err(error),
                 Ok(instance) => instance,
             };
-        let (vulkan_physical_device, vulkan_graphic_queue_family_index) =
-            match ApplicationVulkanInstanceDevicePhysical::pick(&vulkan_instance) {
+        let create_vulkan_surface_result = VulkanWindow::create_surface(&vulkan_instance, window);
+        let vulkan_surface =
+            match create_vulkan_surface_result {
+                Err(error) => {
+                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                    return Err(TerminationProcessMain::InitializationVulkanSurfaceCreateFail(vulkan_error_code));
+                },
+                Ok(surface) => surface,
+            };
+        let (vulkan_physical_device,
+             vulkan_graphic_queue_family_index,
+             vulkan_surface_queue_family_index) =
+            match ApplicationVulkanInstanceDevicePhysical::pick(&vulkan_instance, vulkan_surface) {
                 Err(error) => return Err(error),
                 Ok(device_and_queue_index) => device_and_queue_index,
             };
