@@ -36,6 +36,7 @@ impl Application {
     }
 
     pub unsafe fn destroy(&mut self) -> () {
+        self.vulkan_device_logical.destroy_device(None);
         if Option::is_some(&self.vulkan_debug_messenger) {
             self.vulkan_instance.destroy_debug_utils_messenger_ext(self.vulkan_debug_messenger.unwrap(), None);
         };
