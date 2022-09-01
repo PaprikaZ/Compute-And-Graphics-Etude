@@ -11,6 +11,7 @@ use crate::initialization::Initialization;
 use crate::initialization::window::InitializationWindow;
 use crate::composition::execution::CompositionExecution;
 use crate::config::VULKAN_VALIDATION_LAYER;
+use crate::config::VULKAN_DEVICE_PHYSICAL_EXTENSION_S;
 
 
 fn main() -> TerminationProcessMain {
@@ -23,12 +24,17 @@ fn main() -> TerminationProcessMain {
             Err(termination) => return termination,
             Ok(uniform_window_application) => uniform_window_application,
         };
-    let application = unsafe {
-        match Application::create(&window.entity_main, Some(&VULKAN_VALIDATION_LAYER)) {
+    let create_application_result = unsafe {
+        Application::create(
+            &window.entity_main,
+            Some(&VULKAN_VALIDATION_LAYER),
+            &VULKAN_DEVICE_PHYSICAL_EXTENSION_S)
+    };
+    let application =
+        match create_application_result {
             Err(termination) => return termination,
             Ok(application) => application,
-        }
-    };
+        };
     CompositionExecution::bind_window_event_loop_default(window, application);
     TerminationProcessMain::Ok
 }
