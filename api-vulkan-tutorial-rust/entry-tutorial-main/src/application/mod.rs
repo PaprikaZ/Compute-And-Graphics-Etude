@@ -5,3 +5,4 @@ pub mod vulkan_instance_validation_wi;
 pub mod vulkan_instance_device_physical;
 pub mod vulkan_instance_device_logical;
 pub mod vulkan_instance_swapchain;
+pub mod vulkan_instance_swapchain_image_view;
