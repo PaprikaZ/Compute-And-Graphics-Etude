@@ -18,6 +18,8 @@ pub enum TerminationProcessMain {
     InitializationVulkanDevicePhysicalSurfaceCapabilitySGetFail(VulkanErrorCode),
     InitializationVulkanDevicePhysicalSurfaceFormatSGetFail(VulkanErrorCode),
     InitializationVulkanDevicePhysicalSurfacePresentModeSGetFail(VulkanErrorCode),
+    InitializationVulkanSwapchainCreateFail(VulkanErrorCode),
+    InitializationVulkanSwapchainImageSGetFail(VulkanErrorCode),
     InitializationVulkanDevicePhysicalExtensionPropertySEnumerateFail(VulkanErrorCode),
 }
 
@@ -38,6 +40,8 @@ impl TerminationProcessMain {
             Self::InitializationVulkanDevicePhysicalSurfaceCapabilitySGetFail(_) => 11u8,
             Self::InitializationVulkanDevicePhysicalSurfaceFormatSGetFail(_) => 12u8,
             Self::InitializationVulkanDevicePhysicalSurfacePresentModeSGetFail(_) => 13u8,
+            Self::InitializationVulkanSwapchainCreateFail(_) => 14u8,
+            Self::InitializationVulkanSwapchainImageSGetFail(_) => 15u8,
             Self::InitializationVulkanDevicePhysicalExtensionPropertySEnumerateFail(_) => 16u8,
         }
     }
