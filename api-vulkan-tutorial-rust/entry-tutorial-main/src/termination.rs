@@ -15,6 +15,9 @@ pub enum TerminationProcessMain {
     InitializationVulkanDevicePhysicalAllQueueFamilyQualifiedNotSupport,
     InitializationVulkanDeviceLogicalCreateFail(VulkanErrorCode),
     InitializationVulkanSurfaceCreateFail(VulkanErrorCode),
+    InitializationVulkanDevicePhysicalSurfaceCapabilitySGetFail(VulkanErrorCode),
+    InitializationVulkanDevicePhysicalSurfaceFormatSGetFail(VulkanErrorCode),
+    InitializationVulkanDevicePhysicalSurfacePresentModeSGetFail(VulkanErrorCode),
 }
 
 impl TerminationProcessMain {
@@ -31,6 +34,9 @@ impl TerminationProcessMain {
             Self::InitializationVulkanDevicePhysicalAllQueueFamilyQualifiedNotSupport => 8u8,
             Self::InitializationVulkanDeviceLogicalCreateFail(_) => 9u8,
             Self::InitializationVulkanSurfaceCreateFail(_) => 10u8,
+            Self::InitializationVulkanDevicePhysicalSurfaceCapabilitySGetFail(_) => 11u8,
+            Self::InitializationVulkanDevicePhysicalSurfaceFormatSGetFail(_) => 12u8,
+            Self::InitializationVulkanDevicePhysicalSurfacePresentModeSGetFail(_) => 13u8,
         }
     }
 }
