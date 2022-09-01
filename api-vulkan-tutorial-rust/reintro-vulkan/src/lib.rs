@@ -32,6 +32,21 @@ pub use ::vulkanalia::vk::SurfaceKHR as VulkanSurfaceKhr;
 pub use ::vulkanalia::vk::Win32SurfaceCreateInfoKHR as VulkanSurfaceCreateInformationKhr;
 pub use ::vulkanalia::vk::Win32SurfaceCreateInfoKHRBuilder as VulkanSurfaceCreateInformationBuilderKhr;
 pub use ::vulkanalia::vk::KhrWin32SurfaceExtension as VulkanSurfaceExtensionWin32;
+pub use ::vulkanalia::vk::SurfaceCapabilitiesKHR as VulkanSurfaceCapabilitySKhr;
+pub use ::vulkanalia::vk::SurfaceFormatKHR as VulkanSurfaceFormatKhr;
+pub use ::vulkanalia::vk::PresentModeKHR as VulkanPresentModeKhr;
+
+pub use ::vulkanalia::vk::KhrSwapchainExtension as VulkanSwapchainExtensionKhr;
+pub use ::vulkanalia::vk::SwapchainKHR as VulkanSwapchainKhr;
+pub use ::vulkanalia::vk::Format as VulkanFormat;
+pub use ::vulkanalia::vk::ColorSpaceKHR as VulkanColorSpaceKhr;
+pub use ::vulkanalia::vk::Extent2D as VulkanExtentD2;
+pub use ::vulkanalia::vk::Image as VulkanImage;
+pub use ::vulkanalia::vk::SharingMode as VulkanSharingMode;
+pub use ::vulkanalia::vk::SwapchainCreateInfoKHR as VulkanSwapchainCreateInformationKhr;
+pub use ::vulkanalia::vk::SwapchainCreateInfoKHRBuilder as VulkanSwapchainCreateInformationBuilderKhr;
+pub use ::vulkanalia::vk::ImageUsageFlags as VulkanImageUsageFlagS;
+pub use ::vulkanalia::vk::CompositeAlphaFlagsKHR as VulkanCompositeAlphaFlagSKhr;
 
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
@@ -56,6 +71,7 @@ pub use ::vulkanalia::vk::SUBPASS_EXTERNAL as VULKAN_SUBPASS_EXTERNAL;
 pub use ::vulkanalia::vk::TRUE as VULKAN_TRUE;
 pub use ::vulkanalia::vk::UUID_SIZE as VULKAN_UUID_SIZE;
 pub use ::vulkanalia::vk::WHOLE_SIZE as VULKAN_WHOLE_SIZE;
+pub use ::vulkanalia::vk::KHR_SWAPCHAIN_EXTENSION as VULKAN_SWAPCHAIN_EXTENSION_KHR;
 
 pub use ::vulkanalia::Device as VulkanDevice;
 pub use ::vulkanalia::Entry as VulkanEntry;
@@ -102,6 +118,7 @@ pub mod prelude {
 }
 
 
+#[derive(Clone, Copy)]
 pub struct VulkanErrorCode(i32);
 
 impl VulkanErrorCode {
@@ -110,6 +127,7 @@ impl VulkanErrorCode {
     }
 }
 
+#[derive(Clone, Copy)]
 pub struct VulkanQueueFamilyIndexGraphic(u32);
 
 impl VulkanQueueFamilyIndexGraphic {
@@ -122,11 +140,25 @@ impl VulkanQueueFamilyIndexGraphic {
     }
 }
 
+#[derive(Clone, Copy)]
 pub struct VulkanQueueFamilyIndexSurface(u32);
 
 impl VulkanQueueFamilyIndexSurface {
     pub fn new(queue_index: u32) -> Self {
         Self(queue_index)
+    }
+
+    pub fn as_raw(&self) -> u32 {
+        self.0
+    }
+}
+
+#[derive(Clone, Copy)]
+pub struct VulkanSwapchainImageCount(u32);
+
+impl VulkanSwapchainImageCount {
+    pub fn new(image_count: u32) -> Self {
+        Self(image_count)
     }
 
     pub fn as_raw(&self) -> u32 {

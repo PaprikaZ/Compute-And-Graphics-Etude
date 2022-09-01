@@ -5,17 +5,23 @@ use ::vulkan::VulkanLibraryLoader;
 use ::vulkan::VulkanInstanceCreateInformation;
 use ::vulkan::VulkanWindow;
 use ::vulkan::prelude::version1_2::*;
+use ::vulkan::VulkanExtensionName;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::main::Application;
 use crate::application::vulkan_instance_share::ApplicationVulkanInstanceShare;
 use crate::application::vulkan_instance_device_physical::ApplicationVulkanInstanceDevicePhysical;
 use crate::application::vulkan_instance_device_logical::ApplicationVulkanInstanceDeviceLogical;
+use crate::application::vulkan_instance_swapchain::ApplicationVulkanInstanceSwapchain;
 
 pub struct ApplicationVulkanInstanceValidationWo {}
 
 impl ApplicationVulkanInstanceValidationWo {
-    pub unsafe fn create(window: &WindowUniformWindow) -> Result<Application, TerminationProcessMain> {
+    pub unsafe fn create(
+        window: &WindowUniformWindow,
+        vulkan_extension_s: &[VulkanExtensionName])
+     -> Result<Application, TerminationProcessMain>
+    {
         let vulkan_library_loader =
             match VulkanLibraryLoader::new(VULKAN_LIBRARY_FILE_NAME) {
                 Err(error) => return Err(TerminationProcessMain::InitializationVulkanLibraryLoadingFail(error)),
@@ -43,7 +49,7 @@ impl ApplicationVulkanInstanceValidationWo {
         let (vulkan_physical_device,
              vulkan_graphic_queue_family_index,
              vulkan_surface_queue_family_index) =
-            match ApplicationVulkanInstanceDevicePhysical::pick(&vulkan_instance, vulkan_surface) {
+            match ApplicationVulkanInstanceDevicePhysical::pick(&vulkan_instance, vulkan_surface, vulkan_extension_s) {
                 Err(error) => return Err(error),
                 Ok(device_and_queue_index) => device_and_queue_index,
             };
@@ -51,6 +57,7 @@ impl ApplicationVulkanInstanceValidationWo {
             ApplicationVulkanInstanceDeviceLogical::create(
                 &vulkan_instance,
                 vulkan_physical_device,
+                vulkan_extension_s,
                 vulkan_graphic_queue_family_index,
                 vulkan_surface_queue_family_index);
         let (vulkan_logical_device, vulkan_graphic_queue, vulkan_present_queue) =
@@ -58,6 +65,11 @@ impl ApplicationVulkanInstanceValidationWo {
                 Err(error) => return Err(error),
                 Ok(device_and_queue) => device_and_queue,
             };
+        let (vulkan_surface_format, vulkan_extent, vulkan_swapchain, vulkan_image_s) =
+            ApplicationVulkanInstanceSwapchain::create(
+                window, &vulkan_instance, vulkan_surface, &vulkan_logical_device,
+                vulkan_physical_device, vulkan_graphic_queue_family_index, vulkan_surface_queue_family_index
+            )?;
         Ok(Application {
             vulkan_entry: vulkan_entry,
             vulkan_instance: vulkan_instance,
@@ -67,6 +79,10 @@ impl ApplicationVulkanInstanceValidationWo {
             vulkan_queue_graphic: vulkan_graphic_queue,
             vulkan_surface: vulkan_surface,
             vulkan_queue_present: vulkan_present_queue,
+            vulkan_swapchain_format: vulkan_surface_format,
+            vulkan_swapchain_extent: vulkan_extent,
+            vulkan_swapchain: vulkan_swapchain,
+            vulkan_swapchain_image_s: vulkan_image_s,
         })
     }
 

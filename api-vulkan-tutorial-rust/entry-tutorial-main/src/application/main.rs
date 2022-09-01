@@ -1,5 +1,6 @@
 use vulkan::VulkanExtensionDebugUtility;
 use vulkan::VulkanSurfaceExtensionKhr;
+use vulkan::VulkanSwapchainExtensionKhr;
 use ::window_uniform::prelude::*;
 use ::vulkan::VulkanExtensionName;
 use ::vulkan::VulkanExtensionDebugUtilityMessenger;
@@ -7,6 +8,10 @@ use ::vulkan::prelude::version1_2::*;
 use ::vulkan::VulkanQueue;
 use ::vulkan::VulkanDevicePhysical;
 use ::vulkan::VulkanSurfaceKhr;
+use ::vulkan::VulkanFormat;
+use ::vulkan::VulkanExtentD2;
+use ::vulkan::VulkanSwapchainKhr;
+use ::vulkan::VulkanImage;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_instance_validation_wi::ApplicationVulkanInstanceValidationWi;
@@ -22,16 +27,24 @@ pub struct Application {
     pub vulkan_queue_graphic: VulkanQueue,
     pub vulkan_surface: VulkanSurfaceKhr,
     pub vulkan_queue_present: VulkanQueue,
+    pub vulkan_swapchain_format: VulkanFormat,
+    pub vulkan_swapchain_extent: VulkanExtentD2,
+    pub vulkan_swapchain: VulkanSwapchainKhr,
+    pub vulkan_swapchain_image_s: Vec<VulkanImage>,
 }
 
 impl Application {
     pub unsafe fn create(
-        window: &WindowUniformWindow, optional_validation_layer: Option<&VulkanExtensionName>)
+        window: &WindowUniformWindow,
+        optional_validation_layer: Option<&VulkanExtensionName>,
+        vulkan_physical_device_extension_s: &[VulkanExtensionName])
      -> Result<Self, TerminationProcessMain>
     {
         match optional_validation_layer {
-            None => ApplicationVulkanInstanceValidationWo::create(window),
-            Some(validation_layer) => ApplicationVulkanInstanceValidationWi::create(window, validation_layer),
+            None =>
+                ApplicationVulkanInstanceValidationWo::create(window, vulkan_physical_device_extension_s),
+            Some(validation_layer) =>
+                ApplicationVulkanInstanceValidationWi::create(window, validation_layer, vulkan_physical_device_extension_s),
         }
     }
 
@@ -40,6 +53,7 @@ impl Application {
     }
 
     pub unsafe fn destroy(&mut self) -> () {
+        self.vulkan_device_logical.destroy_swapchain_khr(self.vulkan_swapchain, None);
         self.vulkan_device_logical.destroy_device(None);
         self.vulkan_instance.destroy_surface_khr(self.vulkan_surface, None);
         if Option::is_some(&self.vulkan_debug_messenger) {

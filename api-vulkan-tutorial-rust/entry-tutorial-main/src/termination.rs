@@ -12,9 +12,15 @@ pub enum TerminationProcessMain {
     InitializationVulkanInstanceCreateFail(VulkanErrorCode),
     InitializationVulkanValidationLayerNotSupport,
     InitializationVulkanEnumeratePhysicalDeviceFail(VulkanErrorCode),
-    InitializationVulkanDevicePhysicalAllQueueFamilyQualifiedNotSupport,
+    InitializationVulkanDevicePhysicalAllNotQualified,
     InitializationVulkanDeviceLogicalCreateFail(VulkanErrorCode),
     InitializationVulkanSurfaceCreateFail(VulkanErrorCode),
+    InitializationVulkanDevicePhysicalSurfaceCapabilitySGetFail(VulkanErrorCode),
+    InitializationVulkanDevicePhysicalSurfaceFormatSGetFail(VulkanErrorCode),
+    InitializationVulkanDevicePhysicalSurfacePresentModeSGetFail(VulkanErrorCode),
+    InitializationVulkanSwapchainCreateFail(VulkanErrorCode),
+    InitializationVulkanSwapchainImageSGetFail(VulkanErrorCode),
+    InitializationVulkanDevicePhysicalExtensionPropertySEnumerateFail(VulkanErrorCode),
 }
 
 impl TerminationProcessMain {
@@ -28,9 +34,15 @@ impl TerminationProcessMain {
             Self::InitializationVulkanInstanceCreateFail(_) => 5u8,
             Self::InitializationVulkanValidationLayerNotSupport => 6u8,
             Self::InitializationVulkanEnumeratePhysicalDeviceFail(_) => 7u8,
-            Self::InitializationVulkanDevicePhysicalAllQueueFamilyQualifiedNotSupport => 8u8,
+            Self::InitializationVulkanDevicePhysicalAllNotQualified => 8u8,
             Self::InitializationVulkanDeviceLogicalCreateFail(_) => 9u8,
             Self::InitializationVulkanSurfaceCreateFail(_) => 10u8,
+            Self::InitializationVulkanDevicePhysicalSurfaceCapabilitySGetFail(_) => 11u8,
+            Self::InitializationVulkanDevicePhysicalSurfaceFormatSGetFail(_) => 12u8,
+            Self::InitializationVulkanDevicePhysicalSurfacePresentModeSGetFail(_) => 13u8,
+            Self::InitializationVulkanSwapchainCreateFail(_) => 14u8,
+            Self::InitializationVulkanSwapchainImageSGetFail(_) => 15u8,
+            Self::InitializationVulkanDevicePhysicalExtensionPropertySEnumerateFail(_) => 16u8,
         }
     }
 }
