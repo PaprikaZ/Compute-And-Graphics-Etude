@@ -25,6 +25,7 @@ use crate::application::vulkan_instance_device_physical::ApplicationVulkanInstan
 use crate::application::vulkan_instance_device_logical::ApplicationVulkanInstanceDeviceLogical;
 use crate::application::vulkan_instance_swapchain::ApplicationVulkanInstanceSwapchain;
 use crate::application::vulkan_instance_swapchain_image_view::ApplicationInstanceSwapchainImageView;
+use crate::application::vulkan_pipeline::ApplicationVulkanPipeline;
 
 
 pub struct ApplicationVulkanInstanceValidationWi {}
@@ -89,6 +90,8 @@ impl ApplicationVulkanInstanceValidationWi {
         let vulkan_image_view_s =
             ApplicationInstanceSwapchainImageView::create_all(
                 &vulkan_logical_device, vulkan_surface_format, &vulkan_image_s)?;
+        let vulkan_pipeline_layout =
+            ApplicationVulkanPipeline::create_layout(&vulkan_logical_device, vulkan_extent)?;
         Ok(Application {
             vulkan_entry: vulkan_entry,
             vulkan_instance: vulkan_instance,
@@ -103,6 +106,7 @@ impl ApplicationVulkanInstanceValidationWi {
             vulkan_swapchain: vulkan_swapchain,
             vulkan_swapchain_image_s: vulkan_image_s,
             vulkan_swapchain_image_view_s: vulkan_image_view_s,
+            vulkan_pipeline_layout: vulkan_pipeline_layout,
         })
     }
 

@@ -21,7 +21,6 @@ use ::vulkan::VulkanPipelineColorBlendStateCreateInformation;
 use ::vulkan::VulkanPipelineLayoutCreateInformation;
 use ::vulkan::VulkanColorComponentFlagS;
 use ::vulkan::VulkanLogicOperation;
-use ::vulkan::VulkanBlendOperation;
 use ::vulkan::VulkanSampleCountFlagS;
 use ::vulkan::VulkanPipelineColorBlendAttachmentState;
 use ::vulkan::VulkanPipelineLayout;
@@ -32,7 +31,7 @@ use crate::termination::TerminationProcessMain;
 pub struct ApplicationVulkanPipeline {}
 
 impl ApplicationVulkanPipeline {
-    pub unsafe fn create(
+    pub unsafe fn create_layout(
         vulkan_logical_device: &VulkanDeviceLogical, vulkan_2d_extent: VulkanExtentD2)
      -> Result<VulkanPipelineLayout, TerminationProcessMain>
     {
