@@ -13,6 +13,8 @@ use ::vulkan::VulkanExtentD2;
 use ::vulkan::VulkanSwapchainKhr;
 use ::vulkan::VulkanImage;
 use ::vulkan::VulkanImageView;
+use ::vulkan::VulkanRenderPass;
+use ::vulkan::VulkanPipelineLayout;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_instance_validation_wi::ApplicationVulkanInstanceValidationWi;
@@ -33,6 +35,8 @@ pub struct Application {
     pub vulkan_swapchain: VulkanSwapchainKhr,
     pub vulkan_swapchain_image_s: Vec<VulkanImage>,
     pub vulkan_swapchain_image_view_s: Vec<VulkanImageView>,
+    pub vulkan_render_pass: VulkanRenderPass,
+    pub vulkan_pipeline_layout: VulkanPipelineLayout,
 }
 
 impl Application {
@@ -55,6 +59,8 @@ impl Application {
     }
 
     pub unsafe fn destroy(&mut self) -> () {
+        self.vulkan_device_logical.destroy_pipeline_layout(self.vulkan_pipeline_layout, None);
+        self.vulkan_device_logical.destroy_render_pass(self.vulkan_render_pass, None);
         self.vulkan_swapchain_image_view_s
         .iter()
         .for_each(|v| self.vulkan_device_logical.destroy_image_view(*v, None));
