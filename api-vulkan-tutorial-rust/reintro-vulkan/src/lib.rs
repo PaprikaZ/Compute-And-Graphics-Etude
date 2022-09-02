@@ -48,6 +48,16 @@ pub use ::vulkanalia::vk::SwapchainCreateInfoKHRBuilder as VulkanSwapchainCreate
 pub use ::vulkanalia::vk::ImageUsageFlags as VulkanImageUsageFlagS;
 pub use ::vulkanalia::vk::CompositeAlphaFlagsKHR as VulkanCompositeAlphaFlagSKhr;
 
+pub use ::vulkanalia::vk::ImageView as VulkanImageView;
+pub use ::vulkanalia::vk::ComponentMapping as VulkanComponentMapping;
+pub use ::vulkanalia::vk::ComponentMappingBuilder as VulkanComponentMappingBuilder;
+pub use ::vulkanalia::vk::ComponentSwizzle as VulkanComponentSwizzle;
+pub use ::vulkanalia::vk::ImageSubresourceRange as VulkanImageSubResourceRange;
+pub use ::vulkanalia::vk::ImageSubresourceRangeBuilder as VulkanImageSubResourceRangeBuilder;
+pub use ::vulkanalia::vk::ImageAspectFlags as VulkanImageAspectFlagS;
+pub use ::vulkanalia::vk::ImageViewCreateInfo as VulkanImageViewCreateInformation;
+pub use ::vulkanalia::vk::ImageViewType as VulkanImageViewType;
+
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
 pub use ::vulkanalia::vk::LOD_CLAMP_NONE as VULKAN_LOD_CLAMP_NONE;

@@ -21,6 +21,7 @@ pub enum TerminationProcessMain {
     InitializationVulkanSwapchainCreateFail(VulkanErrorCode),
     InitializationVulkanSwapchainImageSGetFail(VulkanErrorCode),
     InitializationVulkanDevicePhysicalExtensionPropertySEnumerateFail(VulkanErrorCode),
+    InitializationVulkanImageViewCreateFail(VulkanErrorCode),
 }
 
 impl TerminationProcessMain {
@@ -43,6 +44,7 @@ impl TerminationProcessMain {
             Self::InitializationVulkanSwapchainCreateFail(_) => 14u8,
             Self::InitializationVulkanSwapchainImageSGetFail(_) => 15u8,
             Self::InitializationVulkanDevicePhysicalExtensionPropertySEnumerateFail(_) => 16u8,
+            Self::InitializationVulkanImageViewCreateFail(_) => 17u8,
         }
     }
 }
