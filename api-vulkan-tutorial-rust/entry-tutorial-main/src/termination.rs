@@ -25,6 +25,7 @@ pub enum TerminationProcessMain {
     InitializationVulkanShaderByteCodeAlignmentIncorrect,
     InitializationVulkanShaderModuleCreateFail(VulkanErrorCode),
     InitializationVulkanPipelineLayoutCreateFail(VulkanErrorCode),
+    InitializationVulkanRenderPassCreateFail(VulkanErrorCode),
 }
 
 impl TerminationProcessMain {
@@ -51,6 +52,7 @@ impl TerminationProcessMain {
             Self::InitializationVulkanShaderByteCodeAlignmentIncorrect => 18u8,
             Self::InitializationVulkanShaderModuleCreateFail(_) => 19u8,
             Self::InitializationVulkanPipelineLayoutCreateFail(_) => 20u8,
+            Self::InitializationVulkanRenderPassCreateFail(_) => 21u8,
         }
     }
 }
