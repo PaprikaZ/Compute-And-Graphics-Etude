@@ -99,6 +99,17 @@ pub use ::vulkanalia::vk::PipelineLayout as VulkanPipelineLayout;
 pub use ::vulkanalia::vk::PipelineLayoutCreateInfo as VulkanPipelineLayoutCreateInformation;
 pub use ::vulkanalia::vk::PipelineLayoutCreateInfoBuilder as VulkanPipelineLayoutCreateInformationBuilder;
 
+pub use ::vulkanalia::vk::AttachmentDescription as VulkanAttachmentDescription;
+pub use ::vulkanalia::vk::AttachmentLoadOp as VulkanAttachmentLoadOperation;
+pub use ::vulkanalia::vk::AttachmentStoreOp as VulkanAttachmentStoreOperation;
+pub use ::vulkanalia::vk::ImageLayout as VulkanImageLayout;
+pub use ::vulkanalia::vk::AttachmentReference as VulkanAttachmentReference;
+pub use ::vulkanalia::vk::SubpassDescription as VulkanSubpassDescription;
+pub use ::vulkanalia::vk::PipelineBindPoint as VulkanPipelineBindPoint;
+pub use ::vulkanalia::vk::RenderPass as VulkanRenderPass;
+pub use ::vulkanalia::vk::RenderPassCreateInfo as VulkanRenderPassCreateInformation;
+pub use ::vulkanalia::vk::RenderPassCreateInfoBuilder as VulkanRenderPassCreateInformationBuilder;
+
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
 pub use ::vulkanalia::vk::LOD_CLAMP_NONE as VULKAN_LOD_CLAMP_NONE;
