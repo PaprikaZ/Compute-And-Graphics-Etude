@@ -78,8 +78,8 @@ impl ApplicationVulkanInstanceValidationWo {
                 &vulkan_logical_device, vulkan_surface_format, &vulkan_image_s)?;
         let vulkan_render_pass =
             ApplicationVulkanRenderPass::create(&vulkan_logical_device, vulkan_surface_format)?;
-        let vulkan_pipeline_layout =
-            ApplicationVulkanPipeline::create_layout(&vulkan_logical_device, vulkan_extent)?;
+        let (vulkan_pipeline, vulkan_pipeline_layout) =
+            ApplicationVulkanPipeline::create_layout(&vulkan_logical_device, vulkan_extent, vulkan_render_pass)?;
         Ok(Application {
             vulkan_entry: vulkan_entry,
             vulkan_instance: vulkan_instance,
@@ -96,6 +96,7 @@ impl ApplicationVulkanInstanceValidationWo {
             vulkan_swapchain_image_view_s: vulkan_image_view_s,
             vulkan_render_pass: vulkan_render_pass,
             vulkan_pipeline_layout: vulkan_pipeline_layout,
+            vulkan_pipeline: vulkan_pipeline,
         })
     }
 

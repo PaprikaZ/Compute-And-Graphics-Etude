@@ -24,6 +24,10 @@ use ::vulkan::VulkanLogicOperation;
 use ::vulkan::VulkanSampleCountFlagS;
 use ::vulkan::VulkanPipelineColorBlendAttachmentState;
 use ::vulkan::VulkanPipelineLayout;
+use ::vulkan::VulkanGraphicsPipelineCreateInformation;
+use ::vulkan::VulkanRenderPass;
+use ::vulkan::VulkanPipelineCache;
+use ::vulkan::VulkanPipeline;
 
 use crate::termination::TerminationProcessMain;
 
@@ -32,8 +36,10 @@ pub struct ApplicationVulkanPipeline {}
 
 impl ApplicationVulkanPipeline {
     pub unsafe fn create_layout(
-        vulkan_logical_device: &VulkanDeviceLogical, vulkan_2d_extent: VulkanExtentD2)
-     -> Result<VulkanPipelineLayout, TerminationProcessMain>
+        vulkan_logical_device: &VulkanDeviceLogical,
+        vulkan_2d_extent: VulkanExtentD2,
+        vulkan_render_pass: VulkanRenderPass)
+     -> Result<(VulkanPipeline, VulkanPipelineLayout), TerminationProcessMain>
     {
         let vulkan_vertex_shader_bytecode_data = include_bytes!("../../shader/vert.spv");
         let vulkan_fragment_shader_bytecode_data = include_bytes!("../../shader/frag.spv");
@@ -41,24 +47,21 @@ impl ApplicationVulkanPipeline {
             Self::create_shader_module(vulkan_logical_device, vulkan_vertex_shader_bytecode_data)?;
         let vulkan_fragment_shader_module =
             Self::create_shader_module(vulkan_logical_device, vulkan_fragment_shader_bytecode_data)?;
-        let _vulkan_vertex_shader_stage_create_information =
+        let vulkan_vertex_shader_stage_create_information =
             VulkanPipelineShaderStageCreateInformation::builder()
             .stage(VulkanShaderStageFlagS::VERTEX)
             .module(vulkan_vertex_shader_module)
             .name(b"main\0");
-        let _vulkan_fragment_shader_stage_create_infomation =
+        let vulkan_fragment_shader_stage_create_infomation =
             VulkanPipelineShaderStageCreateInformation::builder()
             .stage(VulkanShaderStageFlagS::FRAGMENT)
             .module(vulkan_fragment_shader_module)
             .name(b"main\0");
-
-        let _vulkan_vertex_input_state_create_infomation = VulkanPipelineVertexInputStateCreateInformation::builder();
-
-        let _vulkan_input_assembly_state_create_information =
+        let vulkan_vertex_input_state_create_infomation = VulkanPipelineVertexInputStateCreateInformation::builder();
+        let vulkan_input_assembly_state_create_information =
             VulkanPipelineInputAssemblyStateCreateInformation::builder()
             .topology(VulkanPrimitiveTopology::TRIANGLE_LIST)
             .primitive_restart_enable(false);
-
         let vulkan_viewport =
             VulkanViewport::builder()
             .x(0.0)
@@ -67,21 +70,17 @@ impl ApplicationVulkanPipeline {
             .height(vulkan_2d_extent.height as f32)
             .min_depth(0.0)
             .max_depth(1.0);
-
         let vulkan_scissor =
             VulkanRectangleD2::builder()
             .offset(VulkanOffsetD2 { x: 0, y: 0 })
             .extent(vulkan_2d_extent);
-
         let vulkan_viewport_s = &[vulkan_viewport];
         let vulkan_scissor_s = &[vulkan_scissor];
-
-        let _vulkan_viewport_state_create_information =
+        let vulkan_viewport_state_create_information =
             VulkanPipelineViewportStateCreateInformation::builder()
             .viewports(vulkan_viewport_s)
             .scissors(vulkan_scissor_s);
-
-        let _vulkan_rasterization_state_create_information =
+        let vulkan_rasterization_state_create_information =
             VulkanPipelineRasterizationStateCreateInformation::builder()
             .depth_clamp_enable(false)
             .rasterizer_discard_enable(false)
@@ -90,31 +89,24 @@ impl ApplicationVulkanPipeline {
             .cull_mode(VulkanCullModeFlagS::BACK)
             .front_face(VulkanFrontFace::CLOCKWISE)
             .depth_bias_enable(false);
-
-        let _vulkan_pipeline_multisample_state_create_information =
+        let vulkan_pipeline_multisample_state_create_information =
             VulkanPipelineMultisampleStateCreateInformation::builder()
             .sample_shading_enable(false)
             .rasterization_samples(VulkanSampleCountFlagS::_1);
-
         let vulkan_color_blend_attachment_state =
             VulkanPipelineColorBlendAttachmentState::builder()
             .color_write_mask(VulkanColorComponentFlagS::all())
             .blend_enable(false);
-
         let vulkan_color_blend_attachment_state_s = &[vulkan_color_blend_attachment_state];
-
-        let _vulkan_color_blend_state =
+        let vulkan_color_blend_state_create_information =
             VulkanPipelineColorBlendStateCreateInformation::builder()
             .logic_op_enable(false)
             .logic_op(VulkanLogicOperation::COPY)
             .attachments(vulkan_color_blend_attachment_state_s)
             .blend_constants([0.0, 0.0, 0.0, 0.0]);
-
         let vulkan_pipeline_layout_create_infomation = VulkanPipelineLayoutCreateInformation::builder();
-
         let create_vulkan_pipeline_layout_result =
             vulkan_logical_device.create_pipeline_layout(&vulkan_pipeline_layout_create_infomation, None);
-
         let vulkan_pipeline_layout =
             match create_vulkan_pipeline_layout_result {
                 Err(error) => {
@@ -123,11 +115,36 @@ impl ApplicationVulkanPipeline {
                 },
                 Ok(layout) => layout,
             };
-
+        let vulkan_stage_s =
+            &[vulkan_vertex_shader_stage_create_information, vulkan_fragment_shader_stage_create_infomation];
+        let vulkan_graphics_pipeline_create_information =
+            VulkanGraphicsPipelineCreateInformation::builder()
+            .stages(vulkan_stage_s)
+            .vertex_input_state(&vulkan_vertex_input_state_create_infomation)
+            .input_assembly_state(&vulkan_input_assembly_state_create_information)
+            .viewport_state(&vulkan_viewport_state_create_information)
+            .rasterization_state(&vulkan_rasterization_state_create_information)
+            .multisample_state(&vulkan_pipeline_multisample_state_create_information)
+            .color_blend_state(&vulkan_color_blend_state_create_information)
+            .layout(vulkan_pipeline_layout)
+            .render_pass(vulkan_render_pass)
+            .subpass(0);
+        let create_vulkan_graphics_pipeline_result =
+            vulkan_logical_device.create_graphics_pipelines(
+                VulkanPipelineCache::null(),
+                &[vulkan_graphics_pipeline_create_information],
+                None);
+        let (vulkan_graphics_pipeline, _) =
+            match create_vulkan_graphics_pipeline_result {
+                Err(error) => {
+                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                    return Err(TerminationProcessMain::InitializationVulkanGraphicsPipelineSCreateFail(vulkan_error_code));
+                },
+                Ok(pipeline_and_success_code) => pipeline_and_success_code,
+            };
         vulkan_logical_device.destroy_shader_module(vulkan_vertex_shader_module, None);
         vulkan_logical_device.destroy_shader_module(vulkan_fragment_shader_module, None);
-
-        Ok(vulkan_pipeline_layout)
+        Ok((vulkan_graphics_pipeline, vulkan_pipeline_layout))
     }
 
     unsafe fn create_shader_module(
@@ -141,7 +158,7 @@ impl ApplicationVulkanPipeline {
         }
         let vulkan_shader_module_create_information =
             VulkanShaderModuleCreateInformation::builder()
-            .code_size(byte_s.len())
+            .code_size(bytecode_byte_s.len())
             .code(byte_s);
         let create_vulkan_shader_module_result =
             vulkan_logical_device.create_shader_module(&vulkan_shader_module_create_information, None);
