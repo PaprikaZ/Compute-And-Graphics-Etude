@@ -27,6 +27,7 @@ use crate::application::vulkan_instance_swapchain::ApplicationVulkanInstanceSwap
 use crate::application::vulkan_instance_swapchain_image_view::ApplicationInstanceSwapchainImageView;
 use crate::application::vulkan_pipeline::ApplicationVulkanPipeline;
 use crate::application::vulkan_render_pass::ApplicationVulkanRenderPass;
+use crate::application::vulkan_frame_buffer::ApplicationVulkanFrameBuffer;
 
 
 pub struct ApplicationVulkanInstanceValidationWi {}
@@ -95,6 +96,8 @@ impl ApplicationVulkanInstanceValidationWi {
             ApplicationVulkanRenderPass::create(&vulkan_logical_device, vulkan_surface_format)?;
         let (vulkan_pipeline, vulkan_pipeline_layout) =
             ApplicationVulkanPipeline::create_layout(&vulkan_logical_device, vulkan_extent, vulkan_render_pass)?;
+        let vulkan_frame_buffer_s =
+            ApplicationVulkanFrameBuffer::create_all(&vulkan_logical_device, &vulkan_image_view_s, vulkan_render_pass, vulkan_extent)?;
         Ok(Application {
             vulkan_entry: vulkan_entry,
             vulkan_instance: vulkan_instance,
@@ -112,6 +115,7 @@ impl ApplicationVulkanInstanceValidationWi {
             vulkan_render_pass: vulkan_render_pass,
             vulkan_pipeline_layout: vulkan_pipeline_layout,
             vulkan_pipeline: vulkan_pipeline,
+            vulkan_frame_buffer_s: vulkan_frame_buffer_s,
         })
     }
 
