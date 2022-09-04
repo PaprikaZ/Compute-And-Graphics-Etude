@@ -141,7 +141,7 @@ impl ApplicationVulkanPipeline {
         }
         let vulkan_shader_module_create_information =
             VulkanShaderModuleCreateInformation::builder()
-            .code_size(byte_s.len())
+            .code_size(bytecode_byte_s.len())
             .code(byte_s);
         let create_vulkan_shader_module_result =
             vulkan_logical_device.create_shader_module(&vulkan_shader_module_create_information, None);
