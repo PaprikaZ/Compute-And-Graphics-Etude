@@ -116,6 +116,10 @@ pub use ::vulkanalia::vk::PipelineCreateFlags as VulkanPipelineCreateFlagS;
 pub use ::vulkanalia::vk::PipelineCache as VulkanPipelineCache;
 pub use ::vulkanalia::vk::Pipeline as VulkanPipeline;
 
+pub use ::vulkanalia::vk::Framebuffer as VulkanFrameBuffer;
+pub use ::vulkanalia::vk::FramebufferCreateInfo as VulkanFrameBufferCreateInformation;
+pub use ::vulkanalia::vk::FramebufferCreateInfoBuilder as VulkanFrameBufferCreateInformationBuilder;
+
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
 pub use ::vulkanalia::vk::LOD_CLAMP_NONE as VULKAN_LOD_CLAMP_NONE;
