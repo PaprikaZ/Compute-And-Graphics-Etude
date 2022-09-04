@@ -16,6 +16,7 @@ use ::vulkan::VulkanImageView;
 use ::vulkan::VulkanRenderPass;
 use ::vulkan::VulkanPipelineLayout;
 use ::vulkan::VulkanPipeline;
+use ::vulkan::VulkanFrameBuffer;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_instance_validation_wi::ApplicationVulkanInstanceValidationWi;
@@ -39,6 +40,7 @@ pub struct Application {
     pub vulkan_render_pass: VulkanRenderPass,
     pub vulkan_pipeline_layout: VulkanPipelineLayout,
     pub vulkan_pipeline: VulkanPipeline,
+    pub vulkan_frame_buffer_s: Vec<VulkanFrameBuffer>,
 }
 
 impl Application {
@@ -61,6 +63,9 @@ impl Application {
     }
 
     pub unsafe fn destroy(&mut self) -> () {
+        self.vulkan_frame_buffer_s
+        .iter()
+        .for_each(|f| self.vulkan_device_logical.destroy_framebuffer(*f, None));
         self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline, None);
         self.vulkan_device_logical.destroy_pipeline_layout(self.vulkan_pipeline_layout, None);
         self.vulkan_device_logical.destroy_render_pass(self.vulkan_render_pass, None);
