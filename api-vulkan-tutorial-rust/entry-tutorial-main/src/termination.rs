@@ -29,6 +29,9 @@ pub enum TerminationProcessMain {
     InitializationVulkanGraphicsPipelineSCreateFail(VulkanErrorCode),
     InitializationVulkanFrameBufferCreateFail(VulkanErrorCode),
     InitializationVulkanCommandPoolCreateFail(VulkanErrorCode),
+    InitializationVulkanCommandBufferSAllocateFail(VulkanErrorCode),
+    InitializationVulkanCommandBufferBeginFail(VulkanErrorCode),
+    InitializationVulkanCommandBufferEndFail(VulkanErrorCode),
 }
 
 impl TerminationProcessMain {
@@ -59,6 +62,9 @@ impl TerminationProcessMain {
             Self::InitializationVulkanGraphicsPipelineSCreateFail(_) => 22u8,
             Self::InitializationVulkanFrameBufferCreateFail(_) => 23u8,
             Self::InitializationVulkanCommandPoolCreateFail(_) => 24u8,
+            Self::InitializationVulkanCommandBufferSAllocateFail(_) => 25u8,
+            Self::InitializationVulkanCommandBufferBeginFail(_) => 26u8,
+            Self::InitializationVulkanCommandBufferEndFail(_) => 27u8,
         }
     }
 }
