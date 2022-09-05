@@ -120,6 +120,23 @@ pub use ::vulkanalia::vk::Framebuffer as VulkanFrameBuffer;
 pub use ::vulkanalia::vk::FramebufferCreateInfo as VulkanFrameBufferCreateInformation;
 pub use ::vulkanalia::vk::FramebufferCreateInfoBuilder as VulkanFrameBufferCreateInformationBuilder;
 
+pub use ::vulkanalia::vk::CommandPool as VulkanCommandPool;
+pub use ::vulkanalia::vk::CommandPoolCreateFlags as VulkanCommandPoolCreateFlagS;
+pub use ::vulkanalia::vk::CommandBuffer as VulkanCommandBuffer;
+pub use ::vulkanalia::vk::CommandBufferAllocateInfo as VulkanCommandBufferAllocateInformation;
+pub use ::vulkanalia::vk::CommandBufferAllocateInfoBuilder as VulkanCommandBufferAllocateInformationBuilder;
+pub use ::vulkanalia::vk::CommandBufferLevel as VulkanCommandBufferLevel;
+pub use ::vulkanalia::vk::CommandBufferBeginInfo as VulkanCommandBufferBeginInformation;
+pub use ::vulkanalia::vk::CommandBufferInheritanceInfo as VulkanCommandBufferInheritanceInfomation;
+pub use ::vulkanalia::vk::CommandBufferInheritanceInfoBuilder as VulkanCommandBufferInheritanceInfomationBuilder;
+pub use ::vulkanalia::vk::CommandBufferUsageFlags as VulkanCommandBufferUsageFlagS;
+pub use ::vulkanalia::vk::ClearValue as VulkanClearValue;
+pub use ::vulkanalia::vk::ClearColorValue as VulkanClearColorValue;
+pub use ::vulkanalia::vk::RenderPassBeginInfo as VulkanRenderPassBeginInformation;
+pub use ::vulkanalia::vk::SubpassContents as VulkanSubpassContents;
+pub use ::vulkanalia::vk::CommandPoolCreateInfo as VulkanCommandPoolCreateInformation;
+pub use ::vulkanalia::vk::CommandPoolCreateInfoBuilder as VulkanCommandPoolCreateInformationBuilder;
+
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
 pub use ::vulkanalia::vk::LOD_CLAMP_NONE as VULKAN_LOD_CLAMP_NONE;
