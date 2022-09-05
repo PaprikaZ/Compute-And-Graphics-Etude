@@ -28,6 +28,8 @@ use crate::application::vulkan_instance_swapchain_image_view::ApplicationInstanc
 use crate::application::vulkan_pipeline::ApplicationVulkanPipeline;
 use crate::application::vulkan_render_pass::ApplicationVulkanRenderPass;
 use crate::application::vulkan_frame_buffer::ApplicationVulkanFrameBuffer;
+use crate::application::vulkan_command_pool::ApplicationVulkanCommandPool;
+use crate::application::vulkan_command_buffer::ApplicationVulkanCommandBuffer;
 
 
 pub struct ApplicationVulkanInstanceValidationWi {}
@@ -98,6 +100,12 @@ impl ApplicationVulkanInstanceValidationWi {
             ApplicationVulkanPipeline::create_layout(&vulkan_logical_device, vulkan_extent, vulkan_render_pass)?;
         let vulkan_frame_buffer_s =
             ApplicationVulkanFrameBuffer::create_all(&vulkan_logical_device, &vulkan_image_view_s, vulkan_render_pass, vulkan_extent)?;
+        let vulkan_command_pool =
+            ApplicationVulkanCommandPool::create(&vulkan_logical_device, vulkan_graphic_queue_family_index)?;
+        let vulkan_command_buffer_s =
+            ApplicationVulkanCommandBuffer::create_all(
+                &vulkan_logical_device, vulkan_command_pool,
+                &vulkan_frame_buffer_s, vulkan_extent, vulkan_render_pass, vulkan_pipeline)?;
         Ok(Application {
             vulkan_entry: vulkan_entry,
             vulkan_instance: vulkan_instance,
@@ -116,6 +124,8 @@ impl ApplicationVulkanInstanceValidationWi {
             vulkan_pipeline_layout: vulkan_pipeline_layout,
             vulkan_pipeline: vulkan_pipeline,
             vulkan_frame_buffer_s: vulkan_frame_buffer_s,
+            vulkan_command_pool: vulkan_command_pool,
+            vulkan_command_buffer_s: vulkan_command_buffer_s,
         })
     }
 
