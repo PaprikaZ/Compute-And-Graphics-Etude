@@ -1,10 +1,8 @@
-use vulkan::VulkanExtensionDebugUtility;
-use vulkan::VulkanSurfaceExtensionKhr;
-use vulkan::VulkanSwapchainExtensionKhr;
 use ::window_uniform::prelude::*;
 use ::vulkan::VulkanExtensionName;
 use ::vulkan::VulkanExtensionDebugUtilityMessenger;
 use ::vulkan::prelude::version1_2::*;
+use ::vulkan::VulkanErrorCode;
 use ::vulkan::VulkanQueue;
 use ::vulkan::VulkanDevicePhysical;
 use ::vulkan::VulkanSurfaceKhr;
@@ -19,7 +17,16 @@ use ::vulkan::VulkanPipeline;
 use ::vulkan::VulkanFrameBuffer;
 use ::vulkan::VulkanCommandPool;
 use ::vulkan::VulkanCommandBuffer;
+use ::vulkan::VulkanSemaphore;
+use ::vulkan::VulkanFence;
+use ::vulkan::VulkanExtensionDebugUtility;
+use ::vulkan::VulkanSurfaceExtensionKhr;
+use ::vulkan::VulkanSwapchainExtensionKhr;
+use ::vulkan::VulkanPipelineStageFlagS;
+use ::vulkan::VulkanSubmitInformation;
+use ::vulkan::VulkanPresentInformationKhr;
 
+use crate::config::VULKAN_FRAME_IN_FLIGHT_MAX;
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_instance_validation_wi::ApplicationVulkanInstanceValidationWi;
 use crate::application::vulkan_instance_validation_wo::ApplicationVulkanInstanceValidationWo;
@@ -45,6 +52,11 @@ pub struct Application {
     pub vulkan_frame_buffer_s: Vec<VulkanFrameBuffer>,
     pub vulkan_command_pool: VulkanCommandPool,
     pub vulkan_command_buffer_s: Vec<VulkanCommandBuffer>,
+    pub vulkan_semaphore_s_image_available: Vec<VulkanSemaphore>,
+    pub vulkan_semaphore_s_render_finished: Vec<VulkanSemaphore>,
+    pub vulkan_fence_s_in_flight_slide: Vec<VulkanFence>,
+    pub vulkan_fence_s_in_flight_image: Vec<VulkanFence>,
+    pub vulkan_frame_index_current: usize,
 }
 
 impl Application {
@@ -66,7 +78,24 @@ impl Application {
         Ok(())
     }
 
-    pub unsafe fn destroy(&mut self) -> () {
+    pub unsafe fn destroy(&mut self) -> Result<(), TerminationProcessMain> {
+        match self.vulkan_device_logical.device_wait_idle() {
+            Err(error) => {
+                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                return Err(TerminationProcessMain::InitializationVulkanDeviceWaitIdleFail(vulkan_error_code));
+            },
+            Ok(()) => (),
+        };
+        self.vulkan_fence_s_in_flight_slide
+        .iter()
+        .for_each(|f| self.vulkan_device_logical.destroy_fence(*f, None));
+        self.vulkan_semaphore_s_render_finished
+        .iter()
+        .for_each(|s| self.vulkan_device_logical.destroy_semaphore(*s, None));
+        self.vulkan_semaphore_s_image_available
+        .iter()
+        .for_each(|s| self.vulkan_device_logical.destroy_semaphore(*s, None));
+        //
         self.vulkan_device_logical.destroy_command_pool(self.vulkan_command_pool, None);
         self.vulkan_frame_buffer_s
         .iter()
@@ -84,5 +113,6 @@ impl Application {
             self.vulkan_instance.destroy_debug_utils_messenger_ext(self.vulkan_debug_messenger.unwrap(), None);
         };
         self.vulkan_instance.destroy_instance(None);
+        Ok(())
     }
 }

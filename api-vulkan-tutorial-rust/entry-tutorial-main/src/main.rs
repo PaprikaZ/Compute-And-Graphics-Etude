@@ -35,6 +35,6 @@ fn main() -> TerminationProcessMain {
             Err(termination) => return termination,
             Ok(application) => application,
         };
-    CompositionExecution::bind_window_event_loop_default(window, application);
+    let _result = CompositionExecution::bind_window_event_loop_default(window, application);
     TerminationProcessMain::Ok
 }
