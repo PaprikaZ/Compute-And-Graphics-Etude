@@ -137,6 +137,19 @@ pub use ::vulkanalia::vk::SubpassContents as VulkanSubpassContents;
 pub use ::vulkanalia::vk::CommandPoolCreateInfo as VulkanCommandPoolCreateInformation;
 pub use ::vulkanalia::vk::CommandPoolCreateInfoBuilder as VulkanCommandPoolCreateInformationBuilder;
 
+pub use ::vulkanalia::vk::Semaphore as VulkanSemaphore;
+pub use ::vulkanalia::vk::SemaphoreCreateInfo as VulkanSemaphoreCreateInformation;
+pub use ::vulkanalia::vk::SemaphoreCreateInfoBuilder as VulkanSemaphoreCreateInformationBuilder;
+pub use ::vulkanalia::vk::PipelineStageFlags as VulkanPipelineStageFlagS;
+pub use ::vulkanalia::vk::SubmitInfo as VulkanSubmitInformation;
+pub use ::vulkanalia::vk::Fence as VulkanFence;
+pub use ::vulkanalia::vk::FenceCreateInfo as VulkanFenceCreateInformation;
+pub use ::vulkanalia::vk::FenceCreateInfoBuilder as VulkanFenceCreateInformationBuilder;
+pub use ::vulkanalia::vk::SubpassDependency as VulkanSubpassDependency;
+pub use ::vulkanalia::vk::AccessFlags as VulkanAccessFlagS;
+pub use ::vulkanalia::vk::PresentInfoKHR as VulkanPresentInformationKhr;
+pub use ::vulkanalia::vk::FenceCreateFlags as VulkanFenceCreateFlagS;
+
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
 pub use ::vulkanalia::vk::LOD_CLAMP_NONE as VULKAN_LOD_CLAMP_NONE;
