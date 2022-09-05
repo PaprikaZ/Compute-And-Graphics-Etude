@@ -32,6 +32,14 @@ pub enum TerminationProcessMain {
     InitializationVulkanCommandBufferSAllocateFail(VulkanErrorCode),
     InitializationVulkanCommandBufferBeginFail(VulkanErrorCode),
     InitializationVulkanCommandBufferEndFail(VulkanErrorCode),
+    InitializationVulkanSemaphoreCreateFail(VulkanErrorCode),
+    InitializationVulkanFenceCreateFail(VulkanErrorCode),
+    InitializationVulkanDeviceWaitIdleFail(VulkanErrorCode),
+    InitializationVulkanFenceWaitFail(VulkanErrorCode),
+    InitializationVulkanAcquireNextImageFail(VulkanErrorCode),
+    InitializationVulkanFenceResetFail(VulkanErrorCode),
+    InitializationVulkanQueueSubmitFail(VulkanErrorCode),
+    InitializationVulkanQueuePresentFail(VulkanErrorCode),
 }
 
 impl TerminationProcessMain {
@@ -65,6 +73,14 @@ impl TerminationProcessMain {
             Self::InitializationVulkanCommandBufferSAllocateFail(_) => 25u8,
             Self::InitializationVulkanCommandBufferBeginFail(_) => 26u8,
             Self::InitializationVulkanCommandBufferEndFail(_) => 27u8,
+            Self::InitializationVulkanSemaphoreCreateFail(_) => 28u8,
+            Self::InitializationVulkanFenceCreateFail(_) => 29u8,
+            Self::InitializationVulkanDeviceWaitIdleFail(_) => 30u8,
+            Self::InitializationVulkanFenceWaitFail(_) => 31u8,
+            Self::InitializationVulkanAcquireNextImageFail(_) => 32u8,
+            Self::InitializationVulkanFenceResetFail(_) => 33u8,
+            Self::InitializationVulkanQueueSubmitFail(_) => 34u8,
+            Self::InitializationVulkanQueuePresentFail(_) => 35u8,
         }
     }
 }

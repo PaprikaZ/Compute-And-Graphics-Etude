@@ -30,6 +30,7 @@ use crate::application::vulkan_render_pass::ApplicationVulkanRenderPass;
 use crate::application::vulkan_frame_buffer::ApplicationVulkanFrameBuffer;
 use crate::application::vulkan_command_pool::ApplicationVulkanCommandPool;
 use crate::application::vulkan_command_buffer::ApplicationVulkanCommandBuffer;
+use crate::application::vulkan_synchronization::ApplicationVulkanSynchronization;
 
 
 pub struct ApplicationVulkanInstanceValidationWi {}
@@ -106,6 +107,9 @@ impl ApplicationVulkanInstanceValidationWi {
             ApplicationVulkanCommandBuffer::create_all(
                 &vulkan_logical_device, vulkan_command_pool,
                 &vulkan_frame_buffer_s, vulkan_extent, vulkan_render_pass, vulkan_pipeline)?;
+        let (vulkan_image_available_semaphore_s, vulkan_render_finished_semaphore_s,
+             vulkan_slide_in_flight_fence_s, vulkan_image_in_flight_fence_s) =
+            ApplicationVulkanSynchronization::create_all(&vulkan_logical_device, &vulkan_image_s)?;
         Ok(Application {
             vulkan_entry: vulkan_entry,
             vulkan_instance: vulkan_instance,
@@ -126,6 +130,11 @@ impl ApplicationVulkanInstanceValidationWi {
             vulkan_frame_buffer_s: vulkan_frame_buffer_s,
             vulkan_command_pool: vulkan_command_pool,
             vulkan_command_buffer_s: vulkan_command_buffer_s,
+            vulkan_semaphore_s_image_available: vulkan_image_available_semaphore_s,
+            vulkan_semaphore_s_render_finished: vulkan_render_finished_semaphore_s,
+            vulkan_fence_s_in_flight_slide: vulkan_slide_in_flight_fence_s,
+            vulkan_fence_s_in_flight_image: vulkan_image_in_flight_fence_s,
+            vulkan_frame_index_current: 0,
         })
     }
 

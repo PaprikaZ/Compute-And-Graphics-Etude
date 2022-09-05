@@ -3,6 +3,7 @@ use ::vulkan::VulkanErrorCode;
 use ::vulkan::VulkanQueueFamilyIndexGraphic;
 use ::vulkan::VulkanCommandPool;
 use ::vulkan::VulkanCommandPoolCreateInformation;
+use ::vulkan::VulkanCommandPoolCreateFlagS;
 
 use crate::termination::TerminationProcessMain;
 
@@ -17,6 +18,7 @@ impl ApplicationVulkanCommandPool {
     {
         let vulkan_command_pool_create_information =
             VulkanCommandPoolCreateInformation::builder()
+            .flags(VulkanCommandPoolCreateFlagS::empty())
             .queue_family_index(vulkan_graphic_queue_family_index.as_raw());
         let create_vulkan_command_pool_result =
             vulkan_logical_device.create_command_pool(&vulkan_command_pool_create_information, None);
