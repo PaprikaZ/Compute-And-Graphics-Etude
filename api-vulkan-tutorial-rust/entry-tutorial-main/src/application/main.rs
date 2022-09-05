@@ -74,7 +74,88 @@ impl Application {
         }
     }
 
-    pub unsafe fn render(&mut self, _window: &WindowUniformWindow) -> Result<(), ()> {
+    pub unsafe fn render(&mut self, _window: &WindowUniformWindow) -> Result<(), TerminationProcessMain> {
+        let vulkan_slide_in_flight_fence = self.vulkan_fence_s_in_flight_slide[self.vulkan_frame_index_current];
+        let vulkan_image_in_flight_fence = self.vulkan_fence_s_in_flight_image[self.vulkan_frame_index_current];
+        let vulkan_available_image_semaphore = self.vulkan_semaphore_s_image_available[self.vulkan_frame_index_current];
+        let wait_vulkan_in_flight_fence_result =
+            self.vulkan_device_logical.wait_for_fences(&[vulkan_slide_in_flight_fence], true, u64::max_value());
+        let _ =
+            match wait_vulkan_in_flight_fence_result {
+                Err(error) => {
+                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                    return Err(TerminationProcessMain::InitializationVulkanFenceWaitFail(vulkan_error_code));
+                },
+                Ok(success_code) => success_code,
+            };
+        let acquire_vulkan_next_image_index_result =
+            self.vulkan_device_logical.acquire_next_image_khr(
+                self.vulkan_swapchain, u64::max_value(), vulkan_available_image_semaphore, VulkanFence::null());
+        let vulkan_next_image_index =
+            match acquire_vulkan_next_image_index_result {
+                Err(error) => {
+                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                    return Err(TerminationProcessMain::InitializationVulkanAcquireNextImageFail(vulkan_error_code));
+                },
+                Ok((image_index, _success_code)) => image_index as usize,
+            };
+        if !vulkan_image_in_flight_fence.is_null() {
+            let wait_vulkan_unknown_fence_result =
+                self.vulkan_device_logical.wait_for_fences(&[vulkan_image_in_flight_fence], true, u64::max_value());
+            match wait_vulkan_unknown_fence_result {
+                Err(error) => {
+                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                    return Err(TerminationProcessMain::InitializationVulkanFenceWaitFail(vulkan_error_code));
+                },
+                Ok(_success_code) => (),
+            }
+        }
+        self.vulkan_fence_s_in_flight_image[vulkan_next_image_index] = vulkan_slide_in_flight_fence;
+        let wait_vulkan_semaphore_s = &[self.vulkan_semaphore_s_image_available[self.vulkan_frame_index_current]];
+        let wait_vulkan_pipeline_stage_flag_s = &[VulkanPipelineStageFlagS::COLOR_ATTACHMENT_OUTPUT];
+        let vulkan_command_buffer_s = &[self.vulkan_command_buffer_s[vulkan_next_image_index]];
+        let vulkan_signal_semaphore_s = &[self.vulkan_semaphore_s_render_finished[self.vulkan_frame_index_current]];
+        let vulkan_submit_information =
+            VulkanSubmitInformation::builder()
+            .wait_semaphores(wait_vulkan_semaphore_s)
+            .wait_dst_stage_mask(wait_vulkan_pipeline_stage_flag_s)
+            .command_buffers(vulkan_command_buffer_s)
+            .signal_semaphores(vulkan_signal_semaphore_s);
+        let reset_vulkan_fence_s_result =
+            self.vulkan_device_logical.reset_fences(&[vulkan_slide_in_flight_fence]);
+        match reset_vulkan_fence_s_result {
+            Err(error) => {
+                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                return Err(TerminationProcessMain::InitializationVulkanFenceResetFail(vulkan_error_code));
+            },
+            Ok(()) => (),
+        };
+        let submit_vulkan_queue_result =
+            self.vulkan_device_logical.queue_submit(self.vulkan_queue_graphic, &[vulkan_submit_information], vulkan_slide_in_flight_fence);
+        match submit_vulkan_queue_result {
+            Err(error) => {
+                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                return Err(TerminationProcessMain::InitializationVulkanQueueSubmitFail(vulkan_error_code));
+            },
+            Ok(()) => (),
+        };
+        let vulkan_swapchain_s = &[self.vulkan_swapchain];
+        let vulkan_image_index_s = &[vulkan_next_image_index as u32];
+        let vulkan_present_information =
+            VulkanPresentInformationKhr::builder()
+            .wait_semaphores(vulkan_signal_semaphore_s)
+            .swapchains(vulkan_swapchain_s)
+            .image_indices(vulkan_image_index_s);
+        let present_vulkan_queue_result =
+            self.vulkan_device_logical.queue_present_khr(self.vulkan_queue_present, &vulkan_present_information);
+        match present_vulkan_queue_result {
+            Err(error) => {
+                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                return Err(TerminationProcessMain::InitializationVulkanQueuePresentFail(vulkan_error_code));
+            },
+            Ok(_success_code) => (),
+        };
+        self.vulkan_frame_index_current = (self.vulkan_frame_index_current + 1) % (VULKAN_FRAME_IN_FLIGHT_MAX as usize);
         Ok(())
     }
 
