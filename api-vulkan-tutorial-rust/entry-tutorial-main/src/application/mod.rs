@@ -9,3 +9,4 @@ pub mod vulkan_instance_swapchain_image_view;
 pub mod vulkan_pipeline;
 pub mod vulkan_render_pass;
 pub mod vulkan_frame_buffer;
+pub mod vulkan_command_pool;
