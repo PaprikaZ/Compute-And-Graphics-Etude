@@ -3,6 +3,8 @@ use ::vulkan::VulkanExtensionName;
 use ::vulkan::VulkanExtensionDebugUtilityMessenger;
 use ::vulkan::prelude::version1_2::*;
 use ::vulkan::VulkanErrorCode;
+use ::vulkan::VulkanErrorCode_;
+use ::vulkan::VulkanSuccessCode_;
 use ::vulkan::VulkanQueue;
 use ::vulkan::VulkanDevicePhysical;
 use ::vulkan::VulkanSurfaceKhr;
@@ -19,6 +21,8 @@ use ::vulkan::VulkanCommandPool;
 use ::vulkan::VulkanCommandBuffer;
 use ::vulkan::VulkanSemaphore;
 use ::vulkan::VulkanFence;
+use ::vulkan::VulkanQueueFamilyIndexGraphic;
+use ::vulkan::VulkanQueueFamilyIndexSurface;
 use ::vulkan::VulkanExtensionDebugUtility;
 use ::vulkan::VulkanSurfaceExtensionKhr;
 use ::vulkan::VulkanSwapchainExtensionKhr;
@@ -28,18 +32,27 @@ use ::vulkan::VulkanPresentInformationKhr;
 
 use crate::config::VULKAN_FRAME_IN_FLIGHT_MAX;
 use crate::termination::TerminationProcessMain;
+use crate::application::vulkan_instance_swapchain::ApplicationVulkanInstanceSwapchain;
+use crate::application::vulkan_instance_swapchain_image_view::ApplicationInstanceSwapchainImageView;
+use crate::application::vulkan_render_pass::ApplicationVulkanRenderPass;
+use crate::application::vulkan_pipeline::ApplicationVulkanPipeline;
+use crate::application::vulkan_frame_buffer::ApplicationVulkanFrameBuffer;
+use crate::application::vulkan_command_buffer::ApplicationVulkanCommandBuffer;
 use crate::application::vulkan_instance_validation_wi::ApplicationVulkanInstanceValidationWi;
 use crate::application::vulkan_instance_validation_wo::ApplicationVulkanInstanceValidationWo;
 
 
 pub struct Application {
+    pub signal_window_resized: bool,
     pub vulkan_entry: VulkanEntry,
     pub vulkan_instance: VulkanInstance,
     pub vulkan_debug_messenger: Option<VulkanExtensionDebugUtilityMessenger>,
     pub vulkan_device_physical: VulkanDevicePhysical,
     pub vulkan_device_logical: VulkanDeviceLogical,
+    pub vulkan_queue_family_index_graphic: VulkanQueueFamilyIndexGraphic,
     pub vulkan_queue_graphic: VulkanQueue,
     pub vulkan_surface: VulkanSurfaceKhr,
+    pub vulkan_queue_family_index_present: VulkanQueueFamilyIndexSurface,
     pub vulkan_queue_present: VulkanQueue,
     pub vulkan_swapchain_format: VulkanFormat,
     pub vulkan_swapchain_extent: VulkanExtentD2,
@@ -74,7 +87,7 @@ impl Application {
         }
     }
 
-    pub unsafe fn render(&mut self, _window: &WindowUniformWindow) -> Result<(), TerminationProcessMain> {
+    pub unsafe fn render(&mut self, window: &WindowUniformWindow) -> Result<(), TerminationProcessMain> {
         let vulkan_slide_in_flight_fence = self.vulkan_fence_s_in_flight_slide[self.vulkan_frame_index_current];
         let vulkan_image_in_flight_fence = self.vulkan_fence_s_in_flight_image[self.vulkan_frame_index_current];
         let vulkan_available_image_semaphore = self.vulkan_semaphore_s_image_available[self.vulkan_frame_index_current];
@@ -93,6 +106,7 @@ impl Application {
                 self.vulkan_swapchain, u64::max_value(), vulkan_available_image_semaphore, VulkanFence::null());
         let vulkan_next_image_index =
             match acquire_vulkan_next_image_index_result {
+                Err(VulkanErrorCode_::OUT_OF_DATE_KHR) => return self.recreate_swapchain(window),
                 Err(error) => {
                     let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
                     return Err(TerminationProcessMain::InitializationVulkanAcquireNextImageFail(vulkan_error_code));
@@ -148,14 +162,71 @@ impl Application {
             .image_indices(vulkan_image_index_s);
         let present_vulkan_queue_result =
             self.vulkan_device_logical.queue_present_khr(self.vulkan_queue_present, &vulkan_present_information);
-        match present_vulkan_queue_result {
+        let present_result_need_recreate_swapchain =
+            match present_vulkan_queue_result {
+                Err(VulkanErrorCode_::OUT_OF_DATE_KHR) => true,
+                Ok(VulkanSuccessCode_::SUBOPTIMAL_KHR) => true,
+                Err(error) => {
+                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                    return Err(TerminationProcessMain::InitializationVulkanQueuePresentFail(vulkan_error_code));
+                },
+                Ok(_) => false,
+            };
+        match (self.signal_window_resized, present_result_need_recreate_swapchain) {
+            (true, true) => {
+                self.signal_window_resized = false;
+                let _result = self.recreate_swapchain(window);
+            },
+            _ => (),
+        }
+        self.vulkan_frame_index_current = (self.vulkan_frame_index_current + 1) % (VULKAN_FRAME_IN_FLIGHT_MAX as usize);
+        Ok(())
+    }
+
+    unsafe fn recreate_swapchain(&mut self, window: &WindowUniformWindow) -> Result<(), TerminationProcessMain> {
+        match self.vulkan_device_logical.device_wait_idle() {
             Err(error) => {
                 let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanQueuePresentFail(vulkan_error_code));
+                return Err(TerminationProcessMain::InitializationVulkanDeviceWaitIdleFail(vulkan_error_code));
             },
-            Ok(_success_code) => (),
+            Ok(()) => (),
         };
-        self.vulkan_frame_index_current = (self.vulkan_frame_index_current + 1) % (VULKAN_FRAME_IN_FLIGHT_MAX as usize);
+        self.destroy_swapchain();
+        let (vulkan_format, vulkan_extent, vulkan_swapchain, vulkan_image_s) =
+            ApplicationVulkanInstanceSwapchain::create(
+                window,
+                &self.vulkan_instance,
+                self.vulkan_surface,
+                &self.vulkan_device_logical,
+                self.vulkan_device_physical,
+                self.vulkan_queue_family_index_graphic,
+                self.vulkan_queue_family_index_present)?;
+        let vulkan_image_view_s =
+            ApplicationInstanceSwapchainImageView::create_all(
+                &self.vulkan_device_logical,
+                vulkan_format,
+                &vulkan_image_s)?;
+        let vulkan_render_pass =
+            ApplicationVulkanRenderPass::create(&self.vulkan_device_logical, vulkan_format)?;
+        let (vulkan_pipeline, vulkan_pipeline_layout) =
+            ApplicationVulkanPipeline::create_layout(&self.vulkan_device_logical, vulkan_extent, vulkan_render_pass)?;
+        let vulkan_frame_buffer_s =
+            ApplicationVulkanFrameBuffer::create_all(&self.vulkan_device_logical, &vulkan_image_view_s, vulkan_render_pass, vulkan_extent)?;
+        let vulkan_command_buffer_s =
+            ApplicationVulkanCommandBuffer::create_all(
+                &self.vulkan_device_logical,
+                self.vulkan_command_pool, &vulkan_frame_buffer_s, vulkan_extent, vulkan_render_pass, vulkan_pipeline)?;
+        self.vulkan_swapchain_format = vulkan_format;
+        self.vulkan_swapchain_extent = vulkan_extent;
+        self.vulkan_swapchain = vulkan_swapchain;
+        self.vulkan_swapchain_image_s = vulkan_image_s;
+        self.vulkan_swapchain_image_view_s = vulkan_image_view_s;
+        self.vulkan_render_pass = vulkan_render_pass;
+        self.vulkan_pipeline = vulkan_pipeline;
+        self.vulkan_pipeline_layout = vulkan_pipeline_layout;
+        self.vulkan_frame_buffer_s = vulkan_frame_buffer_s;
+        self.vulkan_command_buffer_s = vulkan_command_buffer_s;
+        self.vulkan_fence_s_in_flight_image.resize(self.vulkan_swapchain_image_s.len(), VulkanFence::null());
         Ok(())
     }
 
@@ -167,6 +238,7 @@ impl Application {
             },
             Ok(()) => (),
         };
+        self.destroy_swapchain();
         self.vulkan_fence_s_in_flight_slide
         .iter()
         .for_each(|f| self.vulkan_device_logical.destroy_fence(*f, None));
@@ -178,6 +250,17 @@ impl Application {
         .for_each(|s| self.vulkan_device_logical.destroy_semaphore(*s, None));
         //
         self.vulkan_device_logical.destroy_command_pool(self.vulkan_command_pool, None);
+        self.vulkan_device_logical.destroy_device(None);
+        self.vulkan_instance.destroy_surface_khr(self.vulkan_surface, None);
+        if Option::is_some(&self.vulkan_debug_messenger) {
+            self.vulkan_instance.destroy_debug_utils_messenger_ext(self.vulkan_debug_messenger.unwrap(), None);
+        };
+        self.vulkan_instance.destroy_instance(None);
+        Ok(())
+    }
+
+    unsafe fn destroy_swapchain(&mut self) -> () {
+        self.vulkan_device_logical.free_command_buffers(self.vulkan_command_pool, &self.vulkan_command_buffer_s);
         self.vulkan_frame_buffer_s
         .iter()
         .for_each(|f| self.vulkan_device_logical.destroy_framebuffer(*f, None));
@@ -188,12 +271,5 @@ impl Application {
         .iter()
         .for_each(|v| self.vulkan_device_logical.destroy_image_view(*v, None));
         self.vulkan_device_logical.destroy_swapchain_khr(self.vulkan_swapchain, None);
-        self.vulkan_device_logical.destroy_device(None);
-        self.vulkan_instance.destroy_surface_khr(self.vulkan_surface, None);
-        if Option::is_some(&self.vulkan_debug_messenger) {
-            self.vulkan_instance.destroy_debug_utils_messenger_ext(self.vulkan_debug_messenger.unwrap(), None);
-        };
-        self.vulkan_instance.destroy_instance(None);
-        Ok(())
     }
 }
