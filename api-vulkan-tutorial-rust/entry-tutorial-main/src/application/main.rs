@@ -167,6 +167,7 @@ impl Application {
             },
             Ok(()) => (),
         };
+        self.destroy_swapchain();
         self.vulkan_fence_s_in_flight_slide
         .iter()
         .for_each(|f| self.vulkan_device_logical.destroy_fence(*f, None));
@@ -178,6 +179,17 @@ impl Application {
         .for_each(|s| self.vulkan_device_logical.destroy_semaphore(*s, None));
         //
         self.vulkan_device_logical.destroy_command_pool(self.vulkan_command_pool, None);
+        self.vulkan_device_logical.destroy_device(None);
+        self.vulkan_instance.destroy_surface_khr(self.vulkan_surface, None);
+        if Option::is_some(&self.vulkan_debug_messenger) {
+            self.vulkan_instance.destroy_debug_utils_messenger_ext(self.vulkan_debug_messenger.unwrap(), None);
+        };
+        self.vulkan_instance.destroy_instance(None);
+        Ok(())
+    }
+
+    unsafe fn destroy_swapchain(&mut self) -> () {
+        self.vulkan_device_logical.free_command_buffers(self.vulkan_command_pool, &self.vulkan_command_buffer_s);
         self.vulkan_frame_buffer_s
         .iter()
         .for_each(|f| self.vulkan_device_logical.destroy_framebuffer(*f, None));
@@ -188,12 +200,5 @@ impl Application {
         .iter()
         .for_each(|v| self.vulkan_device_logical.destroy_image_view(*v, None));
         self.vulkan_device_logical.destroy_swapchain_khr(self.vulkan_swapchain, None);
-        self.vulkan_device_logical.destroy_device(None);
-        self.vulkan_instance.destroy_surface_khr(self.vulkan_surface, None);
-        if Option::is_some(&self.vulkan_debug_messenger) {
-            self.vulkan_instance.destroy_debug_utils_messenger_ext(self.vulkan_debug_messenger.unwrap(), None);
-        };
-        self.vulkan_instance.destroy_instance(None);
-        Ok(())
     }
 }
