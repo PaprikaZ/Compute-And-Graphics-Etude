@@ -111,13 +111,16 @@ impl ApplicationVulkanInstanceValidationWi {
              vulkan_slide_in_flight_fence_s, vulkan_image_in_flight_fence_s) =
             ApplicationVulkanSynchronization::create_all(&vulkan_logical_device, &vulkan_image_s)?;
         Ok(Application {
+            signal_window_resized: false,
             vulkan_entry: vulkan_entry,
             vulkan_instance: vulkan_instance,
             vulkan_debug_messenger: None,
             vulkan_device_physical: vulkan_physical_device,
             vulkan_device_logical: vulkan_logical_device,
+            vulkan_queue_family_index_graphic: vulkan_graphic_queue_family_index,
             vulkan_queue_graphic: vulkan_graphic_queue,
             vulkan_surface: vulkan_surface,
+            vulkan_queue_family_index_present: vulkan_surface_queue_family_index,
             vulkan_queue_present: vulkan_present_queue,
             vulkan_swapchain_format: vulkan_surface_format,
             vulkan_swapchain_extent: vulkan_extent,

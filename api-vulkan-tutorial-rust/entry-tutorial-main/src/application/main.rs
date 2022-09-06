@@ -3,6 +3,8 @@ use ::vulkan::VulkanExtensionName;
 use ::vulkan::VulkanExtensionDebugUtilityMessenger;
 use ::vulkan::prelude::version1_2::*;
 use ::vulkan::VulkanErrorCode;
+use ::vulkan::VulkanErrorCode_;
+use ::vulkan::VulkanSuccessCode_;
 use ::vulkan::VulkanQueue;
 use ::vulkan::VulkanDevicePhysical;
 use ::vulkan::VulkanSurfaceKhr;
@@ -19,6 +21,8 @@ use ::vulkan::VulkanCommandPool;
 use ::vulkan::VulkanCommandBuffer;
 use ::vulkan::VulkanSemaphore;
 use ::vulkan::VulkanFence;
+use ::vulkan::VulkanQueueFamilyIndexGraphic;
+use ::vulkan::VulkanQueueFamilyIndexSurface;
 use ::vulkan::VulkanExtensionDebugUtility;
 use ::vulkan::VulkanSurfaceExtensionKhr;
 use ::vulkan::VulkanSwapchainExtensionKhr;
@@ -33,13 +37,16 @@ use crate::application::vulkan_instance_validation_wo::ApplicationVulkanInstance
 
 
 pub struct Application {
+    pub signal_window_resized: bool,
     pub vulkan_entry: VulkanEntry,
     pub vulkan_instance: VulkanInstance,
     pub vulkan_debug_messenger: Option<VulkanExtensionDebugUtilityMessenger>,
     pub vulkan_device_physical: VulkanDevicePhysical,
     pub vulkan_device_logical: VulkanDeviceLogical,
+    pub vulkan_queue_family_index_graphic: VulkanQueueFamilyIndexGraphic,
     pub vulkan_queue_graphic: VulkanQueue,
     pub vulkan_surface: VulkanSurfaceKhr,
+    pub vulkan_queue_family_index_present: VulkanQueueFamilyIndexSurface,
     pub vulkan_queue_present: VulkanQueue,
     pub vulkan_swapchain_format: VulkanFormat,
     pub vulkan_swapchain_extent: VulkanExtentD2,
