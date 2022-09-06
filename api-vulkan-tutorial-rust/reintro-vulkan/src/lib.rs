@@ -5,6 +5,8 @@ pub use ::vulkanalia::vk;
 pub use ::vulkanalia::vk::Bool32 as VulkanBool32;
 pub use ::vulkanalia::vk::Handle as VulkanHandler;
 pub use ::vulkanalia::vk::HasBuilder as VulkanBuilderHas;
+pub use ::vulkanalia::vk::ErrorCode as VulkanErrorCode_;
+pub use ::vulkanalia::vk::SuccessCode as VulkanSuccessCode_;
 pub use ::vulkanalia::vk::ApplicationInfo as VulkanApplicationInfomation;
 pub use ::vulkanalia::vk::ApplicationInfoBuilder as VulkanApplicationInformationBuilder;
 pub use ::vulkanalia::vk::InstanceCreateInfo as VulkanInstanceCreateInformation;
