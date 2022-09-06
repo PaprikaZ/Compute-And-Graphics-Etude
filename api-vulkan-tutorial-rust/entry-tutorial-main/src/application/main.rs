@@ -87,7 +87,7 @@ impl Application {
         }
     }
 
-    pub unsafe fn render(&mut self, _window: &WindowUniformWindow) -> Result<(), TerminationProcessMain> {
+    pub unsafe fn render(&mut self, window: &WindowUniformWindow) -> Result<(), TerminationProcessMain> {
         let vulkan_slide_in_flight_fence = self.vulkan_fence_s_in_flight_slide[self.vulkan_frame_index_current];
         let vulkan_image_in_flight_fence = self.vulkan_fence_s_in_flight_image[self.vulkan_frame_index_current];
         let vulkan_available_image_semaphore = self.vulkan_semaphore_s_image_available[self.vulkan_frame_index_current];
@@ -106,6 +106,7 @@ impl Application {
                 self.vulkan_swapchain, u64::max_value(), vulkan_available_image_semaphore, VulkanFence::null());
         let vulkan_next_image_index =
             match acquire_vulkan_next_image_index_result {
+                Err(VulkanErrorCode_::OUT_OF_DATE_KHR) => return self.recreate_swapchain(window),
                 Err(error) => {
                     let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
                     return Err(TerminationProcessMain::InitializationVulkanAcquireNextImageFail(vulkan_error_code));
@@ -161,13 +162,23 @@ impl Application {
             .image_indices(vulkan_image_index_s);
         let present_vulkan_queue_result =
             self.vulkan_device_logical.queue_present_khr(self.vulkan_queue_present, &vulkan_present_information);
-        match present_vulkan_queue_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanQueuePresentFail(vulkan_error_code));
+        let present_result_need_recreate_swapchain =
+            match present_vulkan_queue_result {
+                Err(VulkanErrorCode_::OUT_OF_DATE_KHR) => true,
+                Ok(VulkanSuccessCode_::SUBOPTIMAL_KHR) => true,
+                Err(error) => {
+                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                    return Err(TerminationProcessMain::InitializationVulkanQueuePresentFail(vulkan_error_code));
+                },
+                Ok(_) => false,
+            };
+        match (self.signal_window_resized, present_result_need_recreate_swapchain) {
+            (true, true) => {
+                self.signal_window_resized = false;
+                let _result = self.recreate_swapchain(window);
             },
-            Ok(_success_code) => (),
-        };
+            _ => (),
+        }
         self.vulkan_frame_index_current = (self.vulkan_frame_index_current + 1) % (VULKAN_FRAME_IN_FLIGHT_MAX as usize);
         Ok(())
     }
