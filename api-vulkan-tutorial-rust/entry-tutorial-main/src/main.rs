@@ -5,6 +5,7 @@ mod termination;
 mod application;
 mod initialization;
 mod composition;
+mod data;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::main::Application;
