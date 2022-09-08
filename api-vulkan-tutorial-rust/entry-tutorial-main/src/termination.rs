@@ -40,6 +40,7 @@ pub enum TerminationProcessMain {
     InitializationVulkanFenceResetFail(VulkanErrorCode),
     InitializationVulkanQueueSubmitFail(VulkanErrorCode),
     InitializationVulkanQueuePresentFail(VulkanErrorCode),
+    InitializationVulkanMemoryTypeNotSupport,
 }
 
 impl TerminationProcessMain {
@@ -81,6 +82,7 @@ impl TerminationProcessMain {
             Self::InitializationVulkanFenceResetFail(_) => 33u8,
             Self::InitializationVulkanQueueSubmitFail(_) => 34u8,
             Self::InitializationVulkanQueuePresentFail(_) => 35u8,
+            Self::InitializationVulkanMemoryTypeNotSupport => 37u8,
         }
     }
 }
