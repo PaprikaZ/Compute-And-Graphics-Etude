@@ -40,6 +40,11 @@ pub enum TerminationProcessMain {
     InitializationVulkanFenceResetFail(VulkanErrorCode),
     InitializationVulkanQueueSubmitFail(VulkanErrorCode),
     InitializationVulkanQueuePresentFail(VulkanErrorCode),
+    InitializationVulkanVertexBufferCreateFail(VulkanErrorCode),
+    InitializationVulkanMemoryTypeNotSupport,
+    InitializationVulkanMemoryAllocateFail(VulkanErrorCode),
+    InitializationVulkanMemoryBufferBindFail(VulkanErrorCode),
+    InitializationVulkanMemoryMapFail(VulkanErrorCode),
 }
 
 impl TerminationProcessMain {
@@ -81,6 +86,11 @@ impl TerminationProcessMain {
             Self::InitializationVulkanFenceResetFail(_) => 33u8,
             Self::InitializationVulkanQueueSubmitFail(_) => 34u8,
             Self::InitializationVulkanQueuePresentFail(_) => 35u8,
+            Self::InitializationVulkanVertexBufferCreateFail(_) => 36u8,
+            Self::InitializationVulkanMemoryTypeNotSupport => 37u8,
+            Self::InitializationVulkanMemoryAllocateFail(_) => 38u8,
+            Self::InitializationVulkanMemoryBufferBindFail(_) => 39u8,
+            Self::InitializationVulkanMemoryMapFail(_) => 40u8,
         }
     }
 }

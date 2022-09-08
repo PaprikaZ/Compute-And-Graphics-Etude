@@ -12,3 +12,5 @@ pub mod vulkan_frame_buffer;
 pub mod vulkan_command_pool;
 pub mod vulkan_command_buffer;
 pub mod vulkan_synchronization;
+pub mod vulkan_vertex;
+pub mod vulkan_memory;

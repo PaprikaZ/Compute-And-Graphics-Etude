@@ -16,8 +16,10 @@ use ::vulkan::VulkanRenderPassBeginInformation;
 use ::vulkan::VulkanSubpassContents;
 use ::vulkan::VulkanPipelineBindPoint;
 use ::vulkan::VulkanCommandBuffer;
+use ::vulkan::VulkanBuffer;
 
 use crate::termination::TerminationProcessMain;
+use crate::lib::vertex::Vertex;
 
 
 pub struct ApplicationVulkanCommandBuffer {}
@@ -29,7 +31,10 @@ impl ApplicationVulkanCommandBuffer {
         vulkan_frame_buffer_s: &Vec<VulkanFrameBuffer>,
         vulkan_extent: VulkanExtentD2,
         vulkan_render_pass: VulkanRenderPass,
-        vulkan_pipeline: VulkanPipeline)
+        vulkan_pipeline: VulkanPipeline,
+        vulkan_vertex_buffer: VulkanBuffer,
+        input_vertex_s: &Vec<Vertex>,
+    )
      -> Result<Vec<VulkanCommandBuffer>, TerminationProcessMain>
     {
         let vulkan_command_buffer_allocate_information =
@@ -76,7 +81,9 @@ impl ApplicationVulkanCommandBuffer {
                 *vulkan_command_buffer, &vulkan_render_pass_begin_information, VulkanSubpassContents::INLINE);
             vulkan_logical_device.cmd_bind_pipeline(
                 *vulkan_command_buffer, VulkanPipelineBindPoint::GRAPHICS, vulkan_pipeline);
-            vulkan_logical_device.cmd_draw(*vulkan_command_buffer, 3, 1, 0, 0);
+            vulkan_logical_device.cmd_bind_vertex_buffers(
+                *vulkan_command_buffer, 0, &[vulkan_vertex_buffer], &[0]);
+            vulkan_logical_device.cmd_draw(*vulkan_command_buffer, input_vertex_s.len() as u32, 1, 0, 0);
             vulkan_logical_device.cmd_end_render_pass(*vulkan_command_buffer);
             let end_vulkan_command_buffer_result =
                 vulkan_logical_device.end_command_buffer(*vulkan_command_buffer);

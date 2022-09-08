@@ -158,6 +158,18 @@ pub use ::vulkanalia::vk::VertexInputAttributeDescription as VulkanVertexInputAt
 pub use ::vulkanalia::vk::PipelineVertexInputStateCreateInfo as VulkanVertexInputStateCreateInformation;
 pub use ::vulkanalia::vk::PipelineVertexInputStateCreateInfoBuilder as VulkanVertexInputStateCreateInformationBuilder;
 
+pub use ::vulkanalia::vk::BufferCreateInfo as VulkanBufferCreateInformation;
+pub use ::vulkanalia::vk::BufferCreateInfoBuilder as VulkanBufferCreateInformationBuilder;
+pub use ::vulkanalia::vk::BufferUsageFlags as VulkanBufferUsageFlagS;
+pub use ::vulkanalia::vk::MemoryType as VulkanMemoryType;
+pub use ::vulkanalia::vk::MemoryPropertyFlags as VulkanMemoryPropertyFlagS;
+pub use ::vulkanalia::vk::MemoryAllocateInfo as VulkanMemoryAllocateInfomration;
+pub use ::vulkanalia::vk::MemoryMapFlags as VulkanMemoryMapFlagS;
+pub use ::vulkanalia::vk::MemoryRequirements as VulkanMemoryRequirementS;
+
+pub use ::vulkanalia::vk::Buffer as VulkanBuffer;
+pub use ::vulkanalia::vk::DeviceMemory as VulkanDeviceMemory;
+
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
 pub use ::vulkanalia::vk::LOD_CLAMP_NONE as VULKAN_LOD_CLAMP_NONE;
@@ -269,6 +281,19 @@ pub struct VulkanSwapchainImageCount(u32);
 impl VulkanSwapchainImageCount {
     pub fn new(image_count: u32) -> Self {
         Self(image_count)
+    }
+
+    pub fn as_raw(&self) -> u32 {
+        self.0
+    }
+}
+
+#[derive(Clone, Copy)]
+pub struct VulkanMemoryTypeIndex(u32);
+
+impl VulkanMemoryTypeIndex {
+    pub fn new(index: u32) -> Self {
+        Self(index)
     }
 
     pub fn as_raw(&self) -> u32 {
