@@ -1,3 +1,4 @@
+mod lib;
 mod config;
 mod window;
 mod termination;
