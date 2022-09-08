@@ -152,6 +152,12 @@ pub use ::vulkanalia::vk::AccessFlags as VulkanAccessFlagS;
 pub use ::vulkanalia::vk::PresentInfoKHR as VulkanPresentInformationKhr;
 pub use ::vulkanalia::vk::FenceCreateFlags as VulkanFenceCreateFlagS;
 
+pub use ::vulkanalia::vk::VertexInputBindingDescription as VulkanVertexInputBindingDescription;
+pub use ::vulkanalia::vk::VertexInputRate as VulkanVertexInputRate;
+pub use ::vulkanalia::vk::VertexInputAttributeDescription as VulkanVertexInputAttributeDescription;
+pub use ::vulkanalia::vk::PipelineVertexInputStateCreateInfo as VulkanVertexInputStateCreateInformation;
+pub use ::vulkanalia::vk::PipelineVertexInputStateCreateInfoBuilder as VulkanVertexInputStateCreateInformationBuilder;
+
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
 pub use ::vulkanalia::vk::LOD_CLAMP_NONE as VULKAN_LOD_CLAMP_NONE;
