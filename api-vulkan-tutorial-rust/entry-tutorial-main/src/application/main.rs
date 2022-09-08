@@ -6,6 +6,7 @@ use ::vulkan::VulkanErrorCode;
 use ::vulkan::VulkanErrorCode_;
 use ::vulkan::VulkanSuccessCode_;
 use ::vulkan::VulkanQueue;
+use ::vulkan::VulkanBuffer;
 use ::vulkan::VulkanDevicePhysical;
 use ::vulkan::VulkanSurfaceKhr;
 use ::vulkan::VulkanFormat;
@@ -21,6 +22,7 @@ use ::vulkan::VulkanCommandPool;
 use ::vulkan::VulkanCommandBuffer;
 use ::vulkan::VulkanSemaphore;
 use ::vulkan::VulkanFence;
+use ::vulkan::VulkanDeviceMemory;
 use ::vulkan::VulkanQueueFamilyIndexGraphic;
 use ::vulkan::VulkanQueueFamilyIndexSurface;
 use ::vulkan::VulkanExtensionDebugUtility;
@@ -31,6 +33,7 @@ use ::vulkan::VulkanSubmitInformation;
 use ::vulkan::VulkanPresentInformationKhr;
 
 use crate::config::VULKAN_FRAME_IN_FLIGHT_MAX;
+use crate::lib::vertex::Vertex;
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_instance_swapchain::ApplicationVulkanInstanceSwapchain;
 use crate::application::vulkan_instance_swapchain_image_view::ApplicationInstanceSwapchainImageView;
@@ -70,6 +73,9 @@ pub struct Application {
     pub vulkan_fence_s_in_flight_slide: Vec<VulkanFence>,
     pub vulkan_fence_s_in_flight_image: Vec<VulkanFence>,
     pub vulkan_frame_index_current: usize,
+    pub vulkan_vertex_buffer: VulkanBuffer,
+    pub vulkan_vertex_buffer_memory: VulkanDeviceMemory,
+    pub input_vertex_s: Vec<Vertex>,
 }
 
 impl Application {
@@ -248,6 +254,9 @@ impl Application {
         self.vulkan_semaphore_s_image_available
         .iter()
         .for_each(|s| self.vulkan_device_logical.destroy_semaphore(*s, None));
+        //
+        self.vulkan_device_logical.free_memory(self.vulkan_vertex_buffer_memory, None);
+        self.vulkan_device_logical.destroy_buffer(self.vulkan_vertex_buffer, None);
         //
         self.vulkan_device_logical.destroy_command_pool(self.vulkan_command_pool, None);
         self.vulkan_device_logical.destroy_device(None);
