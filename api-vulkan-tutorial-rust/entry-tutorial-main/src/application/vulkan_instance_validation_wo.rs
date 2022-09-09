@@ -94,7 +94,8 @@ impl ApplicationVulkanInstanceValidationWo {
         let input_vertex_s = DataVertex::get_default();
         let (vulkan_vertex_buffer, vulkan_vertex_buffer_memory) =
             ApplicationVulkanVertexBuffer::create(
-                &vulkan_instance, vulkan_physical_device, &vulkan_logical_device, &input_vertex_s)?;
+                &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
+                vulkan_command_pool, vulkan_graphic_queue, &input_vertex_s)?;
         let vulkan_command_buffer_s =
             ApplicationVulkanCommandBuffer::create_all(
                 &vulkan_logical_device, vulkan_command_pool, &vulkan_frame_buffer_s, vulkan_extent,
