@@ -81,4 +81,76 @@ impl ApplicationVulkanBuffer {
         };
         Ok((vulkan_buffer, vulkan_buffer_memory))
     }
+
+    pub unsafe fn copy(
+        vulkan_logical_device: &VulkanDeviceLogical,
+        vulkan_command_pool: VulkanCommandPool,
+        vulkan_graphic_queue: VulkanQueue,
+        vulkan_souruce_buffer: VulkanBuffer,
+        vulkan_destination_buffer: VulkanBuffer,
+        vulkan_buffer_size: VulkanDeviceSize)
+     -> Result<(), TerminationProcessMain>
+    {
+        let vulkan_command_buffer_allocate_infomation =
+            VulkanCommandBufferAllocateInformation::builder()
+            .level(VulkanCommandBufferLevel::PRIMARY)
+            .command_pool(vulkan_command_pool)
+            .command_buffer_count(1);
+        let allocate_vulkan_command_buffer_s_result =
+            vulkan_logical_device.allocate_command_buffers(&vulkan_command_buffer_allocate_infomation);
+        let vulkan_command_buffer =
+            match allocate_vulkan_command_buffer_s_result {
+                Err(error) => {
+                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                    return Err(TerminationProcessMain::InitializationVulkanCommandBufferSAllocateFail(vulkan_error_code));
+                },
+                Ok(buffer_s) => buffer_s[0],
+            };
+        let vulkan_command_buffer_begin_information =
+            VulkanCommandBufferBeginInformation::builder()
+            .flags(VulkanCommandBufferUsageFlagS::ONE_TIME_SUBMIT);
+        let begin_vulkan_command_buffer_result =
+            vulkan_logical_device.begin_command_buffer(
+                vulkan_command_buffer, &vulkan_command_buffer_begin_information);
+        match begin_vulkan_command_buffer_result {
+            Err(error) => {
+                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                return Err(TerminationProcessMain::InitializationVulkanCommandBufferBeginFail(vulkan_error_code));
+            },
+            Ok(()) => (),
+        };
+        let vulkan_buffer_copy = VulkanBufferCopy::builder().size(vulkan_buffer_size);
+        vulkan_logical_device.cmd_copy_buffer(
+            vulkan_command_buffer, vulkan_souruce_buffer, vulkan_destination_buffer, &[vulkan_buffer_copy]);
+        let end_vulkan_command_buffer_result = vulkan_logical_device.end_command_buffer(vulkan_command_buffer);
+        match end_vulkan_command_buffer_result {
+            Err(error) => {
+                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                return Err(TerminationProcessMain::InitializationVulkanCommandBufferEndFail(vulkan_error_code));
+            },
+            Ok(()) => (),
+        };
+        let vulkan_command_buffer_s = &[vulkan_command_buffer];
+        let vulkan_submit_information =
+            VulkanSubmitInformation::builder().command_buffers(vulkan_command_buffer_s);
+        let submit_vulkan_queue_result =
+            vulkan_logical_device.queue_submit(
+                vulkan_graphic_queue, &[vulkan_submit_information], VulkanFence::null());
+        match submit_vulkan_queue_result {
+            Err(error) => {
+                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                return Err(TerminationProcessMain::InitializationVulkanQueueSubmitFail(vulkan_error_code));
+            },
+            Ok(()) => (),
+        };
+        match vulkan_logical_device.queue_wait_idle(vulkan_graphic_queue) {
+            Err(error) => {
+                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                return Err(TerminationProcessMain::InitializationVulkanDeviceWaitIdleFail(vulkan_error_code));
+            },
+            Ok(()) => (),
+        };
+        vulkan_logical_device.free_command_buffers(vulkan_command_pool, vulkan_command_buffer_s);
+        Ok(())
+    }
 }
