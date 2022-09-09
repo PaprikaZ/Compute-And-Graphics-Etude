@@ -224,7 +224,9 @@ impl Application {
         let vulkan_command_buffer_s =
             ApplicationVulkanCommandBuffer::create_all(
                 &self.vulkan_device_logical, self.vulkan_command_pool, &vulkan_frame_buffer_s, vulkan_extent,
-                vulkan_render_pass, vulkan_pipeline, self.vulkan_vertex_buffer, &self.input_vertex_s)?;
+                vulkan_render_pass, vulkan_pipeline,
+                self.vulkan_vertex_buffer, self.vulkan_vertex_index_buffer,
+                &self.input_vertex_index_s)?;
         self.vulkan_swapchain_format = vulkan_format;
         self.vulkan_swapchain_extent = vulkan_extent;
         self.vulkan_swapchain = vulkan_swapchain;

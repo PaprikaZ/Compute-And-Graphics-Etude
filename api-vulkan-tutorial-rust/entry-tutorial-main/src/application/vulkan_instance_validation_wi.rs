@@ -120,7 +120,8 @@ impl ApplicationVulkanInstanceValidationWi {
         let vulkan_command_buffer_s =
             ApplicationVulkanCommandBuffer::create_all(
                 &vulkan_logical_device, vulkan_command_pool, &vulkan_frame_buffer_s, vulkan_extent,
-                vulkan_render_pass, vulkan_pipeline, vulkan_vertex_buffer, &input_vertex_s)?;
+                vulkan_render_pass, vulkan_pipeline,
+                vulkan_vertex_buffer, vulkan_vertex_index_buffer, &input_vertex_index_s)?;
         let (vulkan_image_available_semaphore_s, vulkan_render_finished_semaphore_s,
              vulkan_slide_in_flight_fence_s, vulkan_image_in_flight_fence_s) =
             ApplicationVulkanSynchronization::create_all(&vulkan_logical_device, &vulkan_image_s)?;
