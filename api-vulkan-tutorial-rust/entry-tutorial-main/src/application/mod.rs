@@ -15,3 +15,4 @@ pub mod vulkan_synchronization;
 pub mod vulkan_vertex;
 pub mod vulkan_buffer;
 pub mod vulkan_memory;
+pub mod vulkan_vertex_index;

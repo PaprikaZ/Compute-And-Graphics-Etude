@@ -75,7 +75,10 @@ pub struct Application {
     pub vulkan_frame_index_current: usize,
     pub vulkan_vertex_buffer: VulkanBuffer,
     pub vulkan_vertex_buffer_memory: VulkanDeviceMemory,
+    pub vulkan_vertex_index_buffer: VulkanBuffer,
+    pub vulkan_vertex_index_buffer_memory: VulkanDeviceMemory,
     pub input_vertex_s: Vec<Vertex>,
+    pub input_vertex_index_s: Vec<u16>,
 }
 
 impl Application {
@@ -221,7 +224,9 @@ impl Application {
         let vulkan_command_buffer_s =
             ApplicationVulkanCommandBuffer::create_all(
                 &self.vulkan_device_logical, self.vulkan_command_pool, &vulkan_frame_buffer_s, vulkan_extent,
-                vulkan_render_pass, vulkan_pipeline, self.vulkan_vertex_buffer, &self.input_vertex_s)?;
+                vulkan_render_pass, vulkan_pipeline,
+                self.vulkan_vertex_buffer, self.vulkan_vertex_index_buffer,
+                &self.input_vertex_index_s)?;
         self.vulkan_swapchain_format = vulkan_format;
         self.vulkan_swapchain_extent = vulkan_extent;
         self.vulkan_swapchain = vulkan_swapchain;
@@ -255,6 +260,8 @@ impl Application {
         .iter()
         .for_each(|s| self.vulkan_device_logical.destroy_semaphore(*s, None));
         //
+        self.vulkan_device_logical.free_memory(self.vulkan_vertex_index_buffer_memory, None);
+        self.vulkan_device_logical.destroy_buffer(self.vulkan_vertex_index_buffer, None);
         self.vulkan_device_logical.free_memory(self.vulkan_vertex_buffer_memory, None);
         self.vulkan_device_logical.destroy_buffer(self.vulkan_vertex_buffer, None);
         //

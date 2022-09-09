@@ -16,3 +16,16 @@ impl Vertex {
         }
     }
 }
+
+#[derive(Copy, Clone, Debug)]
+pub struct VertexIndex(u16);
+
+impl VertexIndex {
+    pub fn new(index: u16) -> Self {
+        Self(index)
+    }
+
+    pub fn as_raw(&self) -> u16 {
+        self.0
+    }
+}

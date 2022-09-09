@@ -15,9 +15,10 @@ pub struct DataVertex {}
 impl DataVertex {
     pub fn get_default() -> Vec<Vertex> {
         vec![
-            Vertex::new(glm::vec2(0.0, -0.5), glm::vec3(1.0, 0.0, 0.0)),
-            Vertex::new(glm::vec2(0.5, 0.5), glm::vec3(0.0, 1.0, 0.0)),
-            Vertex::new(glm::vec2(-0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)),
+            Vertex::new(glm::vec2(-0.5, -0.5), glm::vec3(1.0, 0.0, 0.0)),
+            Vertex::new(glm::vec2(0.5, -0.5), glm::vec3(0.0, 1.0, 0.0)),
+            Vertex::new(glm::vec2(0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)),
+            Vertex::new(glm::vec2(-0.5, 0.5), glm::vec3(1.0, 1.0, 1.0)),
         ]
     }
 
@@ -51,5 +52,13 @@ impl DataVertex {
      -> (VulkanVertexInputAttributeDescription, VulkanVertexInputAttributeDescription)
     {
         (Self::get_input_attributue_description_position(), Self::get_input_attributue_description_color())
+    }
+}
+
+pub struct DataVertexIndex {}
+
+impl DataVertexIndex {
+    pub fn get_default() -> Vec<u16> {
+        vec![0, 1, 2, 2, 3, 0]
     }
 }

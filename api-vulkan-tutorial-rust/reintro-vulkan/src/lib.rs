@@ -173,6 +173,8 @@ pub use ::vulkanalia::vk::DeviceMemory as VulkanDeviceMemory;
 pub use ::vulkanalia::vk::BufferCopy as VulkanBufferCopy;
 pub use ::vulkanalia::vk::DeviceSize as VulkanDeviceSize;
 
+pub use ::vulkanalia::vk::IndexType as VulkanIndexType;
+
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
 pub use ::vulkanalia::vk::LOD_CLAMP_NONE as VULKAN_LOD_CLAMP_NONE;

@@ -20,6 +20,7 @@ use ::vulkan::prelude::version1_2::*;
 
 use crate::termination::TerminationProcessMain;
 use crate::data::vertex::DataVertex;
+use crate::data::vertex::DataVertexIndex;
 use crate::application::main::Application;
 use crate::application::vulkan_instance_share::ApplicationVulkanInstanceShare;
 use crate::application::vulkan_instance_device_physical::ApplicationVulkanInstanceDevicePhysical;
@@ -33,6 +34,7 @@ use crate::application::vulkan_command_pool::ApplicationVulkanCommandPool;
 use crate::application::vulkan_command_buffer::ApplicationVulkanCommandBuffer;
 use crate::application::vulkan_synchronization::ApplicationVulkanSynchronization;
 use crate::application::vulkan_vertex::ApplicationVulkanVertexBuffer;
+use crate::application::vulkan_vertex_index::ApplicationVulkanVertexIndexBuffer;
 
 
 pub struct ApplicationVulkanInstanceValidationWi {}
@@ -110,10 +112,16 @@ impl ApplicationVulkanInstanceValidationWi {
             ApplicationVulkanVertexBuffer::create(
                 &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
                 vulkan_command_pool, vulkan_graphic_queue, &input_vertex_s)?;
+        let input_vertex_index_s = DataVertexIndex::get_default();
+        let (vulkan_vertex_index_buffer, vulkan_vertex_index_buffer_memory) =
+            ApplicationVulkanVertexIndexBuffer::create(
+                &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
+                vulkan_command_pool, vulkan_graphic_queue, &input_vertex_index_s)?;
         let vulkan_command_buffer_s =
             ApplicationVulkanCommandBuffer::create_all(
                 &vulkan_logical_device, vulkan_command_pool, &vulkan_frame_buffer_s, vulkan_extent,
-                vulkan_render_pass, vulkan_pipeline, vulkan_vertex_buffer, &input_vertex_s)?;
+                vulkan_render_pass, vulkan_pipeline,
+                vulkan_vertex_buffer, vulkan_vertex_index_buffer, &input_vertex_index_s)?;
         let (vulkan_image_available_semaphore_s, vulkan_render_finished_semaphore_s,
              vulkan_slide_in_flight_fence_s, vulkan_image_in_flight_fence_s) =
             ApplicationVulkanSynchronization::create_all(&vulkan_logical_device, &vulkan_image_s)?;
@@ -147,7 +155,10 @@ impl ApplicationVulkanInstanceValidationWi {
             vulkan_frame_index_current: 0,
             vulkan_vertex_buffer: vulkan_vertex_buffer,
             vulkan_vertex_buffer_memory: vulkan_vertex_buffer_memory,
+            vulkan_vertex_index_buffer: vulkan_vertex_index_buffer,
+            vulkan_vertex_index_buffer_memory: vulkan_vertex_index_buffer_memory,
             input_vertex_s: input_vertex_s,
+            input_vertex_index_s: input_vertex_index_s,
         })
     }
 
