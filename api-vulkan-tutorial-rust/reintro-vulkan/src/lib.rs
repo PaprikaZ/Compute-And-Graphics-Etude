@@ -175,6 +175,12 @@ pub use ::vulkanalia::vk::DeviceSize as VulkanDeviceSize;
 
 pub use ::vulkanalia::vk::IndexType as VulkanIndexType;
 
+pub use ::vulkanalia::vk::DescriptorSetLayout as VulkanDescriptorSetLayout;
+pub use ::vulkanalia::vk::DescriptorSetLayoutBinding as VulkanDescriptorSetLayoutBinding;
+pub use ::vulkanalia::vk::DescriptorType as VulkanDescriptorType;
+pub use ::vulkanalia::vk::DescriptorSetLayoutCreateInfo as VulkanDescriptorSetLayoutCreateInformation;
+pub use ::vulkanalia::vk::DescriptorSetLayoutCreateInfoBuilder as VulkanDescriptorSetLayoutCreateInformationBuilder;
+
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
 pub use ::vulkanalia::vk::LOD_CLAMP_NONE as VULKAN_LOD_CLAMP_NONE;
