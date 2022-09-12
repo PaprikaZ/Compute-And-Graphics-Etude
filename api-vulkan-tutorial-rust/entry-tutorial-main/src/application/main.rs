@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use ::window_uniform::prelude::*;
 use ::vulkan::VulkanExtensionName;
 use ::vulkan::VulkanExtensionDebugUtilityMessenger;
@@ -48,6 +50,7 @@ use crate::application::vulkan_transform_d3_buffer::ApplicationVulkanTransformD3
 
 
 pub struct Application {
+    pub instant_start: Instant,
     pub signal_window_resized: bool,
     pub vulkan_entry: VulkanEntry,
     pub vulkan_instance: VulkanInstance,

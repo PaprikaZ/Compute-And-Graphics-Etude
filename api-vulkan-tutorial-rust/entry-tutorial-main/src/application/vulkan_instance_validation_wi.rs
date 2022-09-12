@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 use std::ffi::CStr;
 use std::os::raw::c_void;
+use std::time::Instant;
 
 use ::console_log::prelude::*;
 use ::window_uniform::prelude::*;
@@ -134,6 +135,7 @@ impl ApplicationVulkanInstanceValidationWi {
              vulkan_slide_in_flight_fence_s, vulkan_image_in_flight_fence_s) =
             ApplicationVulkanSynchronization::create_all(&vulkan_logical_device, &vulkan_image_s)?;
         Ok(Application {
+            instant_start: Instant::now(),
             signal_window_resized: false,
             vulkan_entry: vulkan_entry,
             vulkan_instance: vulkan_instance,

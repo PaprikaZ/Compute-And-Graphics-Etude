@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use ::window_uniform::prelude::*;
 use ::vulkan::VULKAN_LIBRARY_FILE_NAME;
 use ::vulkan::VulkanErrorCode;
@@ -120,6 +122,7 @@ impl ApplicationVulkanInstanceValidationWo {
              vulkan_slide_in_flight_fence_s, vulkan_image_in_flight_fence_s) =
             ApplicationVulkanSynchronization::create_all(&vulkan_logical_device, &vulkan_image_s)?;
         Ok(Application {
+            instant_start: Instant::now(),
             signal_window_resized: false,
             vulkan_entry: vulkan_entry,
             vulkan_instance: vulkan_instance,
