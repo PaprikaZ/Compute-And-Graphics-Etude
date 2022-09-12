@@ -20,7 +20,6 @@ use ::vulkan::VulkanBuffer;
 use ::vulkan::VulkanIndexType;
 
 use crate::termination::TerminationProcessMain;
-use crate::lib::vertex::Vertex;
 
 
 pub struct ApplicationVulkanCommandBuffer {}

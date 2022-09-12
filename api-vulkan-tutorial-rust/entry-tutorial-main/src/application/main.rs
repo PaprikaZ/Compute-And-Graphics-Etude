@@ -31,6 +31,7 @@ use ::vulkan::VulkanSwapchainExtensionKhr;
 use ::vulkan::VulkanPipelineStageFlagS;
 use ::vulkan::VulkanSubmitInformation;
 use ::vulkan::VulkanPresentInformationKhr;
+use ::vulkan::VulkanDescriptorSetLayout;
 
 use crate::config::VULKAN_FRAME_IN_FLIGHT_MAX;
 use crate::lib::vertex::Vertex;
@@ -43,6 +44,7 @@ use crate::application::vulkan_frame_buffer::ApplicationVulkanFrameBuffer;
 use crate::application::vulkan_command_buffer::ApplicationVulkanCommandBuffer;
 use crate::application::vulkan_instance_validation_wi::ApplicationVulkanInstanceValidationWi;
 use crate::application::vulkan_instance_validation_wo::ApplicationVulkanInstanceValidationWo;
+use crate::application::vulkan_transform_d3_buffer::ApplicationVulkanTransformD3Buffer;
 
 
 pub struct Application {
@@ -77,6 +79,9 @@ pub struct Application {
     pub vulkan_vertex_buffer_memory: VulkanDeviceMemory,
     pub vulkan_vertex_index_buffer: VulkanBuffer,
     pub vulkan_vertex_index_buffer_memory: VulkanDeviceMemory,
+    pub vulkan_transform_d3_main_buffer_s: Vec<VulkanBuffer>,
+    pub vulkan_transform_d3_main_buffer_memory_s: Vec<VulkanDeviceMemory>,
+    pub vulkan_descriptor_set_layout: VulkanDescriptorSetLayout,
     pub input_vertex_s: Vec<Vertex>,
     pub input_vertex_index_s: Vec<u16>,
 }
@@ -218,9 +223,13 @@ impl Application {
         let vulkan_render_pass =
             ApplicationVulkanRenderPass::create(&self.vulkan_device_logical, vulkan_format)?;
         let (vulkan_pipeline, vulkan_pipeline_layout) =
-            ApplicationVulkanPipeline::create_layout(&self.vulkan_device_logical, vulkan_extent, vulkan_render_pass)?;
+            ApplicationVulkanPipeline::create_layout(
+                &self.vulkan_device_logical, vulkan_extent, vulkan_render_pass, self.vulkan_descriptor_set_layout)?;
         let vulkan_frame_buffer_s =
             ApplicationVulkanFrameBuffer::create_all(&self.vulkan_device_logical, &vulkan_image_view_s, vulkan_render_pass, vulkan_extent)?;
+        let (vulkan_main_3d_transform_buffer_s, vulkan_main_3d_transform_buffer_memory_s) =
+            ApplicationVulkanTransformD3Buffer::create_main_all(
+                &self.vulkan_instance, self.vulkan_device_physical, &self.vulkan_device_logical, &vulkan_image_s)?;
         let vulkan_command_buffer_s =
             ApplicationVulkanCommandBuffer::create_all(
                 &self.vulkan_device_logical, self.vulkan_command_pool, &vulkan_frame_buffer_s, vulkan_extent,
@@ -236,6 +245,8 @@ impl Application {
         self.vulkan_pipeline = vulkan_pipeline;
         self.vulkan_pipeline_layout = vulkan_pipeline_layout;
         self.vulkan_frame_buffer_s = vulkan_frame_buffer_s;
+        self.vulkan_transform_d3_main_buffer_s = vulkan_main_3d_transform_buffer_s;
+        self.vulkan_transform_d3_main_buffer_memory_s = vulkan_main_3d_transform_buffer_memory_s;
         self.vulkan_command_buffer_s = vulkan_command_buffer_s;
         self.vulkan_fence_s_in_flight_image.resize(self.vulkan_swapchain_image_s.len(), VulkanFence::null());
         Ok(())
@@ -266,6 +277,7 @@ impl Application {
         self.vulkan_device_logical.destroy_buffer(self.vulkan_vertex_buffer, None);
         //
         self.vulkan_device_logical.destroy_command_pool(self.vulkan_command_pool, None);
+        self.vulkan_device_logical.destroy_descriptor_set_layout(self.vulkan_descriptor_set_layout, None);
         self.vulkan_device_logical.destroy_device(None);
         self.vulkan_instance.destroy_surface_khr(self.vulkan_surface, None);
         if Option::is_some(&self.vulkan_debug_messenger) {
@@ -277,6 +289,12 @@ impl Application {
 
     unsafe fn destroy_swapchain(&mut self) -> () {
         self.vulkan_device_logical.free_command_buffers(self.vulkan_command_pool, &self.vulkan_command_buffer_s);
+        self.vulkan_transform_d3_main_buffer_memory_s
+        .iter()
+        .for_each(|m| self.vulkan_device_logical.free_memory(*m, None));
+        self.vulkan_transform_d3_main_buffer_s
+        .iter()
+        .for_each(|b| self.vulkan_device_logical.destroy_buffer(*b, None));
         self.vulkan_frame_buffer_s
         .iter()
         .for_each(|f| self.vulkan_device_logical.destroy_framebuffer(*f, None));
