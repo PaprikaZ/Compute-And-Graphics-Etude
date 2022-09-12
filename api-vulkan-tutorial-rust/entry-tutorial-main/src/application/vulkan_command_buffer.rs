@@ -18,6 +18,8 @@ use ::vulkan::VulkanPipelineBindPoint;
 use ::vulkan::VulkanCommandBuffer;
 use ::vulkan::VulkanBuffer;
 use ::vulkan::VulkanIndexType;
+use ::vulkan::VulkanPipelineLayout;
+use ::vulkan::VulkanDescriptorSet;
 
 use crate::termination::TerminationProcessMain;
 
@@ -27,6 +29,7 @@ pub struct ApplicationVulkanCommandBuffer {}
 impl ApplicationVulkanCommandBuffer {
     pub unsafe fn create_all(
         vulkan_logical_device: &VulkanDeviceLogical,
+        vulkan_pipeline_layout: VulkanPipelineLayout,
         vulkan_command_pool: VulkanCommandPool,
         vulkan_frame_buffer_s: &Vec<VulkanFrameBuffer>,
         vulkan_extent: VulkanExtentD2,
@@ -35,7 +38,7 @@ impl ApplicationVulkanCommandBuffer {
         vulkan_vertex_buffer: VulkanBuffer,
         vulkan_vertex_index_buffer: VulkanBuffer,
         input_vertex_index_s: &Vec<u16>,
-    )
+        vulkan_descriptor_set_s: &Vec<VulkanDescriptorSet>)
      -> Result<Vec<VulkanCommandBuffer>, TerminationProcessMain>
     {
         let vulkan_command_buffer_allocate_information =
@@ -86,6 +89,9 @@ impl ApplicationVulkanCommandBuffer {
                 *vulkan_command_buffer, 0, &[vulkan_vertex_buffer], &[0]);
             vulkan_logical_device.cmd_bind_index_buffer(
                 *vulkan_command_buffer, vulkan_vertex_index_buffer, 0, VulkanIndexType::UINT16);
+            vulkan_logical_device.cmd_bind_descriptor_sets(
+                *vulkan_command_buffer, VulkanPipelineBindPoint::GRAPHICS,
+                vulkan_pipeline_layout, 0, &[vulkan_descriptor_set_s[index]], &[]);
             vulkan_logical_device.cmd_draw_indexed(
                 *vulkan_command_buffer, input_vertex_index_s.len() as u32, 1, 0, 0, 0);
             vulkan_logical_device.cmd_end_render_pass(*vulkan_command_buffer);
