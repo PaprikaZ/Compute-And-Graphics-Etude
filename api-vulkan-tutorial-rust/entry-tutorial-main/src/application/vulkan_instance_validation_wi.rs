@@ -38,6 +38,8 @@ use crate::application::vulkan_vertex::ApplicationVulkanVertexBuffer;
 use crate::application::vulkan_vertex_index::ApplicationVulkanVertexIndexBuffer;
 use crate::application::vulkan_transform_d3_descriptor::ApplicationVulkanTransformD3Descriptor;
 use crate::application::vulkan_transform_d3_buffer::ApplicationVulkanTransformD3Buffer;
+use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorPool;
+use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorSet;
 
 
 pub struct ApplicationVulkanInstanceValidationWi {}
@@ -126,6 +128,12 @@ impl ApplicationVulkanInstanceValidationWi {
         let (vulkan_main_3d_transform_buffer_s, vulkan_main_3d_transform_buffer_memory_s) =
             ApplicationVulkanTransformD3Buffer::create_main_all(
                 &vulkan_instance, vulkan_physical_device, &vulkan_logical_device, &vulkan_image_s)?;
+        let vulkan_descriptor_pool =
+            ApplicationVulkanDescriptorPool::create(&vulkan_logical_device, &vulkan_image_s)?;
+        let vulkan_descriptor_set_s =
+            ApplicationVulkanDescriptorSet::create_all(
+                &vulkan_logical_device, &vulkan_image_s,
+                vulkan_descriptor_set_layout, &vulkan_main_3d_transform_buffer_s, vulkan_descriptor_pool)?;
         let vulkan_command_buffer_s =
             ApplicationVulkanCommandBuffer::create_all(
                 &vulkan_logical_device, vulkan_command_pool, &vulkan_frame_buffer_s, vulkan_extent,
@@ -170,6 +178,8 @@ impl ApplicationVulkanInstanceValidationWi {
             vulkan_transform_d3_main_buffer_s: vulkan_main_3d_transform_buffer_s,
             vulkan_transform_d3_main_buffer_memory_s: vulkan_main_3d_transform_buffer_memory_s,
             vulkan_descriptor_set_layout: vulkan_descriptor_set_layout,
+            vulkan_descriptor_pool: vulkan_descriptor_pool,
+            vulkan_descriptor_set_s: vulkan_descriptor_set_s,
             input_vertex_s: input_vertex_s,
             input_vertex_index_s: input_vertex_index_s,
         })

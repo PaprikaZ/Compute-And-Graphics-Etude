@@ -34,6 +34,8 @@ use ::vulkan::VulkanPipelineStageFlagS;
 use ::vulkan::VulkanSubmitInformation;
 use ::vulkan::VulkanPresentInformationKhr;
 use ::vulkan::VulkanDescriptorSetLayout;
+use ::vulkan::VulkanDescriptorPool;
+use ::vulkan::VulkanDescriptorSet;
 
 use crate::config::VULKAN_FRAME_IN_FLIGHT_MAX;
 use crate::lib::vertex::Vertex;
@@ -48,6 +50,8 @@ use crate::application::vulkan_instance_validation_wi::ApplicationVulkanInstance
 use crate::application::vulkan_instance_validation_wo::ApplicationVulkanInstanceValidationWo;
 use crate::application::evolution::ApplicationEvolution;
 use crate::application::vulkan_transform_d3_buffer::ApplicationVulkanTransformD3Buffer;
+use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorPool;
+use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorSet;
 
 
 pub struct Application {
@@ -86,6 +90,8 @@ pub struct Application {
     pub vulkan_transform_d3_main_buffer_s: Vec<VulkanBuffer>,
     pub vulkan_transform_d3_main_buffer_memory_s: Vec<VulkanDeviceMemory>,
     pub vulkan_descriptor_set_layout: VulkanDescriptorSetLayout,
+    pub vulkan_descriptor_pool: VulkanDescriptorPool,
+    pub vulkan_descriptor_set_s: Vec<VulkanDescriptorSet>,
     pub input_vertex_s: Vec<Vertex>,
     pub input_vertex_index_s: Vec<u16>,
 }
@@ -236,6 +242,12 @@ impl Application {
         let (vulkan_main_3d_transform_buffer_s, vulkan_main_3d_transform_buffer_memory_s) =
             ApplicationVulkanTransformD3Buffer::create_main_all(
                 &self.vulkan_instance, self.vulkan_device_physical, &self.vulkan_device_logical, &vulkan_image_s)?;
+        let vulkan_descriptor_pool =
+            ApplicationVulkanDescriptorPool::create(&self.vulkan_device_logical, &vulkan_image_s)?;
+        let vulkan_descriptor_set_s =
+            ApplicationVulkanDescriptorSet::create_all(
+                &self.vulkan_device_logical, &vulkan_image_s,
+                self.vulkan_descriptor_set_layout, &vulkan_main_3d_transform_buffer_s, vulkan_descriptor_pool)?;
         let vulkan_command_buffer_s =
             ApplicationVulkanCommandBuffer::create_all(
                 &self.vulkan_device_logical, self.vulkan_command_pool, &vulkan_frame_buffer_s, vulkan_extent,
@@ -253,6 +265,8 @@ impl Application {
         self.vulkan_frame_buffer_s = vulkan_frame_buffer_s;
         self.vulkan_transform_d3_main_buffer_s = vulkan_main_3d_transform_buffer_s;
         self.vulkan_transform_d3_main_buffer_memory_s = vulkan_main_3d_transform_buffer_memory_s;
+        self.vulkan_descriptor_pool = vulkan_descriptor_pool;
+        self.vulkan_descriptor_set_s = vulkan_descriptor_set_s;
         self.vulkan_command_buffer_s = vulkan_command_buffer_s;
         self.vulkan_fence_s_in_flight_image.resize(self.vulkan_swapchain_image_s.len(), VulkanFence::null());
         Ok(())
@@ -295,6 +309,7 @@ impl Application {
 
     unsafe fn destroy_swapchain(&mut self) -> () {
         self.vulkan_device_logical.free_command_buffers(self.vulkan_command_pool, &self.vulkan_command_buffer_s);
+        self.vulkan_device_logical.destroy_descriptor_pool(self.vulkan_descriptor_pool, None);
         self.vulkan_transform_d3_main_buffer_memory_s
         .iter()
         .for_each(|m| self.vulkan_device_logical.free_memory(*m, None));
