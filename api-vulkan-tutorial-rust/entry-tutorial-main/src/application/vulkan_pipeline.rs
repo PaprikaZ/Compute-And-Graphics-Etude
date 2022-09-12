@@ -28,6 +28,7 @@ use ::vulkan::VulkanGraphicsPipelineCreateInformation;
 use ::vulkan::VulkanRenderPass;
 use ::vulkan::VulkanPipelineCache;
 use ::vulkan::VulkanPipeline;
+use ::vulkan::VulkanDescriptorSetLayout;
 
 use crate::data::vertex::DataVertex;
 use crate::termination::TerminationProcessMain;
@@ -39,7 +40,8 @@ impl ApplicationVulkanPipeline {
     pub unsafe fn create_layout(
         vulkan_logical_device: &VulkanDeviceLogical,
         vulkan_2d_extent: VulkanExtentD2,
-        vulkan_render_pass: VulkanRenderPass)
+        vulkan_render_pass: VulkanRenderPass,
+        vulkan_descriptor_set_layout: VulkanDescriptorSetLayout)
      -> Result<(VulkanPipeline, VulkanPipelineLayout), TerminationProcessMain>
     {
         let vulkan_vertex_shader_bytecode_data = include_bytes!("../../shader/vert.spv");
@@ -115,7 +117,10 @@ impl ApplicationVulkanPipeline {
             .logic_op(VulkanLogicOperation::COPY)
             .attachments(vulkan_color_blend_attachment_state_s)
             .blend_constants([0.0, 0.0, 0.0, 0.0]);
-        let vulkan_pipeline_layout_create_infomation = VulkanPipelineLayoutCreateInformation::builder();
+        let vulkan_descriptor_set_layout_s = &[vulkan_descriptor_set_layout];
+        let vulkan_pipeline_layout_create_infomation =
+            VulkanPipelineLayoutCreateInformation::builder()
+            .set_layouts(vulkan_descriptor_set_layout_s);
         let create_vulkan_pipeline_layout_result =
             vulkan_logical_device.create_pipeline_layout(&vulkan_pipeline_layout_create_infomation, None);
         let vulkan_pipeline_layout =

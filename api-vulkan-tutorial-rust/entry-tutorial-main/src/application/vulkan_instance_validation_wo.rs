@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use ::window_uniform::prelude::*;
 use ::vulkan::VULKAN_LIBRARY_FILE_NAME;
 use ::vulkan::VulkanErrorCode;
@@ -24,6 +26,8 @@ use crate::application::vulkan_command_buffer::ApplicationVulkanCommandBuffer;
 use crate::application::vulkan_synchronization::ApplicationVulkanSynchronization;
 use crate::application::vulkan_vertex::ApplicationVulkanVertexBuffer;
 use crate::application::vulkan_vertex_index::ApplicationVulkanVertexIndexBuffer;
+use crate::application::vulkan_transform_d3_descriptor::ApplicationVulkanTransformD3Descriptor;
+use crate::application::vulkan_transform_d3_buffer::ApplicationVulkanTransformD3Buffer;
 
 
 pub struct ApplicationVulkanInstanceValidationWo {}
@@ -87,8 +91,11 @@ impl ApplicationVulkanInstanceValidationWo {
                 &vulkan_logical_device, vulkan_surface_format, &vulkan_image_s)?;
         let vulkan_render_pass =
             ApplicationVulkanRenderPass::create(&vulkan_logical_device, vulkan_surface_format)?;
+        let vulkan_descriptor_set_layout =
+            ApplicationVulkanTransformD3Descriptor::create_set_layout_main(&vulkan_logical_device)?;
         let (vulkan_pipeline, vulkan_pipeline_layout) =
-            ApplicationVulkanPipeline::create_layout(&vulkan_logical_device, vulkan_extent, vulkan_render_pass)?;
+            ApplicationVulkanPipeline::create_layout(
+                &vulkan_logical_device, vulkan_extent, vulkan_render_pass, vulkan_descriptor_set_layout)?;
         let vulkan_frame_buffer_s =
             ApplicationVulkanFrameBuffer::create_all(&vulkan_logical_device, &vulkan_image_view_s, vulkan_render_pass, vulkan_extent)?;
         let vulkan_command_pool =
@@ -103,6 +110,9 @@ impl ApplicationVulkanInstanceValidationWo {
             ApplicationVulkanVertexIndexBuffer::create(
                 &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
                 vulkan_command_pool, vulkan_graphic_queue, &input_vertex_index_s)?;
+        let (vulkan_main_3d_transform_buffer_s, vulkan_main_3d_transform_buffer_memory_s) =
+            ApplicationVulkanTransformD3Buffer::create_main_all(
+                &vulkan_instance, vulkan_physical_device, &vulkan_logical_device, &vulkan_image_s)?;
         let vulkan_command_buffer_s =
             ApplicationVulkanCommandBuffer::create_all(
                 &vulkan_logical_device, vulkan_command_pool, &vulkan_frame_buffer_s, vulkan_extent,
@@ -112,6 +122,7 @@ impl ApplicationVulkanInstanceValidationWo {
              vulkan_slide_in_flight_fence_s, vulkan_image_in_flight_fence_s) =
             ApplicationVulkanSynchronization::create_all(&vulkan_logical_device, &vulkan_image_s)?;
         Ok(Application {
+            instant_start: Instant::now(),
             signal_window_resized: false,
             vulkan_entry: vulkan_entry,
             vulkan_instance: vulkan_instance,
@@ -143,6 +154,9 @@ impl ApplicationVulkanInstanceValidationWo {
             vulkan_vertex_buffer_memory: vulkan_vertex_buffer_memory,
             vulkan_vertex_index_buffer: vulkan_vertex_index_buffer,
             vulkan_vertex_index_buffer_memory: vulkan_vertex_index_buffer_memory,
+            vulkan_transform_d3_main_buffer_s: vulkan_main_3d_transform_buffer_s,
+            vulkan_transform_d3_main_buffer_memory_s: vulkan_main_3d_transform_buffer_memory_s,
+            vulkan_descriptor_set_layout: vulkan_descriptor_set_layout,
             input_vertex_s: input_vertex_s,
             input_vertex_index_s: input_vertex_index_s,
         })
