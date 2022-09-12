@@ -18,4 +18,5 @@ pub mod vulkan_memory;
 pub mod vulkan_vertex_index;
 pub mod vulkan_transform_d3_buffer;
 pub mod vulkan_transform_d3_descriptor;
+pub mod vulkan_descriptor;
 pub mod evolution;

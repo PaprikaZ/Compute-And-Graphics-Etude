@@ -46,6 +46,7 @@ pub enum TerminationProcessMain {
     InitializationVulkanMemoryBufferBindFail(VulkanErrorCode),
     InitializationVulkanMemoryMapFail(VulkanErrorCode),
     InitializationVulkanDescriptorSetLayoutCreateFail(VulkanErrorCode),
+    InitializationVulkanDescriptorPoolCreateFail(VulkanErrorCode),
 }
 
 impl TerminationProcessMain {
@@ -93,6 +94,7 @@ impl TerminationProcessMain {
             Self::InitializationVulkanMemoryBufferBindFail(_) => 39u8,
             Self::InitializationVulkanMemoryMapFail(_) => 40u8,
             Self::InitializationVulkanDescriptorSetLayoutCreateFail(_) => 41u8,
+            Self::InitializationVulkanDescriptorPoolCreateFail(_) => 42u8,
         }
     }
 }
