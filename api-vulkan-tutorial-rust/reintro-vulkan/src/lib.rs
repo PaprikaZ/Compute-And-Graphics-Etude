@@ -181,6 +181,17 @@ pub use ::vulkanalia::vk::DescriptorType as VulkanDescriptorType;
 pub use ::vulkanalia::vk::DescriptorSetLayoutCreateInfo as VulkanDescriptorSetLayoutCreateInformation;
 pub use ::vulkanalia::vk::DescriptorSetLayoutCreateInfoBuilder as VulkanDescriptorSetLayoutCreateInformationBuilder;
 
+pub use ::vulkanalia::vk::DescriptorPoolSize as VulkanDescriptorPoolSize;
+pub use ::vulkanalia::vk::DescriptorPoolSizeBuilder as VulkanDescriptorPoolSizeBuilder;
+pub use ::vulkanalia::vk::DescriptorPool as VulkanDescriptorPool;
+pub use ::vulkanalia::vk::DescriptorPoolCreateInfo as VulkanDescriptorPoolCreateInformation;
+pub use ::vulkanalia::vk::DescriptorSetAllocateInfo as VulkanDescriptorSetAllocateInformation;
+pub use ::vulkanalia::vk::DescriptorSetAllocateInfoBuilder as VulkanDescriptorSetAllocateInformationBuilder;
+pub use ::vulkanalia::vk::DescriptorSet as VulkanDescriptorSet;
+pub use ::vulkanalia::vk::DescriptorBufferInfo as VulkanDescriptorBufferInformation;
+pub use ::vulkanalia::vk::WriteDescriptorSet as VulkanWriteDescriptorSet;
+pub use ::vulkanalia::vk::CopyDescriptorSet as VulkanCopyDescriptorSet;
+
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
 pub use ::vulkanalia::vk::LOD_CLAMP_NONE as VULKAN_LOD_CLAMP_NONE;

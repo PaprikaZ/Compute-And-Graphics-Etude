@@ -100,7 +100,7 @@ impl ApplicationVulkanPipeline {
             .polygon_mode(VulkanPolygonMode::FILL)
             .line_width(1.0)
             .cull_mode(VulkanCullModeFlagS::BACK)
-            .front_face(VulkanFrontFace::CLOCKWISE)
+            .front_face(VulkanFrontFace::COUNTER_CLOCKWISE)
             .depth_bias_enable(false);
         let vulkan_pipeline_multisample_state_create_information =
             VulkanPipelineMultisampleStateCreateInformation::builder()
