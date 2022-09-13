@@ -20,6 +20,10 @@ use ::vulkan::VulkanBuffer;
 use ::vulkan::VulkanIndexType;
 use ::vulkan::VulkanPipelineLayout;
 use ::vulkan::VulkanDescriptorSet;
+use ::vulkan::VulkanCommandBufferUsageFlagS;
+use ::vulkan::VulkanSubmitInformation;
+use ::vulkan::VulkanQueue;
+use ::vulkan::VulkanFence;
 
 use crate::termination::TerminationProcessMain;
 
@@ -106,5 +110,84 @@ impl ApplicationVulkanCommandBuffer {
             };
         };
         Ok(vulkan_command_buffer_s)
+    }
+}
+
+pub struct ApplicationVulkanCommandBufferOneTime {}
+
+impl ApplicationVulkanCommandBufferOneTime {
+    pub unsafe fn create_and_begin(
+        vulkan_logical_device: &VulkanDeviceLogical,
+        vulkan_command_pool: VulkanCommandPool)
+     -> Result<VulkanCommandBuffer, TerminationProcessMain>
+    {
+        let vulkan_command_buffer_allocate_information =
+            VulkanCommandBufferAllocateInformation::builder()
+            .level(VulkanCommandBufferLevel::PRIMARY)
+            .command_pool(vulkan_command_pool)
+            .command_buffer_count(1);
+        let allocate_vulkan_command_buffer_result =
+            vulkan_logical_device.allocate_command_buffers(&vulkan_command_buffer_allocate_information);
+        let vulkan_command_buffer =
+            match allocate_vulkan_command_buffer_result {
+                Err(error) => {
+                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                    return Err(TerminationProcessMain::InitializationVulkanCommandBufferSAllocateFail(vulkan_error_code));
+                },
+                Ok(buffer_s) => buffer_s[0],
+            };
+        //
+        let vulkan_command_buffer_begin_information =
+            VulkanCommandBufferBeginInformation::builder()
+            .flags(VulkanCommandBufferUsageFlagS::ONE_TIME_SUBMIT);
+        let begin_vulkan_command_buffer_result =
+            vulkan_logical_device.begin_command_buffer(vulkan_command_buffer, &vulkan_command_buffer_begin_information);
+        match begin_vulkan_command_buffer_result {
+            Err(error) => {
+                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                return Err(TerminationProcessMain::InitializationVulkanCommandBufferBeginFail(vulkan_error_code));
+            },
+            Ok(()) => (),
+        };
+        Ok(vulkan_command_buffer)
+    }
+
+    pub unsafe fn end_submit_wait(
+        vulkan_logical_device: &VulkanDeviceLogical,
+        vulkan_command_pool: VulkanCommandPool,
+        vulkan_command_buffer: VulkanCommandBuffer,
+        vulkan_graphic_queue: VulkanQueue)
+     -> Result<(), TerminationProcessMain>
+    {
+        match vulkan_logical_device.end_command_buffer(vulkan_command_buffer) {
+            Err(error) => {
+                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                return Err(TerminationProcessMain::InitializationVulkanCommandBufferEndFail(vulkan_error_code));
+            },
+            Ok(()) => (),
+        };
+        let vulkan_command_buffer_s = &[vulkan_command_buffer];
+        let vulkan_submit_information =
+            VulkanSubmitInformation::builder()
+            .command_buffers(vulkan_command_buffer_s);
+        let vulkan_submit_result =
+            vulkan_logical_device.queue_submit(
+                vulkan_graphic_queue, &[vulkan_submit_information], VulkanFence::null());
+        match vulkan_submit_result {
+            Err(error) => {
+                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                return Err(TerminationProcessMain::InitializationVulkanQueueSubmitFail(vulkan_error_code));
+            },
+            Ok(()) => (),
+        };
+        match vulkan_logical_device.queue_wait_idle(vulkan_graphic_queue) {
+            Err(error) => {
+                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                return Err(TerminationProcessMain::InitializationVulkanDeviceWaitIdleFail(vulkan_error_code));
+            },
+            Ok(()) => (),
+        };
+        vulkan_logical_device.free_command_buffers(vulkan_command_pool, vulkan_command_buffer_s);
+        Ok(())
     }
 }

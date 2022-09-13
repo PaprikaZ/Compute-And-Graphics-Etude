@@ -92,6 +92,8 @@ pub struct Application {
     pub vulkan_descriptor_set_layout: VulkanDescriptorSetLayout,
     pub vulkan_descriptor_pool: VulkanDescriptorPool,
     pub vulkan_descriptor_set_s: Vec<VulkanDescriptorSet>,
+    pub vulkan_texture_image: VulkanImage,
+    pub vulkan_texture_image_memory: VulkanDeviceMemory,
     pub input_vertex_s: Vec<Vertex>,
     pub input_vertex_index_s: Vec<u16>,
 }
@@ -296,6 +298,8 @@ impl Application {
         self.vulkan_device_logical.free_memory(self.vulkan_vertex_buffer_memory, None);
         self.vulkan_device_logical.destroy_buffer(self.vulkan_vertex_buffer, None);
         //
+        self.vulkan_device_logical.free_memory(self.vulkan_texture_image_memory, None);
+        self.vulkan_device_logical.destroy_image(self.vulkan_texture_image, None);
         self.vulkan_device_logical.destroy_command_pool(self.vulkan_command_pool, None);
         self.vulkan_device_logical.destroy_descriptor_set_layout(self.vulkan_descriptor_set_layout, None);
         self.vulkan_device_logical.destroy_device(None);

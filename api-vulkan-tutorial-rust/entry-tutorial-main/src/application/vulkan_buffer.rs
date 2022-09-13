@@ -5,7 +5,7 @@ use ::vulkan::VulkanInstance;
 use ::vulkan::VulkanSharingMode;
 use ::vulkan::VulkanBufferUsageFlagS;
 use ::vulkan::VulkanBufferCreateInformation;
-use ::vulkan::VulkanMemoryAllocateInfomration;
+use ::vulkan::VulkanMemoryAllocateInformation;
 use ::vulkan::VulkanMemoryPropertyFlagS;
 use ::vulkan::VulkanBuffer;
 use ::vulkan::VulkanDeviceMemory;
@@ -57,7 +57,7 @@ impl ApplicationVulkanBuffer {
             ApplicationVulkanMemory::get_type_index(
                 vulkan_instance, vulkan_physical_device, vulkan_memory_property_flag_s, vulkan_memory_requirement_s)?;
         let vulkan_memory_allocate_infomation =
-            VulkanMemoryAllocateInfomration::builder()
+            VulkanMemoryAllocateInformation::builder()
             .allocation_size(vulkan_memory_requirement_s.size)
             .memory_type_index(vulkan_memory_type_index.as_raw());
         let allocate_vulkan_buffer_memory_result =
