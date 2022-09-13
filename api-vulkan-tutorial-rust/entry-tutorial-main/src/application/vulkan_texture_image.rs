@@ -48,6 +48,96 @@ use super::vulkan_command_buffer::ApplicationVulkanCommandBufferOneTime;
 pub struct ApplicationVulkanTextureImage {}
 
 impl ApplicationVulkanTextureImage {
+    pub unsafe fn create_buffer_with_memory(
+        vulkan_instance: &VulkanInstance,
+        vulkan_physical_device: VulkanDevicePhysical,
+        vulkan_logical_device: &VulkanDeviceLogical,
+        texture_image_file_path: &Path,
+        vulkan_command_pool: VulkanCommandPool,
+        vulkan_graphic_queue: VulkanQueue)
+     -> Result<(VulkanImage, VulkanDeviceMemory), TerminationProcessMain>
+    {
+        let open_texture_file_result = File::open(texture_image_file_path);
+        let texture_file =
+            match open_texture_file_result {
+                Err(error) => return Err(TerminationProcessMain::InitializationFileOpenFail(error.to_string())),
+                Ok(file) => file,
+            };
+        let png_format_decoder = png::Decoder::new(texture_file);
+        let read_texture_file_information_result = png_format_decoder.read_info();
+        let (texture_file_information, mut texture_file_reader) =
+            match read_texture_file_information_result {
+                Err(error) => return Err(TerminationProcessMain::InitializationFormatPngDecodingError(error)),
+                Ok(information_and_reader) => information_and_reader,
+            };
+        let mut texture_file_pixel_s = vec![0; texture_file_information.buffer_size()];
+        match texture_file_reader.next_frame(&mut texture_file_pixel_s) {
+            Err(error) => return Err(TerminationProcessMain::InitializationFormatPngDecodingError(error)),
+            Ok(()) => (),
+        };
+        let texture_file_buffer_size = texture_file_information.buffer_size() as u64;
+        let (vulkan_texture_staging_buffer, vulkan_texture_staging_buffer_memory) =
+            ApplicationVulkanBuffer::create_with_memory(
+                vulkan_instance,
+                vulkan_physical_device,
+                vulkan_logical_device,
+                texture_file_buffer_size,
+                VulkanBufferUsageFlagS::TRANSFER_SRC,
+                VulkanMemoryPropertyFlagS::HOST_COHERENT | VulkanMemoryPropertyFlagS::HOST_VISIBLE)?;
+        let map_texture_staging_memory_result =
+            vulkan_logical_device.map_memory(
+                vulkan_texture_staging_buffer_memory, 0, texture_file_buffer_size, VulkanMemoryMapFlagS::empty());
+        let texture_staging_memory_address =
+            match map_texture_staging_memory_result {
+                Err(error) => {
+                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                    return Err(TerminationProcessMain::InitializationVulkanMemoryMapFail(vulkan_error_code));
+                },
+                Ok(address) => address,
+            };
+        copy_nonoverlapping(texture_file_pixel_s.as_ptr(), texture_staging_memory_address.cast(), texture_file_pixel_s.len());
+        vulkan_logical_device.unmap_memory(vulkan_texture_staging_buffer_memory);
+        //
+        let (vulkan_texture_image, vulkan_texture_image_memory) =
+            Self::create_with_memory(
+                vulkan_instance,
+                vulkan_physical_device,
+                vulkan_logical_device,
+                texture_file_information.width,
+                texture_file_information.height,
+                VulkanFormat::R8G8B8A8_SRGB,
+                VulkanImageTiling::OPTIMAL,
+                VulkanImageUsageFlagS::SAMPLED | VulkanImageUsageFlagS::TRANSFER_DST,
+                VulkanMemoryPropertyFlagS::DEVICE_LOCAL)?;
+        Self::transition_layout(
+            vulkan_logical_device,
+            vulkan_command_pool,
+            vulkan_graphic_queue,
+            vulkan_texture_image,
+            VulkanFormat::R8G8B8A8_SRGB,
+            VulkanImageLayout::UNDEFINED,
+            VulkanImageLayout::TRANSFER_DST_OPTIMAL)?;
+        Self::copy_from_buffer(
+            vulkan_logical_device,
+            vulkan_command_pool,
+            vulkan_graphic_queue,
+            vulkan_texture_staging_buffer,
+            vulkan_texture_image,
+            texture_file_information.width,
+            texture_file_information.height)?;
+        Self::transition_layout(
+            vulkan_logical_device,
+            vulkan_command_pool,
+            vulkan_graphic_queue,
+            vulkan_texture_image,
+            VulkanFormat::R8G8B8A8_SRGB,
+            VulkanImageLayout::TRANSFER_DST_OPTIMAL,
+            VulkanImageLayout::SHADER_READ_ONLY_OPTIMAL)?;
+        vulkan_logical_device.destroy_buffer(vulkan_texture_staging_buffer, None);
+        vulkan_logical_device.free_memory(vulkan_texture_staging_buffer_memory, None);
+        Ok((vulkan_texture_image, vulkan_texture_image_memory))
+    }
+
     unsafe fn create_with_memory(
         vulkan_instance: &VulkanInstance,
         vulkan_physical_device: VulkanDevicePhysical,
