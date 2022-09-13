@@ -12,6 +12,7 @@ use ::vulkan::VulkanExtensionName;
 use crate::termination::TerminationProcessMain;
 use crate::data::vertex::DataVertex;
 use crate::data::vertex::DataVertexIndex;
+use crate::config::ConfigPath;
 use crate::application::main::Application;
 use crate::application::vulkan_instance_share::ApplicationVulkanInstanceShare;
 use crate::application::vulkan_instance_device_physical::ApplicationVulkanInstanceDevicePhysical;
@@ -30,6 +31,7 @@ use crate::application::vulkan_transform_d3_descriptor::ApplicationVulkanTransfo
 use crate::application::vulkan_transform_d3_buffer::ApplicationVulkanTransformD3Buffer;
 use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorPool;
 use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorSet;
+use crate::application::vulkan_texture_image::ApplicationVulkanTextureImage;
 
 
 pub struct ApplicationVulkanInstanceValidationWo {}
@@ -102,6 +104,10 @@ impl ApplicationVulkanInstanceValidationWo {
             ApplicationVulkanFrameBuffer::create_all(&vulkan_logical_device, &vulkan_image_view_s, vulkan_render_pass, vulkan_extent)?;
         let vulkan_command_pool =
             ApplicationVulkanCommandPool::create(&vulkan_logical_device, vulkan_graphic_queue_family_index)?;
+        let (vulkan_texture_image, vulkan_texture_image_memory) =
+            ApplicationVulkanTextureImage::create_buffer_with_memory(
+                &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
+                &ConfigPath::get_file_texture_image_main(), vulkan_command_pool, vulkan_graphic_queue)?;
         let input_vertex_s = DataVertex::get_default();
         let (vulkan_vertex_buffer, vulkan_vertex_buffer_memory) =
             ApplicationVulkanVertexBuffer::create(
@@ -168,6 +174,8 @@ impl ApplicationVulkanInstanceValidationWo {
             vulkan_descriptor_set_layout: vulkan_descriptor_set_layout,
             vulkan_descriptor_pool: vulkan_descriptor_pool,
             vulkan_descriptor_set_s: vulkan_descriptor_set_s,
+            vulkan_texture_image: vulkan_texture_image,
+            vulkan_texture_image_memory: vulkan_texture_image_memory,
             input_vertex_s: input_vertex_s,
             input_vertex_index_s: input_vertex_index_s,
         })
