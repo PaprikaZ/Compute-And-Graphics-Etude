@@ -192,6 +192,17 @@ pub use ::vulkanalia::vk::DescriptorBufferInfo as VulkanDescriptorBufferInformat
 pub use ::vulkanalia::vk::WriteDescriptorSet as VulkanWriteDescriptorSet;
 pub use ::vulkanalia::vk::CopyDescriptorSet as VulkanCopyDescriptorSet;
 
+pub use ::vulkanalia::vk::ImageCreateInfo as VulkanImageCreateInformation;
+pub use ::vulkanalia::vk::ImageCreateInfoBuilder as VulkanImageCreateInformationBuilder;
+pub use ::vulkanalia::vk::ImageType as VulkanImageType;
+pub use ::vulkanalia::vk::ImageTiling as VulkanImageTiling;
+pub use ::vulkanalia::vk::DependencyFlags as VulkanDependencyFlagS;
+pub use ::vulkanalia::vk::BufferImageCopy as VulkanBufferImageCopy;
+pub use ::vulkanalia::vk::ImageSubresourceLayers as VulkanImageSubresourceLayerS;
+pub use ::vulkanalia::vk::ImageMemoryBarrier as VulkanImageMemoryBarrier;
+pub use ::vulkanalia::vk::MemoryBarrier as VulkanMemoryBarrier;
+pub use ::vulkanalia::vk::BufferMemoryBarrier as VulkanBufferMemoryBarrier;
+
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
 pub use ::vulkanalia::vk::LOD_CLAMP_NONE as VULKAN_LOD_CLAMP_NONE;
