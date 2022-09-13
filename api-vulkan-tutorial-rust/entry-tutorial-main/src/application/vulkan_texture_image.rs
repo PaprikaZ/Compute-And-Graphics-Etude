@@ -48,6 +48,63 @@ use super::vulkan_command_buffer::ApplicationVulkanCommandBufferOneTime;
 pub struct ApplicationVulkanTextureImage {}
 
 impl ApplicationVulkanTextureImage {
+    unsafe fn transition_layout(
+        vulkan_logical_device: &VulkanDeviceLogical,
+        vulkan_command_pool: VulkanCommandPool,
+        vulkan_graphic_queue: VulkanQueue,
+        vulkan_texture_image: VulkanImage,
+        _vulkan_texture_image_format: VulkanFormat,
+        old_vulkan_texture_image_layout: VulkanImageLayout,
+        new_vulkan_texture_image_layout: VulkanImageLayout)
+     -> Result<(), TerminationProcessMain>
+    {
+        let (source_access_mask, destination_access_mask,
+             source_stage_mask, destination_stage_mask) =
+            match (old_vulkan_texture_image_layout, new_vulkan_texture_image_layout) {
+                (VulkanImageLayout::UNDEFINED, VulkanImageLayout::TRANSFER_DST_OPTIMAL) => (
+                    VulkanAccessFlagS::empty(),
+                    VulkanAccessFlagS::TRANSFER_WRITE,
+                    VulkanPipelineStageFlagS::TOP_OF_PIPE,
+                    VulkanPipelineStageFlagS::TRANSFER),
+                (VulkanImageLayout::TRANSFER_DST_OPTIMAL, VulkanImageLayout::SHADER_READ_ONLY_OPTIMAL) => (
+                    VulkanAccessFlagS::TRANSFER_WRITE,
+                    VulkanAccessFlagS::SHADER_READ,
+                    VulkanPipelineStageFlagS::TRANSFER,
+                    VulkanPipelineStageFlagS::FRAGMENT_SHADER),
+                _ => return Err(TerminationProcessMain::InitializationVulkanTextureImageLayoutTransitionNotSupport),
+            };
+        let vulkan_command_buffer =
+            ApplicationVulkanCommandBufferOneTime::create_and_begin(vulkan_logical_device, vulkan_command_pool)?;
+        let vulkan_image_sub_resource_range =
+            VulkanImageSubResourceRange::builder()
+            .aspect_mask(VulkanImageAspectFlagS::COLOR)
+            .base_mip_level(0)
+            .level_count(1)
+            .base_array_layer(0)
+            .layer_count(1);
+        let vulkan_image_memory_barrier =
+            VulkanImageMemoryBarrier::builder()
+            .old_layout(old_vulkan_texture_image_layout)
+            .new_layout(new_vulkan_texture_image_layout)
+            .src_queue_family_index(VULKAN_QUEUE_FAMILY_IGNORED)
+            .dst_queue_family_index(VULKAN_QUEUE_FAMILY_IGNORED)
+            .image(vulkan_texture_image)
+            .subresource_range(vulkan_image_sub_resource_range)
+            .src_access_mask(source_access_mask)
+            .dst_access_mask(destination_access_mask);
+        vulkan_logical_device.cmd_pipeline_barrier(
+            vulkan_command_buffer,
+            source_stage_mask,
+            destination_stage_mask,
+            VulkanDependencyFlagS::empty(),
+            &[] as &[VulkanMemoryBarrier],
+            &[] as &[VulkanBufferMemoryBarrier],
+            &[vulkan_image_memory_barrier]);
+        ApplicationVulkanCommandBufferOneTime::end_submit_wait(
+            vulkan_logical_device, vulkan_command_pool, vulkan_command_buffer, vulkan_graphic_queue)?;
+        Ok(())
+    }
+
     unsafe fn copy_from_buffer(
         vulkan_logical_device: &VulkanDeviceLogical,
         vulkan_command_pool: VulkanCommandPool,

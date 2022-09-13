@@ -48,6 +48,7 @@ pub enum TerminationProcessMain {
     InitializationVulkanDescriptorSetLayoutCreateFail(VulkanErrorCode),
     InitializationVulkanDescriptorPoolCreateFail(VulkanErrorCode),
     InitializationVulkanDescriptorSetSAllocateFail(VulkanErrorCode),
+    InitializationVulkanTextureImageLayoutTransitionNotSupport,
 }
 
 impl TerminationProcessMain {
@@ -97,6 +98,7 @@ impl TerminationProcessMain {
             Self::InitializationVulkanDescriptorSetLayoutCreateFail(_) => 41u8,
             Self::InitializationVulkanDescriptorPoolCreateFail(_) => 42u8,
             Self::InitializationVulkanDescriptorSetSAllocateFail(_) => 43u8,
+            Self::InitializationVulkanTextureImageLayoutTransitionNotSupport => 47u8,
         }
     }
 }
