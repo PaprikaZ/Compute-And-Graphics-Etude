@@ -20,6 +20,35 @@ use crate::application::vulkan_image::ApplicationVulkanImageView;
 pub struct ApplicationVulkanDepth {}
 
 impl ApplicationVulkanDepth {
+    pub unsafe fn create_image_memory_view(
+        vulkan_instance: &VulkanInstance,
+        vulkan_physical_device: VulkanDevicePhysical,
+        vulkan_logical_device: &VulkanDeviceLogical,
+        vulkan_swapchain_extent: VulkanExtentD2)
+     -> Result<(VulkanImage, VulkanDeviceMemory, VulkanImageView), TerminationProcessMain>
+    {
+        let selected_vulkan_depth_format =
+            Self::get_format(vulkan_instance, vulkan_physical_device)?;
+        let (vulkan_depth_image, vulkan_depth_image_memory) =
+            ApplicationVulkanImage::create_with_memory(
+                vulkan_instance,
+                vulkan_physical_device,
+                vulkan_logical_device,
+                vulkan_swapchain_extent.width,
+                vulkan_swapchain_extent.height,
+                selected_vulkan_depth_format,
+                VulkanImageTiling::OPTIMAL,
+                VulkanImageUsageFlagS::DEPTH_STENCIL_ATTACHMENT,
+                VulkanMemoryPropertyFlagS::DEVICE_LOCAL)?;
+        let vulkan_depth_image_view =
+            ApplicationVulkanImageView::create(
+                vulkan_logical_device,
+                vulkan_depth_image,
+                selected_vulkan_depth_format,
+                VulkanImageAspectFlagS::DEPTH)?;
+        Ok((vulkan_depth_image, vulkan_depth_image_memory, vulkan_depth_image_view))
+    }
+
     pub unsafe fn get_format(vulkan_instance: &VulkanInstance, vulkan_physical_device: VulkanDevicePhysical)
      -> Result<VulkanFormat, TerminationProcessMain>
     {
