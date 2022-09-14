@@ -216,6 +216,10 @@ pub use ::vulkanalia::vk::Sampler as VulkanSampler;
 pub use ::vulkanalia::vk::DescriptorImageInfo as VulkanDescriptorImageInformation;
 pub use ::vulkanalia::vk::DescriptorImageInfoBuilder as VulkanDescriptorImageInformationBuilder;
 
+pub use ::vulkanalia::vk::FormatFeatureFlags as VulkanFormatFeatureFlagS;
+pub use ::vulkanalia::vk::ClearDepthStencilValue as VulkanClearDepthStencilValue;
+pub use ::vulkanalia::vk::ClearDepthStencilValueBuilder as VulkanClearDepthStencilValueBuilder;
+
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
 pub use ::vulkanalia::vk::LOD_CLAMP_NONE as VULKAN_LOD_CLAMP_NONE;
