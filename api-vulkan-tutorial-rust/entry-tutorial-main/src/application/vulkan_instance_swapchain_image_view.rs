@@ -26,7 +26,9 @@ impl ApplicationInstanceSwapchainImageView {
         let vulkan_swapchain_image_view_s =
             vulkan_image_s
             .iter()
-            .map(|i| ApplicationVulkanImageView::create(vulkan_logical_device, *i, vulkan_format))
+            .map(|i|
+                ApplicationVulkanImageView::create(
+                    vulkan_logical_device, *i, vulkan_format, VulkanImageAspectFlagS::COLOR))
             .collect::<Result<Vec<_>, _>>()?;
         Ok(vulkan_swapchain_image_view_s)
     }

@@ -103,12 +103,13 @@ impl ApplicationVulkanImageView {
     pub unsafe fn create(
         vulkan_logical_device: &VulkanDeviceLogical,
         vulkan_image: VulkanImage,
-        vulkan_format: VulkanFormat)
+        vulkan_format: VulkanFormat,
+        vulkan_image_aspect_flag_s: VulkanImageAspectFlagS)
      -> Result<VulkanImageView, TerminationProcessMain>
     {
         let vulkan_image_sub_resource_range =
             VulkanImageSubResourceRange::builder()
-            .aspect_mask(VulkanImageAspectFlagS::COLOR)
+            .aspect_mask(vulkan_image_aspect_flag_s)
             .base_mip_level(0)
             .level_count(1)
             .base_array_layer(0)

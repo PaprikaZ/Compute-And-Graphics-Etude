@@ -247,7 +247,8 @@ impl ApplicationVulkanTextureImage {
     {
         let vulkan_image_view =
             ApplicationVulkanImageView::create(
-                vulkan_logical_device, vulkan_texture_image, VulkanFormat::R8G8B8A8_SRGB)?;
+                vulkan_logical_device, vulkan_texture_image,
+                VulkanFormat::R8G8B8A8_SRGB, VulkanImageAspectFlagS::COLOR)?;
         Ok(vulkan_image_view)
     }
 
