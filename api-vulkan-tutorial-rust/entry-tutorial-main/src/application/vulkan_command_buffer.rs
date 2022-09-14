@@ -24,6 +24,7 @@ use ::vulkan::VulkanCommandBufferUsageFlagS;
 use ::vulkan::VulkanSubmitInformation;
 use ::vulkan::VulkanQueue;
 use ::vulkan::VulkanFence;
+use ::vulkan::VulkanClearDepthStencilValue;
 
 use crate::termination::TerminationProcessMain;
 
@@ -76,9 +77,11 @@ impl ApplicationVulkanCommandBuffer {
                 VulkanRectangleD2::builder()
                 .offset(VulkanOffsetD2::default())
                 .extent(vulkan_extent);
-            let vulkan_clear_value =
+            let vulkan_color_clear_value =
                 VulkanClearValue { color: VulkanClearColorValue { float32: [0.0, 0.0, 0.0, 1.0] } };
-            let vulkan_clear_value_s = &[vulkan_clear_value];
+            let vulkan_depth_stencil_clear_value =
+                VulkanClearValue { depth_stencil: VulkanClearDepthStencilValue { depth: 1.0, stencil: 0 } };
+            let vulkan_clear_value_s = &[vulkan_color_clear_value, vulkan_depth_stencil_clear_value];
             let vulkan_render_pass_begin_information =
                 VulkanRenderPassBeginInformation::builder()
                 .render_pass(vulkan_render_pass)
