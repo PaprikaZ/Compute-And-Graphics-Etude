@@ -29,6 +29,8 @@ use ::vulkan::VulkanRenderPass;
 use ::vulkan::VulkanPipelineCache;
 use ::vulkan::VulkanPipeline;
 use ::vulkan::VulkanDescriptorSetLayout;
+use ::vulkan::VulkanPipelineDepthStencilStateCreateInformation;
+use ::vulkan::VulkanCompareOperation;
 
 use crate::data::vertex::DataVertex;
 use crate::termination::TerminationProcessMain;
@@ -107,6 +109,13 @@ impl ApplicationVulkanPipeline {
             VulkanPipelineMultisampleStateCreateInformation::builder()
             .sample_shading_enable(false)
             .rasterization_samples(VulkanSampleCountFlagS::_1);
+        let vulkan_depth_stencil_state =
+            VulkanPipelineDepthStencilStateCreateInformation::builder()
+            .depth_test_enable(true)
+            .depth_write_enable(true)
+            .depth_compare_op(VulkanCompareOperation::LESS)
+            .depth_bounds_test_enable(false)
+            .stencil_test_enable(false);
         let vulkan_color_blend_attachment_state =
             VulkanPipelineColorBlendAttachmentState::builder()
             .color_write_mask(VulkanColorComponentFlagS::all())
@@ -142,6 +151,7 @@ impl ApplicationVulkanPipeline {
             .viewport_state(&vulkan_viewport_state_create_information)
             .rasterization_state(&vulkan_rasterization_state_create_information)
             .multisample_state(&vulkan_pipeline_multisample_state_create_information)
+            .depth_stencil_state(&vulkan_depth_stencil_state)
             .color_blend_state(&vulkan_color_blend_state_create_information)
             .layout(vulkan_pipeline_layout)
             .render_pass(vulkan_render_pass)
