@@ -53,6 +53,8 @@ pub enum TerminationProcessMain {
     InitializationFormatPngDecodingError(FormatPngDecodingError),
     InitializationVulkanImageCreateFail(VulkanErrorCode),
     InitializationVulkanTextureImageLayoutTransitionNotSupport,
+    InitializationVulkanSamplerCreateFail(VulkanErrorCode),
+    InitializationVulkanPhysicalDeviceFeatureSamplerAnisotropyNotSupport,
 }
 
 impl TerminationProcessMain {
@@ -106,6 +108,8 @@ impl TerminationProcessMain {
             Self::InitializationFormatPngDecodingError(_) => 45u8,
             Self::InitializationVulkanImageCreateFail(_) => 46u8,
             Self::InitializationVulkanTextureImageLayoutTransitionNotSupport => 47u8,
+            Self::InitializationVulkanSamplerCreateFail(_) => 48u8,
+            Self::InitializationVulkanPhysicalDeviceFeatureSamplerAnisotropyNotSupport => 49u8,
         }
     }
 }

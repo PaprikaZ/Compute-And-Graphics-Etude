@@ -37,12 +37,20 @@ use ::vulkan::VulkanDependencyFlagS;
 use ::vulkan::VulkanBufferMemoryBarrier;
 use ::vulkan::VulkanQueue;
 use ::vulkan::VulkanBuffer;
+use ::vulkan::VulkanImageView;
+use ::vulkan::VulkanSamplerCreateInformation;
+use ::vulkan::VulkanFilter;
+use ::vulkan::VulkanBorderColor;
+use ::vulkan::VulkanCompareOperation;
+use ::vulkan::VulkanSamplerMipmapMode;
+use ::vulkan::VulkanSamplerAddressMode;
+use ::vulkan::VulkanSampler;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_buffer::ApplicationVulkanBuffer;
 use crate::application::vulkan_memory::ApplicationVulkanMemory;
-
-use super::vulkan_command_buffer::ApplicationVulkanCommandBufferOneTime;
+use crate::application::vulkan_command_buffer::ApplicationVulkanCommandBufferOneTime;
+use crate::application::vulkan_image::ApplicationVulkanImageView;
 
 
 pub struct ApplicationVulkanTextureImage {}
@@ -303,4 +311,42 @@ impl ApplicationVulkanTextureImage {
             vulkan_logical_device, vulkan_command_pool, vulkan_command_buffer, vulkan_graphic_queue)?;
         Ok(())
     }
+
+    pub unsafe fn create_view(vulkan_logical_device: &VulkanDeviceLogical, vulkan_texture_image: VulkanImage)
+     -> Result<VulkanImageView, TerminationProcessMain>
+    {
+        let vulkan_image_view =
+            ApplicationVulkanImageView::create(
+                vulkan_logical_device, vulkan_texture_image, VulkanFormat::R8G8B8A8_SRGB)?;
+        Ok(vulkan_image_view)
+    }
+
+    pub unsafe fn create_sampler(vulkan_logical_device: &VulkanDeviceLogical)
+     -> Result<VulkanSampler, TerminationProcessMain>
+    {
+        let vulkan_sampler_create_information =
+            VulkanSamplerCreateInformation::builder()
+            .mag_filter(VulkanFilter::LINEAR)
+            .min_filter(VulkanFilter::LINEAR)
+            .address_mode_u(VulkanSamplerAddressMode::REPEAT)
+            .address_mode_v(VulkanSamplerAddressMode::REPEAT)
+            .address_mode_w(VulkanSamplerAddressMode::REPEAT)
+            .anisotropy_enable(true)
+            .max_anisotropy(16.0)
+            .border_color(VulkanBorderColor::INT_OPAQUE_WHITE)
+            .unnormalized_coordinates(false)
+            .compare_enable(false)
+            .compare_op(VulkanCompareOperation::ALWAYS)
+            .mipmap_mode(VulkanSamplerMipmapMode::LINEAR);
+        let create_vulkan_sampler_result =
+            vulkan_logical_device.create_sampler(&vulkan_sampler_create_information, None);
+        match create_vulkan_sampler_result {
+            Err(error) => {
+                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                Err(TerminationProcessMain::InitializationVulkanSamplerCreateFail(vulkan_error_code))
+            },
+            Ok(sampler) => Ok(sampler),
+        }
+    }
+
 }

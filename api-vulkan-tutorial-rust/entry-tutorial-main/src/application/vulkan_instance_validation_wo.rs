@@ -108,6 +108,10 @@ impl ApplicationVulkanInstanceValidationWo {
             ApplicationVulkanTextureImage::create_buffer_with_memory(
                 &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
                 &ConfigPath::get_file_texture_image_main(), vulkan_command_pool, vulkan_graphic_queue)?;
+        let vulkan_texture_image_view =
+            ApplicationVulkanTextureImage::create_view(&vulkan_logical_device, vulkan_texture_image)?;
+        let vulkan_texture_sampler =
+            ApplicationVulkanTextureImage::create_sampler(&vulkan_logical_device)?;
         let input_vertex_s = DataVertex::get_default();
         let (vulkan_vertex_buffer, vulkan_vertex_buffer_memory) =
             ApplicationVulkanVertexBuffer::create(
@@ -176,6 +180,8 @@ impl ApplicationVulkanInstanceValidationWo {
             vulkan_descriptor_set_s: vulkan_descriptor_set_s,
             vulkan_texture_image: vulkan_texture_image,
             vulkan_texture_image_memory: vulkan_texture_image_memory,
+            vulkan_texture_image_view: vulkan_texture_image_view,
+            vulkan_texture_sampler: vulkan_texture_sampler,
             input_vertex_s: input_vertex_s,
             input_vertex_index_s: input_vertex_index_s,
         })
