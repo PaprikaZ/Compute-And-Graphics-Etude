@@ -45,6 +45,9 @@ use ::vulkan::VulkanCompareOperation;
 use ::vulkan::VulkanSamplerMipmapMode;
 use ::vulkan::VulkanSamplerAddressMode;
 use ::vulkan::VulkanSampler;
+use ::vulkan::VulkanDescriptorSetLayoutBinding;
+use ::vulkan::VulkanDescriptorType;
+use ::vulkan::VulkanShaderStageFlagS;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_buffer::ApplicationVulkanBuffer;
@@ -349,4 +352,16 @@ impl ApplicationVulkanTextureImage {
         }
     }
 
+    pub unsafe fn create_sampler_descriptor_set_layout_binding()
+     -> Result<VulkanDescriptorSetLayoutBinding, TerminationProcessMain>
+    {
+        let vulkan_descriptor_set_layout_binding =
+            VulkanDescriptorSetLayoutBinding::builder()
+            .binding(1)
+            .descriptor_type(VulkanDescriptorType::COMBINED_IMAGE_SAMPLER)
+            .descriptor_count(1)
+            .stage_flags(VulkanShaderStageFlagS::FRAGMENT)
+            .build();
+        Ok(vulkan_descriptor_set_layout_binding)
+    }
 }

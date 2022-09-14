@@ -213,6 +213,8 @@ pub use ::vulkanalia::vk::CompareOp as VulkanCompareOperation;
 pub use ::vulkanalia::vk::SamplerMipmapMode as VulkanSamplerMipmapMode;
 pub use ::vulkanalia::vk::Filter as VulkanFilter;
 pub use ::vulkanalia::vk::Sampler as VulkanSampler;
+pub use ::vulkanalia::vk::DescriptorImageInfo as VulkanDescriptorImageInformation;
+pub use ::vulkanalia::vk::DescriptorImageInfoBuilder as VulkanDescriptorImageInformationBuilder;
 
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;

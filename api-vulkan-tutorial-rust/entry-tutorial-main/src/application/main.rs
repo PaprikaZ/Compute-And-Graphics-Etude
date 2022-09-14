@@ -252,7 +252,8 @@ impl Application {
         let vulkan_descriptor_set_s =
             ApplicationVulkanDescriptorSet::create_all(
                 &self.vulkan_device_logical, &vulkan_image_s,
-                self.vulkan_descriptor_set_layout, &vulkan_main_3d_transform_buffer_s, vulkan_descriptor_pool)?;
+                self.vulkan_descriptor_set_layout, &vulkan_main_3d_transform_buffer_s, vulkan_descriptor_pool,
+                self.vulkan_texture_image_view, self.vulkan_texture_sampler)?;
         let vulkan_command_buffer_s =
             ApplicationVulkanCommandBuffer::create_all(
                 &self.vulkan_device_logical, self.vulkan_pipeline_layout, self.vulkan_command_pool,

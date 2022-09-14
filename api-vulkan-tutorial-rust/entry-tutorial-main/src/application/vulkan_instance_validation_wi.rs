@@ -42,6 +42,7 @@ use crate::application::vulkan_transform_d3_buffer::ApplicationVulkanTransformD3
 use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorPool;
 use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorSet;
 use crate::application::vulkan_texture_image::ApplicationVulkanTextureImage;
+use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorSetLayout;
 
 
 pub struct ApplicationVulkanInstanceValidationWi {}
@@ -108,8 +109,15 @@ impl ApplicationVulkanInstanceValidationWi {
                 &vulkan_logical_device, vulkan_surface_format, &vulkan_image_s)?;
         let vulkan_render_pass =
             ApplicationVulkanRenderPass::create(&vulkan_logical_device, vulkan_surface_format)?;
+        let vulkan_3d_transform_descriptor_set_layout_binding =
+            ApplicationVulkanTransformD3Descriptor::create_set_layout_binding()?;
+        let vulkan_texture_sampler_transform_descriptor_set_layout_binding =
+            ApplicationVulkanTextureImage::create_sampler_descriptor_set_layout_binding()?;
         let vulkan_descriptor_set_layout =
-            ApplicationVulkanTransformD3Descriptor::create_set_layout_main(&vulkan_logical_device)?;
+            ApplicationVulkanDescriptorSetLayout::create(
+                &vulkan_logical_device,
+                vulkan_3d_transform_descriptor_set_layout_binding,
+                vulkan_texture_sampler_transform_descriptor_set_layout_binding)?;
         let (vulkan_pipeline, vulkan_pipeline_layout) =
             ApplicationVulkanPipeline::create_layout(
                 &vulkan_logical_device, vulkan_extent, vulkan_render_pass, vulkan_descriptor_set_layout)?;
@@ -143,7 +151,8 @@ impl ApplicationVulkanInstanceValidationWi {
         let vulkan_descriptor_set_s =
             ApplicationVulkanDescriptorSet::create_all(
                 &vulkan_logical_device, &vulkan_image_s,
-                vulkan_descriptor_set_layout, &vulkan_main_3d_transform_buffer_s, vulkan_descriptor_pool)?;
+                vulkan_descriptor_set_layout, &vulkan_main_3d_transform_buffer_s, vulkan_descriptor_pool,
+                vulkan_texture_image_view, vulkan_texture_sampler)?;
         let vulkan_command_buffer_s =
             ApplicationVulkanCommandBuffer::create_all(
                 &vulkan_logical_device, vulkan_pipeline_layout, vulkan_command_pool,

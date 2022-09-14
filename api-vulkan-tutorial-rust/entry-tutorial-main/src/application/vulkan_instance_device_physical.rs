@@ -1,5 +1,4 @@
 use std::collections::HashSet;
-use std::process::Termination;
 
 use ::vulkan::VULKAN_TRUE;
 use ::vulkan::VulkanExtensionName;
