@@ -1,5 +1,7 @@
 use std::collections::HashSet;
+use std::process::Termination;
 
+use ::vulkan::VULKAN_TRUE;
 use ::vulkan::VulkanExtensionName;
 use ::vulkan::VulkanInstance;
 use ::vulkan::VulkanInstanceVersion1_0;
@@ -110,6 +112,10 @@ impl ApplicationVulkanInstanceDevicePhysical {
             };
         Self::check_extension_s(vulkan_instance, vulkan_physical_device, vulkan_extension_s)?;
         Self::check_swapchain(vulkan_instance, vulkan_physical_device, vulkan_surface)?;
+        match Self::check_feature_s(vulkan_instance, vulkan_physical_device) {
+            Err(error) => return Err(ApplicationVulkanInstanceDevicePhysicalPickError::Termination(error)),
+            Ok(()) => (),
+        };
         Ok((vulkan_graphic_queue_family_index, vulkan_surface_queue_family_index))
     }
 
@@ -201,6 +207,17 @@ impl ApplicationVulkanInstanceDevicePhysical {
             true => Ok(()),
             false => return Err(ApplicationVulkanInstanceDevicePhysicalPickError::RequirementNotMatch(
                 ApplicationVulkanInstanceDevicePhysicalPickRequirementNotMatch::ExtensionMissing)),
+        }
+    }
+
+    unsafe fn check_feature_s(vulkan_instance: &VulkanInstance, vulkan_physical_device: VulkanDevicePhysical)
+     -> Result<(), TerminationProcessMain>
+    {
+        let vulkan_physical_device_feature_s =
+            vulkan_instance.get_physical_device_features(vulkan_physical_device);
+        match vulkan_physical_device_feature_s.sampler_anisotropy == VULKAN_TRUE {
+            true => Ok(()),
+            false => Err(TerminationProcessMain::InitializationVulkanPhysicalDeviceFeatureSamplerAnisotropyNotSupport),
         }
     }
 }
