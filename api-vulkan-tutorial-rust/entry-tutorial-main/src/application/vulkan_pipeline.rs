@@ -62,15 +62,16 @@ impl ApplicationVulkanPipeline {
             .name(b"main\0");
         let vulkan_vertex_input_binding_description = &[DataVertex::get_input_binding_descrption()];
         let (vulkan_vertex_input_position_attribute_description,
-             vulkan_vertex_input_color_attribute_description) =
+             vulkan_vertex_input_color_attribute_description,
+             vulkan_vertex_input_texture_coordinate) =
             DataVertex::get_input_attribute_description();
         let vulkan_vertex_input_attribute_description_s =
-            &[vulkan_vertex_input_position_attribute_description, vulkan_vertex_input_color_attribute_description];
+            &[vulkan_vertex_input_position_attribute_description, vulkan_vertex_input_color_attribute_description,
+              vulkan_vertex_input_texture_coordinate];
         let vulkan_vertex_input_state_create_infomation =
             VulkanPipelineVertexInputStateCreateInformation::builder()
             .vertex_binding_descriptions(vulkan_vertex_input_binding_description)
             .vertex_attribute_descriptions(vulkan_vertex_input_attribute_description_s);
-
         let vulkan_input_assembly_state_create_information =
             VulkanPipelineInputAssemblyStateCreateInformation::builder()
             .topology(VulkanPrimitiveTopology::TRIANGLE_LIST)
