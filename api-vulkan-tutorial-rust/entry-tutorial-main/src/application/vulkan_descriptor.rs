@@ -35,7 +35,12 @@ impl ApplicationVulkanDescriptorPool {
             VulkanDescriptorPoolSize::builder()
             .type_(VulkanDescriptorType::UNIFORM_BUFFER)
             .descriptor_count(vulkan_swapchain_image_s.len() as u32);
-        let vulkan_descriptor_pool_size_s = &[vulkan_descriptor_pool_size];
+        let vulkan_descriptor_sampler_size =
+            VulkanDescriptorPoolSize::builder()
+            .type_(VulkanDescriptorType::COMBINED_IMAGE_SAMPLER)
+            .descriptor_count(vulkan_swapchain_image_s.len() as u32);
+        let vulkan_descriptor_pool_size_s =
+            &[vulkan_descriptor_pool_size, vulkan_descriptor_sampler_size];
         let vulkan_descriptor_pool_create_information =
             VulkanDescriptorPoolCreateInformation::builder()
             .pool_sizes(vulkan_descriptor_pool_size_s)
