@@ -25,38 +25,31 @@ pub struct ApplicationVulkanRenderPass {}
 
 impl ApplicationVulkanRenderPass {
     pub unsafe fn create(
+        vulkan_instance: &VulkanInstance,
+        vulkan_physical_device: VulkanDevicePhysical,
         vulkan_logical_device: &VulkanDeviceLogical,
         vulkan_swapchain_format: VulkanFormat)
      -> Result<VulkanRenderPass, TerminationProcessMain>
     {
-        let vulkan_color_attachment =
-            VulkanAttachmentDescription::builder()
-            .format(vulkan_swapchain_format)
-            .samples(VulkanSampleCountFlagS::_1)
-            .load_op(VulkanAttachmentLoadOperation::CLEAR)
-            .store_op(VulkanAttachmentStoreOperation::STORE)
-            .stencil_load_op(VulkanAttachmentLoadOperation::DONT_CARE)
-            .stencil_store_op(VulkanAttachmentStoreOperation::DONT_CARE)
-            .initial_layout(VulkanImageLayout::UNDEFINED)
-            .final_layout(VulkanImageLayout::PRESENT_SRC_KHR);
-        let vulkan_color_attachment_reference =
-            VulkanAttachmentReference::builder()
-            .attachment(0)
-            .layout(VulkanImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+        let (vulkan_color_attachment, vulkan_color_attachment_reference) =
+            Self::create_attachment_color(vulkan_swapchain_format);
+        let (vulkan_depth_stencil_attachment, vulkan_depth_stencil_attachment_reference) =
+            Self::create_attachment_depth_stencil(vulkan_instance, vulkan_physical_device)?;
         let vulkan_color_attachment_s = &[vulkan_color_attachment_reference];
         let vulkan_subpass =
             VulkanSubpassDescription::builder()
             .pipeline_bind_point(VulkanPipelineBindPoint::GRAPHICS)
-            .color_attachments(vulkan_color_attachment_s);
+            .color_attachments(vulkan_color_attachment_s)
+            .depth_stencil_attachment(&vulkan_depth_stencil_attachment_reference);
         let vulkan_subpass_dependency=
             VulkanSubpassDependency::builder()
             .src_subpass(VULKAN_SUBPASS_EXTERNAL)
             .dst_subpass(0)
-            .src_stage_mask(VulkanPipelineStageFlagS::COLOR_ATTACHMENT_OUTPUT)
+            .src_stage_mask(VulkanPipelineStageFlagS::COLOR_ATTACHMENT_OUTPUT | VulkanPipelineStageFlagS::EARLY_FRAGMENT_TESTS)
             .src_access_mask(VulkanAccessFlagS::empty())
-            .dst_stage_mask(VulkanPipelineStageFlagS::COLOR_ATTACHMENT_OUTPUT)
-            .dst_access_mask(VulkanAccessFlagS::COLOR_ATTACHMENT_WRITE);
-        let vulkan_attachment_s = &[vulkan_color_attachment];
+            .dst_stage_mask(VulkanPipelineStageFlagS::COLOR_ATTACHMENT_OUTPUT | VulkanPipelineStageFlagS::EARLY_FRAGMENT_TESTS)
+            .dst_access_mask(VulkanAccessFlagS::COLOR_ATTACHMENT_WRITE | VulkanAccessFlagS::DEPTH_STENCIL_ATTACHMENT_WRITE);
+        let vulkan_attachment_s = &[vulkan_color_attachment, vulkan_depth_stencil_attachment];
         let vulkan_subpass_s = &[vulkan_subpass];
         let vulkan_subpass_dependency_s = &[vulkan_subpass_dependency];
         let vulkan_render_pass_create_infomation =

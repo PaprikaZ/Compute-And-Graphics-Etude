@@ -43,6 +43,7 @@ use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorPool;
 use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorSet;
 use crate::application::vulkan_texture_image::ApplicationVulkanTextureImage;
 use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorSetLayout;
+use crate::application::vulkan_depth::ApplicationVulkanDepth;
 
 
 pub struct ApplicationVulkanInstanceValidationWi {}
@@ -108,7 +109,8 @@ impl ApplicationVulkanInstanceValidationWi {
             ApplicationInstanceSwapchainImageView::create_all(
                 &vulkan_logical_device, vulkan_surface_format, &vulkan_image_s)?;
         let vulkan_render_pass =
-            ApplicationVulkanRenderPass::create(&vulkan_logical_device, vulkan_surface_format)?;
+            ApplicationVulkanRenderPass::create(
+                &vulkan_instance, vulkan_physical_device, &vulkan_logical_device, vulkan_surface_format)?;
         let vulkan_3d_transform_descriptor_set_layout_binding =
             ApplicationVulkanTransformD3Descriptor::create_set_layout_binding()?;
         let vulkan_texture_sampler_transform_descriptor_set_layout_binding =

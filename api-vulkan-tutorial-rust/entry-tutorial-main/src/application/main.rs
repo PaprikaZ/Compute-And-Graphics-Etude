@@ -53,6 +53,7 @@ use crate::application::evolution::ApplicationEvolution;
 use crate::application::vulkan_transform_d3_buffer::ApplicationVulkanTransformD3Buffer;
 use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorPool;
 use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorSet;
+use crate::application::vulkan_depth::ApplicationVulkanDepth;
 
 
 pub struct Application {
@@ -238,7 +239,8 @@ impl Application {
                 vulkan_format,
                 &vulkan_image_s)?;
         let vulkan_render_pass =
-            ApplicationVulkanRenderPass::create(&self.vulkan_device_logical, vulkan_format)?;
+            ApplicationVulkanRenderPass::create(
+                &self.vulkan_instance, self.vulkan_device_physical, &self.vulkan_device_logical, vulkan_format)?;
         let (vulkan_pipeline, vulkan_pipeline_layout) =
             ApplicationVulkanPipeline::create_layout(
                 &self.vulkan_device_logical, vulkan_extent, vulkan_render_pass, self.vulkan_descriptor_set_layout)?;
