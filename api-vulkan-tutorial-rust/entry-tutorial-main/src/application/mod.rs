@@ -21,4 +21,5 @@ pub mod vulkan_transform_d3_descriptor;
 pub mod vulkan_descriptor;
 pub mod vulkan_texture_image;
 pub mod vulkan_image;
+pub mod vulkan_depth;
 pub mod evolution;
