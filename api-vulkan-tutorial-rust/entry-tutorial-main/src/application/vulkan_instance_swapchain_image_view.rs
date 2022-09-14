@@ -11,6 +11,7 @@ use ::vulkan::VulkanImageViewCreateInformation;
 use ::vulkan::VulkanImageViewType;
 
 use crate::termination::TerminationProcessMain;
+use crate::application::vulkan_image::ApplicationVulkanImageView;
 
 
 pub struct ApplicationInstanceSwapchainImageView {}
@@ -22,18 +23,15 @@ impl ApplicationInstanceSwapchainImageView {
         vulkan_image_s: &Vec<VulkanImage>)
      -> Result<Vec<VulkanImageView>, TerminationProcessMain>
     {
-        let create_vulkan_swapchain_image_view_s_result =
+        let vulkan_swapchain_image_view_s =
             vulkan_image_s
             .iter()
-            .map(|i| Self::create(vulkan_logical_device, vulkan_format, i))
-            .collect::<Result<Vec<_>, _>>();
-        match create_vulkan_swapchain_image_view_s_result {
-            Err(error) => Err(TerminationProcessMain::InitializationVulkanImageViewCreateFail(error)),
-            Ok(image_view_s) => Ok(image_view_s),
-        }
+            .map(|i| ApplicationVulkanImageView::create(vulkan_logical_device, *i, vulkan_format))
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(vulkan_swapchain_image_view_s)
     }
 
-    unsafe fn create(
+    unsafe fn _create(
         vulkan_logical_device: &VulkanDeviceLogical,
         vulkan_format: VulkanFormat,
         vulkan_image: &VulkanImage,
