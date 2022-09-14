@@ -66,6 +66,8 @@ impl ApplicationVulkanDescriptorSet {
         vulkan_descriptor_set_layout: VulkanDescriptorSetLayout,
         vulkan_main_3d_transform_buffer_s: &Vec<VulkanBuffer>,
         vulkan_descriptor_pool: VulkanDescriptorPool,
+        vulkan_texture_image_view: VulkanImageView,
+        vulkan_texture_sampler: VulkanSampler,
     )
      -> Result<Vec<VulkanDescriptorSet>, TerminationProcessMain>
     {
@@ -92,15 +94,29 @@ impl ApplicationVulkanDescriptorSet {
                 .offset(0)
                 .range(size_of::<TransformD3ModelViewProjection>() as u64);
             let vulkan_descriptor_buffer_information_s = &[vulkan_descriptor_buffer_information];
-            let vulkan_write_descriptor_set =
+            let vulkan_3d_transform_write_descriptor_set =
                 VulkanWriteDescriptorSet::builder()
                 .dst_set(vulkan_descriptor_set_s[index])
                 .dst_binding(0)
                 .dst_array_element(0)
                 .descriptor_type(VulkanDescriptorType::UNIFORM_BUFFER)
                 .buffer_info(vulkan_descriptor_buffer_information_s);
+            let vulkan_descriptor_image_information =
+                VulkanDescriptorImageInformation::builder()
+                .image_layout(VulkanImageLayout::SHADER_READ_ONLY_OPTIMAL)
+                .image_view(vulkan_texture_image_view)
+                .sampler(vulkan_texture_sampler);
+            let vulkan_descriptor_image_information_s = &[vulkan_descriptor_image_information];
+            let vulkan_texture_sampler_write_descriptor_set =
+                VulkanWriteDescriptorSet::builder()
+                .dst_set(vulkan_descriptor_set_s[index])
+                .dst_binding(1)
+                .dst_array_element(0)
+                .descriptor_type(VulkanDescriptorType::COMBINED_IMAGE_SAMPLER)
+                .image_info(vulkan_descriptor_image_information_s);
             vulkan_logical_device.update_descriptor_sets(
-                &[vulkan_write_descriptor_set],
+                &[vulkan_3d_transform_write_descriptor_set,
+                 vulkan_texture_sampler_write_descriptor_set],
                 &[] as &[VulkanCopyDescriptorSet]);
         }
         Ok(vulkan_descriptor_set_s)
