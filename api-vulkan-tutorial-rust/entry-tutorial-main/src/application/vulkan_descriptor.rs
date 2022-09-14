@@ -14,6 +14,12 @@ use ::vulkan::VulkanDescriptorSetAllocateInformation;
 use ::vulkan::VulkanDescriptorSet;
 use ::vulkan::VulkanWriteDescriptorSet;
 use ::vulkan::VulkanCopyDescriptorSet;
+use ::vulkan::VulkanDescriptorSetLayoutBinding;
+use ::vulkan::VulkanDescriptorSetLayoutCreateInformation;
+use ::vulkan::VulkanDescriptorImageInformation;
+use ::vulkan::VulkanImageLayout;
+use ::vulkan::VulkanImageView;
+use ::vulkan::VulkanSampler;
 
 use crate::termination::TerminationProcessMain;
 use crate::lib::transform_d3_model_view_projection::TransformD3ModelViewProjection;
@@ -93,5 +99,32 @@ impl ApplicationVulkanDescriptorSet {
                 &[] as &[VulkanCopyDescriptorSet]);
         }
         Ok(vulkan_descriptor_set_s)
+    }
+}
+
+pub struct ApplicationVulkanDescriptorSetLayout {}
+
+impl ApplicationVulkanDescriptorSetLayout {
+    pub unsafe fn create(
+        vulkan_logical_device: &VulkanDeviceLogical,
+        vulkan_main_3d_transform_descriptor_set_layout_binding: VulkanDescriptorSetLayoutBinding,
+        vulkan_sampler_descriptor_set_layout_binding: VulkanDescriptorSetLayoutBinding)
+     -> Result<VulkanDescriptorSetLayout, TerminationProcessMain>
+    {
+        let vulkan_descriptor_set_layout_binding_s =
+            &[vulkan_main_3d_transform_descriptor_set_layout_binding, vulkan_sampler_descriptor_set_layout_binding];
+        let vulkan_descriptor_set_layout_create_information =
+            VulkanDescriptorSetLayoutCreateInformation::builder()
+            .bindings(vulkan_descriptor_set_layout_binding_s);
+        let create_vulkan_descriptor_set_layout_result =
+            vulkan_logical_device.create_descriptor_set_layout(
+                &vulkan_descriptor_set_layout_create_information, None);
+        match create_vulkan_descriptor_set_layout_result {
+            Err(error) => {
+                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                Err(TerminationProcessMain::InitializationVulkanDescriptorSetLayoutCreateFail(vulkan_error_code))
+            },
+            Ok(layout) => Ok(layout),
+        }
     }
 }
