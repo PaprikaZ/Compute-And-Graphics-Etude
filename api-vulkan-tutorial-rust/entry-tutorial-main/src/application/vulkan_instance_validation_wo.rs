@@ -112,6 +112,9 @@ impl ApplicationVulkanInstanceValidationWo {
                 &vulkan_logical_device, vulkan_extent, vulkan_render_pass, vulkan_descriptor_set_layout)?;
         let vulkan_command_pool =
             ApplicationVulkanCommandPool::create(&vulkan_logical_device, vulkan_graphic_queue_family_index)?;
+        let (vulkan_depth_image, vulkan_depth_image_memory, vulkan_depth_image_view) =
+            ApplicationVulkanDepth::create_image_memory_view(
+                &vulkan_instance, vulkan_physical_device, &vulkan_logical_device, vulkan_extent)?;
         let vulkan_frame_buffer_s =
             ApplicationVulkanFrameBuffer::create_all(
                 &vulkan_logical_device, &vulkan_image_view_s, vulkan_depth_image_view,
@@ -195,6 +198,9 @@ impl ApplicationVulkanInstanceValidationWo {
             vulkan_texture_image_memory: vulkan_texture_image_memory,
             vulkan_texture_image_view: vulkan_texture_image_view,
             vulkan_texture_sampler: vulkan_texture_sampler,
+            vulkan_depth_image: vulkan_depth_image,
+            vulkan_depth_image_memory: vulkan_depth_image_memory,
+            vulkan_depth_image_view: vulkan_depth_image_view,
             input_vertex_s: input_vertex_s,
             input_vertex_index_s: input_vertex_index_s,
         })

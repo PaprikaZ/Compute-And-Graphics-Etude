@@ -98,6 +98,9 @@ pub struct Application {
     pub vulkan_texture_image_memory: VulkanDeviceMemory,
     pub vulkan_texture_image_view: VulkanImageView,
     pub vulkan_texture_sampler: VulkanSampler,
+    pub vulkan_depth_image: VulkanImage,
+    pub vulkan_depth_image_memory: VulkanDeviceMemory,
+    pub vulkan_depth_image_view: VulkanImageView,
     pub input_vertex_s: Vec<Vertex>,
     pub input_vertex_index_s: Vec<u16>,
 }
@@ -244,6 +247,9 @@ impl Application {
         let (vulkan_pipeline, vulkan_pipeline_layout) =
             ApplicationVulkanPipeline::create_layout(
                 &self.vulkan_device_logical, vulkan_extent, vulkan_render_pass, self.vulkan_descriptor_set_layout)?;
+        let (vulkan_depth_image, vulkan_depth_image_memory, vulkan_depth_image_view) =
+            ApplicationVulkanDepth::create_image_memory_view(
+                &self.vulkan_instance, self.vulkan_device_physical, &self.vulkan_device_logical, self.vulkan_swapchain_extent)?;
         let vulkan_frame_buffer_s =
             ApplicationVulkanFrameBuffer::create_all(
                 &self.vulkan_device_logical, &vulkan_image_view_s,
@@ -278,6 +284,9 @@ impl Application {
         self.vulkan_descriptor_pool = vulkan_descriptor_pool;
         self.vulkan_descriptor_set_s = vulkan_descriptor_set_s;
         self.vulkan_command_buffer_s = vulkan_command_buffer_s;
+        self.vulkan_depth_image = vulkan_depth_image;
+        self.vulkan_depth_image_memory = vulkan_depth_image_memory;
+        self.vulkan_depth_image_view = vulkan_depth_image_view;
         self.vulkan_fence_s_in_flight_image.resize(self.vulkan_swapchain_image_s.len(), VulkanFence::null());
         Ok(())
     }
@@ -330,6 +339,9 @@ impl Application {
         self.vulkan_transform_d3_main_buffer_s
         .iter()
         .for_each(|b| self.vulkan_device_logical.destroy_buffer(*b, None));
+        self.vulkan_device_logical.destroy_image_view(self.vulkan_depth_image_view, None);
+        self.vulkan_device_logical.free_memory(self.vulkan_depth_image_memory, None);
+        self.vulkan_device_logical.destroy_image(self.vulkan_depth_image, None);
         self.vulkan_frame_buffer_s
         .iter()
         .for_each(|f| self.vulkan_device_logical.destroy_framebuffer(*f, None));
