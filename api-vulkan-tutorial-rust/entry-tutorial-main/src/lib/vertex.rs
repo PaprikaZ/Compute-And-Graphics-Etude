@@ -4,13 +4,13 @@ use ::nalgebra_glm as glm;
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct Vertex {
-    pub position: glm::Vec2,
+    pub position: glm::Vec3,
     pub color: glm::Vec3,
     pub texture_coordinate: glm::Vec2,
 }
 
 impl Vertex {
-    pub fn new(position: glm::Vec2, color: glm::Vec3, texture_coordinate: glm::Vec2) -> Self {
+    pub fn new(position: glm::Vec3, color: glm::Vec3, texture_coordinate: glm::Vec2) -> Self {
         Self {
             position: position,
             color: color,
