@@ -39,7 +39,7 @@ impl DataVertex {
         VulkanVertexInputAttributeDescription::builder()
         .binding(0)
         .location(0)
-        .format(VulkanFormat::R32G32_SFLOAT)
+        .format(VulkanFormat::R32G32B32_SFLOAT)
         .offset(0)
         .build()
     }
@@ -49,7 +49,7 @@ impl DataVertex {
         .binding(0)
         .location(1)
         .format(VulkanFormat::R32G32B32_SFLOAT)
-        .offset(size_of::<glm::Vec2>() as u32)
+        .offset(size_of::<glm::Vec3>() as u32)
         .build()
     }
 
@@ -58,7 +58,7 @@ impl DataVertex {
         .binding(0)
         .location(2)
         .format(VulkanFormat::R32G32_SFLOAT)
-        .offset((size_of::<glm::Vec2>() + size_of::<glm::Vec3>()) as u32)
+        .offset((size_of::<glm::Vec3>() + size_of::<glm::Vec3>()) as u32)
         .build()
     }
 
