@@ -15,10 +15,10 @@ pub struct DataVertex {}
 impl DataVertex {
     pub fn get_default() -> Vec<Vertex> {
         vec![
-            Vertex::new(glm::vec2(-0.5, -0.5), glm::vec3(1.0, 0.0, 0.0)),
-            Vertex::new(glm::vec2(0.5, -0.5), glm::vec3(0.0, 1.0, 0.0)),
-            Vertex::new(glm::vec2(0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)),
-            Vertex::new(glm::vec2(-0.5, 0.5), glm::vec3(1.0, 1.0, 1.0)),
+            Vertex::new(glm::vec2(-0.5, -0.5), glm::vec3(1.0, 0.0, 0.0), glm::vec2(1.0, 0.0)),
+            Vertex::new(glm::vec2(0.5, -0.5), glm::vec3(0.0, 1.0, 0.0), glm::vec2(0.0, 0.0)),
+            Vertex::new(glm::vec2(0.5, 0.5), glm::vec3(0.0, 0.0, 1.0), glm::vec2(0.0, 1.0)),
+            Vertex::new(glm::vec2(-0.5, 0.5), glm::vec3(1.0, 1.0, 1.0), glm::vec2(1.0, 1.0)),
         ]
     }
 
@@ -30,7 +30,7 @@ impl DataVertex {
         .build()
     }
 
-    fn get_input_attributue_description_position() -> VulkanVertexInputAttributeDescription {
+    fn get_input_attribute_description_position() -> VulkanVertexInputAttributeDescription {
         VulkanVertexInputAttributeDescription::builder()
         .binding(0)
         .location(0)
@@ -39,7 +39,7 @@ impl DataVertex {
         .build()
     }
 
-    fn get_input_attributue_description_color() -> VulkanVertexInputAttributeDescription {
+    fn get_input_attribute_description_color() -> VulkanVertexInputAttributeDescription {
         VulkanVertexInputAttributeDescription::builder()
         .binding(0)
         .location(1)
@@ -48,10 +48,22 @@ impl DataVertex {
         .build()
     }
 
-    pub fn get_input_attributue_description()
-     -> (VulkanVertexInputAttributeDescription, VulkanVertexInputAttributeDescription)
+    fn get_input_attribute_description_texture_coordinate() -> VulkanVertexInputAttributeDescription {
+        VulkanVertexInputAttributeDescription::builder()
+        .binding(0)
+        .location(2)
+        .format(VulkanFormat::R32G32_SFLOAT)
+        .offset((size_of::<glm::Vec2>() + size_of::<glm::Vec3>()) as u32)
+        .build()
+    }
+
+    pub fn get_input_attribute_description()
+     -> (VulkanVertexInputAttributeDescription, VulkanVertexInputAttributeDescription,
+         VulkanVertexInputAttributeDescription)
     {
-        (Self::get_input_attributue_description_position(), Self::get_input_attributue_description_color())
+        (Self::get_input_attribute_description_position(),
+         Self::get_input_attribute_description_color(),
+         Self::get_input_attribute_description_texture_coordinate())
     }
 }
 
