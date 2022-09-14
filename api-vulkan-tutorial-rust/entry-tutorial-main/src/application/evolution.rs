@@ -31,7 +31,7 @@ impl ApplicationEvolution {
                 &glm::vec3(0.0, 0.0, 0.0),
                 &glm::vec3(0.0, 0.0, 1.0));
         let mut main_projection_3d_transform =
-            glm::perspective(
+            glm::perspective_rh_zo(
                 application.vulkan_swapchain_extent.width as f32
                 / application.vulkan_swapchain_extent.height as f32,
                 glm::radians(&glm::vec1(45.0))[0],

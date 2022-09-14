@@ -33,6 +33,7 @@ use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorPool;
 use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorSet;
 use crate::application::vulkan_texture_image::ApplicationVulkanTextureImage;
 use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorSetLayout;
+use crate::application::vulkan_depth::ApplicationVulkanDepth;
 
 
 pub struct ApplicationVulkanInstanceValidationWo {}
@@ -95,7 +96,8 @@ impl ApplicationVulkanInstanceValidationWo {
             ApplicationInstanceSwapchainImageView::create_all(
                 &vulkan_logical_device, vulkan_surface_format, &vulkan_image_s)?;
         let vulkan_render_pass =
-            ApplicationVulkanRenderPass::create(&vulkan_logical_device, vulkan_surface_format)?;
+            ApplicationVulkanRenderPass::create(
+                &vulkan_instance, vulkan_physical_device, &vulkan_logical_device, vulkan_surface_format)?;
         let vulkan_3d_transform_descriptor_set_layout_binding =
             ApplicationVulkanTransformD3Descriptor::create_set_layout_binding()?;
         let vulkan_texture_sampler_transform_descriptor_set_layout_binding =
@@ -108,10 +110,15 @@ impl ApplicationVulkanInstanceValidationWo {
         let (vulkan_pipeline, vulkan_pipeline_layout) =
             ApplicationVulkanPipeline::create_layout(
                 &vulkan_logical_device, vulkan_extent, vulkan_render_pass, vulkan_descriptor_set_layout)?;
-        let vulkan_frame_buffer_s =
-            ApplicationVulkanFrameBuffer::create_all(&vulkan_logical_device, &vulkan_image_view_s, vulkan_render_pass, vulkan_extent)?;
         let vulkan_command_pool =
             ApplicationVulkanCommandPool::create(&vulkan_logical_device, vulkan_graphic_queue_family_index)?;
+        let (vulkan_depth_image, vulkan_depth_image_memory, vulkan_depth_image_view) =
+            ApplicationVulkanDepth::create_image_memory_view(
+                &vulkan_instance, vulkan_physical_device, &vulkan_logical_device, vulkan_extent)?;
+        let vulkan_frame_buffer_s =
+            ApplicationVulkanFrameBuffer::create_all(
+                &vulkan_logical_device, &vulkan_image_view_s, vulkan_depth_image_view,
+                vulkan_render_pass, vulkan_extent)?;
         let (vulkan_texture_image, vulkan_texture_image_memory) =
             ApplicationVulkanTextureImage::create_buffer_with_memory(
                 &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
@@ -191,6 +198,9 @@ impl ApplicationVulkanInstanceValidationWo {
             vulkan_texture_image_memory: vulkan_texture_image_memory,
             vulkan_texture_image_view: vulkan_texture_image_view,
             vulkan_texture_sampler: vulkan_texture_sampler,
+            vulkan_depth_image: vulkan_depth_image,
+            vulkan_depth_image_memory: vulkan_depth_image_memory,
+            vulkan_depth_image_view: vulkan_depth_image_view,
             input_vertex_s: input_vertex_s,
             input_vertex_index_s: input_vertex_index_s,
         })

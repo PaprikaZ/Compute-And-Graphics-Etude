@@ -15,6 +15,7 @@ impl ApplicationVulkanFrameBuffer {
     pub unsafe fn create_all(
         vulkan_logical_device: &VulkanDeviceLogical,
         vulkan_image_view_s: &Vec<VulkanImageView>,
+        vulkan_depth_stencil_image_view: VulkanImageView,
         vulkan_render_pass: VulkanRenderPass,
         vulkan_extent: VulkanExtentD2)
      -> Result<Vec<VulkanFrameBuffer>, TerminationProcessMain>
@@ -23,7 +24,7 @@ impl ApplicationVulkanFrameBuffer {
             vulkan_image_view_s
             .iter()
             .map(|i| {
-                let vulkan_attachment_s = &[*i];
+                let vulkan_attachment_s = &[*i, vulkan_depth_stencil_image_view];
                 let vulkan_frame_buffer_create_information =
                     VulkanFrameBufferCreateInformation::builder()
                     .render_pass(vulkan_render_pass)

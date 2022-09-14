@@ -55,6 +55,7 @@ pub enum TerminationProcessMain {
     InitializationVulkanTextureImageLayoutTransitionNotSupport,
     InitializationVulkanSamplerCreateFail(VulkanErrorCode),
     InitializationVulkanPhysicalDeviceFeatureSamplerAnisotropyNotSupport,
+    InitializationVulkanFormatFeatureNotSupport,
 }
 
 impl TerminationProcessMain {
@@ -110,6 +111,7 @@ impl TerminationProcessMain {
             Self::InitializationVulkanTextureImageLayoutTransitionNotSupport => 47u8,
             Self::InitializationVulkanSamplerCreateFail(_) => 48u8,
             Self::InitializationVulkanPhysicalDeviceFeatureSamplerAnisotropyNotSupport => 49u8,
+            Self::InitializationVulkanFormatFeatureNotSupport => 50u8,
         }
     }
 }

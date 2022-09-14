@@ -15,12 +15,7 @@ use ::vulkan::VulkanFormat;
 use ::vulkan::VulkanImageTiling;
 use ::vulkan::VulkanImageUsageFlagS;
 use ::vulkan::VulkanImageLayout;
-use ::vulkan::VulkanImageCreateInformation;
-use ::vulkan::VulkanImageType;
 use ::vulkan::VulkanExtentD3;
-use ::vulkan::VulkanSampleCountFlagS;
-use ::vulkan::VulkanSharingMode;
-use ::vulkan::VulkanMemoryAllocateInformation;
 use ::vulkan::VulkanAccessFlagS;
 use ::vulkan::VulkanPipelineStageFlagS;
 use ::vulkan::VulkanImageSubResourceRange;
@@ -51,7 +46,7 @@ use ::vulkan::VulkanShaderStageFlagS;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_buffer::ApplicationVulkanBuffer;
-use crate::application::vulkan_memory::ApplicationVulkanMemory;
+use crate::application::vulkan_image::ApplicationVulkanImage;
 use crate::application::vulkan_command_buffer::ApplicationVulkanCommandBufferOneTime;
 use crate::application::vulkan_image::ApplicationVulkanImageView;
 
@@ -110,7 +105,7 @@ impl ApplicationVulkanTextureImage {
         vulkan_logical_device.unmap_memory(vulkan_texture_staging_buffer_memory);
         //
         let (vulkan_texture_image, vulkan_texture_image_memory) =
-            Self::create_with_memory(
+            ApplicationVulkanImage::create_with_memory(
                 vulkan_instance,
                 vulkan_physical_device,
                 vulkan_logical_device,
@@ -146,74 +141,6 @@ impl ApplicationVulkanTextureImage {
             VulkanImageLayout::SHADER_READ_ONLY_OPTIMAL)?;
         vulkan_logical_device.destroy_buffer(vulkan_texture_staging_buffer, None);
         vulkan_logical_device.free_memory(vulkan_texture_staging_buffer_memory, None);
-        Ok((vulkan_texture_image, vulkan_texture_image_memory))
-    }
-
-    unsafe fn create_with_memory(
-        vulkan_instance: &VulkanInstance,
-        vulkan_physical_device: VulkanDevicePhysical,
-        vulkan_logical_device: &VulkanDeviceLogical,
-        vulkan_image_width: u32,
-        vulkan_image_height: u32,
-        vulkan_image_format: VulkanFormat,
-        vulkan_image_tiling: VulkanImageTiling,
-        vulkan_image_usage: VulkanImageUsageFlagS,
-        required_vulkan_memory_property_s: VulkanMemoryPropertyFlagS)
-     -> Result<(VulkanImage, VulkanDeviceMemory), TerminationProcessMain>
-    {
-        let vulkan_texture_image_create_information =
-            VulkanImageCreateInformation::builder()
-            .image_type(VulkanImageType::_2D)
-            .extent(VulkanExtentD3 { width: vulkan_image_width, height: vulkan_image_height, depth: 1 })
-            .mip_levels(1)
-            .array_layers(1)
-            .format(vulkan_image_format)
-            .tiling(vulkan_image_tiling)
-            .initial_layout(VulkanImageLayout::UNDEFINED)
-            .usage(vulkan_image_usage)
-            .samples(VulkanSampleCountFlagS::_1)
-            .sharing_mode(VulkanSharingMode::EXCLUSIVE);
-        let create_vulkan_texture_image_result =
-            vulkan_logical_device.create_image(&vulkan_texture_image_create_information, None);
-        let vulkan_texture_image =
-            match create_vulkan_texture_image_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanImageCreateFail(vulkan_error_code));
-                },
-                Ok(image) => image,
-            };
-        let vulkan_texture_image_memory_requirement_s =
-            vulkan_logical_device.get_image_memory_requirements(vulkan_texture_image);
-        let vulkan_texture_image_memory_type_index =
-            ApplicationVulkanMemory::get_type_index(
-                vulkan_instance,
-                vulkan_physical_device,
-                required_vulkan_memory_property_s,
-                vulkan_texture_image_memory_requirement_s)?;
-        let vulkan_texture_image_memory_allocate_information =
-            VulkanMemoryAllocateInformation::builder()
-            .allocation_size(vulkan_texture_image_memory_requirement_s.size)
-            .memory_type_index(vulkan_texture_image_memory_type_index.as_raw());
-        let allocate_vulkan_texture_image_memory_result =
-            vulkan_logical_device.allocate_memory(&vulkan_texture_image_memory_allocate_information, None);
-        let vulkan_texture_image_memory =
-            match allocate_vulkan_texture_image_memory_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanMemoryAllocateFail(vulkan_error_code));
-                },
-                Ok(memory) => memory,
-            };
-        let bind_vulkan_texture_image_memory_result =
-            vulkan_logical_device.bind_image_memory(vulkan_texture_image, vulkan_texture_image_memory, 0);
-        match bind_vulkan_texture_image_memory_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanMemoryBufferBindFail(vulkan_error_code));
-            },
-            Ok(()) => (),
-        };
         Ok((vulkan_texture_image, vulkan_texture_image_memory))
     }
 
@@ -320,7 +247,8 @@ impl ApplicationVulkanTextureImage {
     {
         let vulkan_image_view =
             ApplicationVulkanImageView::create(
-                vulkan_logical_device, vulkan_texture_image, VulkanFormat::R8G8B8A8_SRGB)?;
+                vulkan_logical_device, vulkan_texture_image,
+                VulkanFormat::R8G8B8A8_SRGB, VulkanImageAspectFlagS::COLOR)?;
         Ok(vulkan_image_view)
     }
 
