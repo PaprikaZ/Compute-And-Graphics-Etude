@@ -245,7 +245,9 @@ impl Application {
             ApplicationVulkanPipeline::create_layout(
                 &self.vulkan_device_logical, vulkan_extent, vulkan_render_pass, self.vulkan_descriptor_set_layout)?;
         let vulkan_frame_buffer_s =
-            ApplicationVulkanFrameBuffer::create_all(&self.vulkan_device_logical, &vulkan_image_view_s, vulkan_render_pass, vulkan_extent)?;
+            ApplicationVulkanFrameBuffer::create_all(
+                &self.vulkan_device_logical, &vulkan_image_view_s,
+                self.vulkan_depth_image_view, vulkan_render_pass, vulkan_extent)?;
         let (vulkan_main_3d_transform_buffer_s, vulkan_main_3d_transform_buffer_memory_s) =
             ApplicationVulkanTransformD3Buffer::create_main_all(
                 &self.vulkan_instance, self.vulkan_device_physical, &self.vulkan_device_logical, &vulkan_image_s)?;

@@ -123,10 +123,12 @@ impl ApplicationVulkanInstanceValidationWi {
         let (vulkan_pipeline, vulkan_pipeline_layout) =
             ApplicationVulkanPipeline::create_layout(
                 &vulkan_logical_device, vulkan_extent, vulkan_render_pass, vulkan_descriptor_set_layout)?;
-        let vulkan_frame_buffer_s =
-            ApplicationVulkanFrameBuffer::create_all(&vulkan_logical_device, &vulkan_image_view_s, vulkan_render_pass, vulkan_extent)?;
         let vulkan_command_pool =
             ApplicationVulkanCommandPool::create(&vulkan_logical_device, vulkan_graphic_queue_family_index)?;
+        let vulkan_frame_buffer_s =
+            ApplicationVulkanFrameBuffer::create_all(
+                &vulkan_logical_device, &vulkan_image_view_s, vulkan_depth_image_view,
+                vulkan_render_pass, vulkan_extent)?;
         let (vulkan_texture_image, vulkan_texture_image_memory) =
             ApplicationVulkanTextureImage::create_buffer_with_memory(
                 &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
