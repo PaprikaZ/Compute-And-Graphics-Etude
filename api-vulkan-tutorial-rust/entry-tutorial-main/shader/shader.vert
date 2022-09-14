@@ -8,8 +8,10 @@ layout(binding = 0) uniform TransformD3ModelViewProjection {
 
 layout(location = 0) in vec2 inputPosition;
 layout(location = 1) in vec3 inputColor;
+layout(location = 2) in vec2 inputTextureCoordinate;
 
 layout(location = 0) out vec3 outputFragmentColor;
+layout(location = 1) out vec2 outputFragmentTextureCoordinate;
 
 
 void main() {
@@ -17,4 +19,5 @@ void main() {
         main3DTransform.projection * main3DTransform.view * main3DTransform.model *
         vec4(inputPosition, 0.0, 1.0);
     outputFragmentColor = inputColor;
+    outputFragmentTextureCoordinate = inputTextureCoordinate;
 }
