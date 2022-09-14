@@ -205,6 +205,15 @@ pub use ::vulkanalia::vk::ImageMemoryBarrier as VulkanImageMemoryBarrier;
 pub use ::vulkanalia::vk::MemoryBarrier as VulkanMemoryBarrier;
 pub use ::vulkanalia::vk::BufferMemoryBarrier as VulkanBufferMemoryBarrier;
 
+pub use ::vulkanalia::vk::SamplerCreateInfo as VulkanSamplerCreateInformation;
+pub use ::vulkanalia::vk::SamplerCreateInfoBuilder as VulkanSamplerCreateInformationBuilder;
+pub use ::vulkanalia::vk::SamplerAddressMode as VulkanSamplerAddressMode;
+pub use ::vulkanalia::vk::BorderColor as VulkanBorderColor;
+pub use ::vulkanalia::vk::CompareOp as VulkanCompareOperation;
+pub use ::vulkanalia::vk::SamplerMipmapMode as VulkanSamplerMipmapMode;
+pub use ::vulkanalia::vk::Filter as VulkanFilter;
+pub use ::vulkanalia::vk::Sampler as VulkanSampler;
+
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
 pub use ::vulkanalia::vk::LOD_CLAMP_NONE as VULKAN_LOD_CLAMP_NONE;
