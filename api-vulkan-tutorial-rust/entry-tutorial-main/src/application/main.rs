@@ -37,6 +37,7 @@ use ::vulkan::VulkanDescriptorSetLayout;
 use ::vulkan::VulkanDescriptorPool;
 use ::vulkan::VulkanDescriptorSet;
 use ::vulkan::VulkanSampler;
+use ::vulkan::VulkanMipLevel;
 
 use crate::config::vulkan::VULKAN_FRAME_IN_FLIGHT_MAX;
 use crate::lib::d3_model_mesh::D3ModelMesh;
@@ -102,6 +103,7 @@ pub struct Application {
     pub vulkan_depth_image: VulkanImage,
     pub vulkan_depth_image_memory: VulkanDeviceMemory,
     pub vulkan_depth_image_view: VulkanImageView,
+    pub vulkan_mip_level: VulkanMipLevel,
     pub d3_model_mesh: D3ModelMesh,
 }
 

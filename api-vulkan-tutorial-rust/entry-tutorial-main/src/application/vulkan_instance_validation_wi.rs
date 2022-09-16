@@ -47,6 +47,7 @@ use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorSet;
 use crate::application::vulkan_texture_image::ApplicationVulkanTextureImage;
 use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorSetLayout;
 use crate::application::vulkan_depth::ApplicationVulkanDepth;
+use crate::application::vulkan_mipmap::ApplicationVulkanMipmap;
 
 
 pub struct ApplicationVulkanInstanceValidationWi {}
@@ -76,6 +77,8 @@ impl ApplicationVulkanInstanceValidationWi {
                     (D3ModelMesh::TutorialFormatObj(d3_model_mesh), texture_image_data, texture_image_information)
                 },
             };
+        let vulkan_mip_level =
+            ApplicationVulkanMipmap::calculate_level_max(texture_image_information.width, texture_image_information.height);
 
         let vulkan_library_loader =
             match VulkanLibraryLoader::new(VULKAN_LIBRARY_FILE_NAME) {
@@ -158,11 +161,11 @@ impl ApplicationVulkanInstanceValidationWi {
             ApplicationVulkanTextureImage::create_buffer_with_memory(
                 &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
                 vulkan_command_pool, vulkan_graphic_queue,
-                texture_image_data, texture_image_information)?;
+                texture_image_data, texture_image_information, vulkan_mip_level)?;
         let vulkan_texture_image_view =
-            ApplicationVulkanTextureImage::create_view(&vulkan_logical_device, vulkan_texture_image)?;
+            ApplicationVulkanTextureImage::create_view(&vulkan_logical_device, vulkan_texture_image, vulkan_mip_level)?;
         let vulkan_texture_sampler =
-            ApplicationVulkanTextureImage::create_sampler(&vulkan_logical_device)?;
+            ApplicationVulkanTextureImage::create_sampler(&vulkan_logical_device, vulkan_mip_level)?;
         let (vulkan_vertex_buffer, vulkan_vertex_buffer_memory) =
             ApplicationVulkanVertexBuffer::create(
                 &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
@@ -235,6 +238,7 @@ impl ApplicationVulkanInstanceValidationWi {
             vulkan_depth_image: vulkan_depth_image,
             vulkan_depth_image_memory: vulkan_depth_image_memory,
             vulkan_depth_image_view: vulkan_depth_image_view,
+            vulkan_mip_level: vulkan_mip_level,
             d3_model_mesh: d3_model_mesh,
         })
     }
