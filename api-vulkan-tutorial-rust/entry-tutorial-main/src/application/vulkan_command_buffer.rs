@@ -27,6 +27,7 @@ use ::vulkan::VulkanFence;
 use ::vulkan::VulkanClearDepthStencilValue;
 
 use crate::termination::TerminationProcessMain;
+use crate::lib::d3_model_mesh::D3ModelMesh;
 
 
 pub struct ApplicationVulkanCommandBuffer {}
@@ -42,10 +43,15 @@ impl ApplicationVulkanCommandBuffer {
         vulkan_pipeline: VulkanPipeline,
         vulkan_vertex_buffer: VulkanBuffer,
         vulkan_vertex_index_buffer: VulkanBuffer,
-        input_vertex_index_s: &Vec<u16>,
+        d3_model_mesh: &D3ModelMesh,
         vulkan_descriptor_set_s: &Vec<VulkanDescriptorSet>)
      -> Result<Vec<VulkanCommandBuffer>, TerminationProcessMain>
     {
+        let input_vertex_index_number =
+            match d3_model_mesh {
+                D3ModelMesh::TutorialSimple(mesh) => mesh.vertex_index_s.len(),
+                D3ModelMesh::TutorialFormatObj(mesh) => mesh.vertex_index_s.len(),
+            };
         let vulkan_command_buffer_allocate_information =
             VulkanCommandBufferAllocateInformation::builder()
             .command_pool(vulkan_command_pool)
@@ -94,13 +100,17 @@ impl ApplicationVulkanCommandBuffer {
                 *vulkan_command_buffer, VulkanPipelineBindPoint::GRAPHICS, vulkan_pipeline);
             vulkan_logical_device.cmd_bind_vertex_buffers(
                 *vulkan_command_buffer, 0, &[vulkan_vertex_buffer], &[0]);
-            vulkan_logical_device.cmd_bind_index_buffer(
-                *vulkan_command_buffer, vulkan_vertex_index_buffer, 0, VulkanIndexType::UINT16);
+            match d3_model_mesh {
+                D3ModelMesh::TutorialSimple(_) => vulkan_logical_device.cmd_bind_index_buffer(
+                    *vulkan_command_buffer, vulkan_vertex_index_buffer, 0, VulkanIndexType::UINT16),
+                D3ModelMesh::TutorialFormatObj(_) => vulkan_logical_device.cmd_bind_index_buffer(
+                    *vulkan_command_buffer, vulkan_vertex_index_buffer, 0, VulkanIndexType::UINT32),
+            };
             vulkan_logical_device.cmd_bind_descriptor_sets(
                 *vulkan_command_buffer, VulkanPipelineBindPoint::GRAPHICS,
                 vulkan_pipeline_layout, 0, &[vulkan_descriptor_set_s[index]], &[]);
             vulkan_logical_device.cmd_draw_indexed(
-                *vulkan_command_buffer, input_vertex_index_s.len() as u32, 1, 0, 0, 0);
+                *vulkan_command_buffer, input_vertex_index_number as u32, 1, 0, 0, 0);
             vulkan_logical_device.cmd_end_render_pass(*vulkan_command_buffer);
             let end_vulkan_command_buffer_result =
                 vulkan_logical_device.end_command_buffer(*vulkan_command_buffer);

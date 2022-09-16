@@ -12,8 +12,10 @@ use crate::application::main::Application;
 use crate::initialization::Initialization;
 use crate::initialization::window::InitializationWindow;
 use crate::composition::execution::CompositionExecution;
-use crate::config::VULKAN_VALIDATION_LAYER;
-use crate::config::VULKAN_DEVICE_PHYSICAL_EXTENSION_S;
+use crate::config::vulkan::VULKAN_VALIDATION_LAYER;
+use crate::config::vulkan::VULKAN_DEVICE_PHYSICAL_EXTENSION_S;
+use crate::data::d3_model_resource::DataD3ModelResource;
+use crate::data::d3_model_resource::DataD3ModelResourceTutorialFormatObj;
 
 
 fn main() -> TerminationProcessMain {
@@ -30,7 +32,8 @@ fn main() -> TerminationProcessMain {
         Application::create(
             &window.entity_main,
             Some(&VULKAN_VALIDATION_LAYER),
-            &VULKAN_DEVICE_PHYSICAL_EXTENSION_S)
+            &VULKAN_DEVICE_PHYSICAL_EXTENSION_S,
+            DataD3ModelResource::TutorialFormatObj(DataD3ModelResourceTutorialFormatObj::VikingRoom))
     };
     let application =
         match create_application_result {

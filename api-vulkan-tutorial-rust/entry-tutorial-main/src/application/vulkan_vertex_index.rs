@@ -14,6 +14,7 @@ use ::vulkan::VulkanCommandPool;
 use ::vulkan::VulkanQueue;
 
 use crate::termination::TerminationProcessMain;
+use crate::lib::d3_model_mesh::D3ModelMesh;
 use crate::application::vulkan_buffer::ApplicationVulkanBuffer;
 
 
@@ -28,11 +29,20 @@ impl ApplicationVulkanVertexIndexBuffer {
         vulkan_logical_device: &VulkanDeviceLogical,
         vulkan_command_pool: VulkanCommandPool,
         vulkan_graphic_queue: VulkanQueue,
-        input_vertex_index_s: &Vec<u16>,
-    )
+        d3_model_mesh: &D3ModelMesh)
      -> Result<(VulkanBuffer, VulkanDeviceMemory), TerminationProcessMain>
     {
-        let vulkan_vertex_index_buffer_size = (size_of::<u16>() * input_vertex_index_s.len()) as u64;
+        let (input_vertex_index_number, vulkan_vertex_index_buffer_size) =
+            match d3_model_mesh {
+                D3ModelMesh::TutorialSimple(mesh) => {
+                    let index_number = mesh.vertex_index_s.len();
+                    (index_number, (size_of::<u16>() * index_number) as u64)
+                },
+                D3ModelMesh::TutorialFormatObj(mesh) => {
+                    let index_number = mesh.vertex_index_s.len();
+                    (index_number, (size_of::<u32>() * index_number) as u64)
+                },
+            };
         //
         let (vulkan_vertex_index_staging_buffer, vulkan_vertex_index_staging_buffer_memory) =
             ApplicationVulkanBuffer::create_with_memory(
@@ -56,10 +66,20 @@ impl ApplicationVulkanVertexIndexBuffer {
                 },
                 Ok(address) => address,
             };
-        copy_nonoverlapping(
-            input_vertex_index_s.as_ptr(),
-            vulkan_vertex_index_staging_buffer_memory_address.cast(),
-            input_vertex_index_s.len());
+        match d3_model_mesh {
+            D3ModelMesh::TutorialSimple(mesh) => {
+                copy_nonoverlapping(
+                    mesh.vertex_index_s.as_ptr(),
+                    vulkan_vertex_index_staging_buffer_memory_address.cast(),
+                    input_vertex_index_number);
+            },
+            D3ModelMesh::TutorialFormatObj(mesh) => {
+                copy_nonoverlapping(
+                    mesh.vertex_index_s.as_ptr(),
+                    vulkan_vertex_index_staging_buffer_memory_address.cast(),
+                    input_vertex_index_number);
+            },
+        };
         vulkan_logical_device.unmap_memory(vulkan_vertex_index_staging_buffer_memory);
         //
         let (vulkan_vertex_index_buffer, vulkan_vertex_index_buffer_memory) =

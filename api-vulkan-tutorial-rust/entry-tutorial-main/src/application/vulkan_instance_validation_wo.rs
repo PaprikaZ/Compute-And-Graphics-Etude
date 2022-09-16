@@ -10,9 +10,12 @@ use ::vulkan::prelude::version1_2::*;
 use ::vulkan::VulkanExtensionName;
 
 use crate::termination::TerminationProcessMain;
-use crate::data::vertex::DataVertex;
-use crate::data::vertex::DataVertexIndex;
-use crate::config::ConfigPath;
+use crate::lib::d3_model_mesh::D3ModelMesh;
+use crate::data::d3_model_resource::DataD3ModelResource;
+use crate::data::d3_model_mesh_tutorial_simple::DataD3ModelMeshTutorialSimple;
+use crate::data::d3_model_mesh_tutorial_format_obj::DataD3ModelMeshTutorialFormatObj;
+use crate::data::d3_model_texture_tutorial_simple::DataD3ModelTextureTutorialSimple;
+use crate::data::d3_model_texture_tutorial_format_obj::DataD3ModelTextureTutorialFormatObj;
 use crate::application::main::Application;
 use crate::application::vulkan_instance_share::ApplicationVulkanInstanceShare;
 use crate::application::vulkan_instance_device_physical::ApplicationVulkanInstanceDevicePhysical;
@@ -41,9 +44,28 @@ pub struct ApplicationVulkanInstanceValidationWo {}
 impl ApplicationVulkanInstanceValidationWo {
     pub unsafe fn create(
         window: &WindowUniformWindow,
-        vulkan_extension_s: &[VulkanExtensionName])
+        vulkan_extension_s: &[VulkanExtensionName],
+        d3_model_resource_name: DataD3ModelResource)
      -> Result<Application, TerminationProcessMain>
     {
+        let (d3_model_mesh, texture_image_data, texture_image_information) =
+            match d3_model_resource_name {
+                DataD3ModelResource::TutorialSimple(resource_name) => {
+                    let d3_model_mesh =
+                        DataD3ModelMeshTutorialSimple::load(resource_name)?;
+                    let (texture_image_data, texture_image_information) =
+                        DataD3ModelTextureTutorialSimple::load(resource_name)?;
+                    (D3ModelMesh::TutorialSimple(d3_model_mesh), texture_image_data, texture_image_information)
+                },
+                DataD3ModelResource::TutorialFormatObj(resource_name) => {
+                    let d3_model_mesh =
+                        DataD3ModelMeshTutorialFormatObj::load(resource_name)?;
+                    let (texture_image_data, texture_image_information) =
+                        DataD3ModelTextureTutorialFormatObj::load(resource_name)?;
+                    (D3ModelMesh::TutorialFormatObj(d3_model_mesh), texture_image_data, texture_image_information)
+                },
+            };
+
         let vulkan_library_loader =
             match VulkanLibraryLoader::new(VULKAN_LIBRARY_FILE_NAME) {
                 Err(error) => return Err(TerminationProcessMain::InitializationVulkanLibraryLoadingFail(error)),
@@ -122,21 +144,20 @@ impl ApplicationVulkanInstanceValidationWo {
         let (vulkan_texture_image, vulkan_texture_image_memory) =
             ApplicationVulkanTextureImage::create_buffer_with_memory(
                 &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
-                &ConfigPath::get_file_texture_image_main(), vulkan_command_pool, vulkan_graphic_queue)?;
+                vulkan_command_pool, vulkan_graphic_queue,
+                texture_image_data, texture_image_information)?;
         let vulkan_texture_image_view =
             ApplicationVulkanTextureImage::create_view(&vulkan_logical_device, vulkan_texture_image)?;
         let vulkan_texture_sampler =
             ApplicationVulkanTextureImage::create_sampler(&vulkan_logical_device)?;
-        let input_vertex_s = DataVertex::get_default();
         let (vulkan_vertex_buffer, vulkan_vertex_buffer_memory) =
             ApplicationVulkanVertexBuffer::create(
                 &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
-                vulkan_command_pool, vulkan_graphic_queue, &input_vertex_s)?;
-        let input_vertex_index_s = DataVertexIndex::get_default();
+                vulkan_command_pool, vulkan_graphic_queue, &d3_model_mesh)?;
         let (vulkan_vertex_index_buffer, vulkan_vertex_index_buffer_memory) =
             ApplicationVulkanVertexIndexBuffer::create(
                 &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
-                vulkan_command_pool, vulkan_graphic_queue, &input_vertex_index_s)?;
+                vulkan_command_pool, vulkan_graphic_queue, &d3_model_mesh)?;
         let (vulkan_main_3d_transform_buffer_s, vulkan_main_3d_transform_buffer_memory_s) =
             ApplicationVulkanTransformD3Buffer::create_main_all(
                 &vulkan_instance, vulkan_physical_device, &vulkan_logical_device, &vulkan_image_s)?;
@@ -151,7 +172,7 @@ impl ApplicationVulkanInstanceValidationWo {
             ApplicationVulkanCommandBuffer::create_all(
                 &vulkan_logical_device, vulkan_pipeline_layout, vulkan_command_pool,
                 &vulkan_frame_buffer_s, vulkan_extent, vulkan_render_pass, vulkan_pipeline,
-                vulkan_vertex_buffer, vulkan_vertex_index_buffer, &input_vertex_index_s,
+                vulkan_vertex_buffer, vulkan_vertex_index_buffer, &d3_model_mesh,
                 &vulkan_descriptor_set_s)?;
         let (vulkan_image_available_semaphore_s, vulkan_render_finished_semaphore_s,
              vulkan_slide_in_flight_fence_s, vulkan_image_in_flight_fence_s) =
@@ -201,8 +222,7 @@ impl ApplicationVulkanInstanceValidationWo {
             vulkan_depth_image: vulkan_depth_image,
             vulkan_depth_image_memory: vulkan_depth_image_memory,
             vulkan_depth_image_view: vulkan_depth_image_view,
-            input_vertex_s: input_vertex_s,
-            input_vertex_index_s: input_vertex_index_s,
+            d3_model_mesh: d3_model_mesh,
         })
     }
 

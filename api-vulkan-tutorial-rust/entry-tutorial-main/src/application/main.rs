@@ -38,8 +38,9 @@ use ::vulkan::VulkanDescriptorPool;
 use ::vulkan::VulkanDescriptorSet;
 use ::vulkan::VulkanSampler;
 
-use crate::config::VULKAN_FRAME_IN_FLIGHT_MAX;
-use crate::lib::vertex::Vertex;
+use crate::config::vulkan::VULKAN_FRAME_IN_FLIGHT_MAX;
+use crate::lib::d3_model_mesh::D3ModelMesh;
+use crate::data::d3_model_resource::DataD3ModelResource;
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_instance_swapchain::ApplicationVulkanInstanceSwapchain;
 use crate::application::vulkan_instance_swapchain_image_view::ApplicationInstanceSwapchainImageView;
@@ -101,22 +102,22 @@ pub struct Application {
     pub vulkan_depth_image: VulkanImage,
     pub vulkan_depth_image_memory: VulkanDeviceMemory,
     pub vulkan_depth_image_view: VulkanImageView,
-    pub input_vertex_s: Vec<Vertex>,
-    pub input_vertex_index_s: Vec<u16>,
+    pub d3_model_mesh: D3ModelMesh,
 }
 
 impl Application {
     pub unsafe fn create(
         window: &WindowUniformWindow,
         optional_validation_layer: Option<&VulkanExtensionName>,
-        vulkan_physical_device_extension_s: &[VulkanExtensionName])
+        vulkan_physical_device_extension_s: &[VulkanExtensionName],
+        d3_model_resource_name: DataD3ModelResource)
      -> Result<Self, TerminationProcessMain>
     {
         match optional_validation_layer {
-            None =>
-                ApplicationVulkanInstanceValidationWo::create(window, vulkan_physical_device_extension_s),
-            Some(validation_layer) =>
-                ApplicationVulkanInstanceValidationWi::create(window, validation_layer, vulkan_physical_device_extension_s),
+            None => ApplicationVulkanInstanceValidationWo::create(
+                window, vulkan_physical_device_extension_s, d3_model_resource_name),
+            Some(validation_layer) => ApplicationVulkanInstanceValidationWi::create(
+                window, validation_layer, vulkan_physical_device_extension_s, d3_model_resource_name),
         }
     }
 
@@ -268,8 +269,8 @@ impl Application {
             ApplicationVulkanCommandBuffer::create_all(
                 &self.vulkan_device_logical, self.vulkan_pipeline_layout, self.vulkan_command_pool,
                 &vulkan_frame_buffer_s, vulkan_extent, vulkan_render_pass, vulkan_pipeline,
-                self.vulkan_vertex_buffer, self.vulkan_vertex_index_buffer, &self.input_vertex_index_s,
-                &self.vulkan_descriptor_set_s)?;
+                self.vulkan_vertex_buffer, self.vulkan_vertex_index_buffer,
+                &self.d3_model_mesh, &self.vulkan_descriptor_set_s)?;
         self.vulkan_swapchain_format = vulkan_format;
         self.vulkan_swapchain_extent = vulkan_extent;
         self.vulkan_swapchain = vulkan_swapchain;

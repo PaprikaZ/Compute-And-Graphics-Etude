@@ -32,8 +32,8 @@ use ::vulkan::VulkanDescriptorSetLayout;
 use ::vulkan::VulkanPipelineDepthStencilStateCreateInformation;
 use ::vulkan::VulkanCompareOperation;
 
-use crate::data::vertex::DataVertex;
 use crate::termination::TerminationProcessMain;
+use crate::data::d3_model_vertex::DataD3ModelVulkanVertexInput;
 
 
 pub struct ApplicationVulkanPipeline {}
@@ -62,11 +62,11 @@ impl ApplicationVulkanPipeline {
             .stage(VulkanShaderStageFlagS::FRAGMENT)
             .module(vulkan_fragment_shader_module)
             .name(b"main\0");
-        let vulkan_vertex_input_binding_description = &[DataVertex::get_input_binding_descrption()];
+        let vulkan_vertex_input_binding_description = &[DataD3ModelVulkanVertexInput::get_binding_descrption()];
         let (vulkan_vertex_input_position_attribute_description,
              vulkan_vertex_input_color_attribute_description,
              vulkan_vertex_input_texture_coordinate) =
-            DataVertex::get_input_attribute_description();
+            DataD3ModelVulkanVertexInput::get_attribute_description_s();
         let vulkan_vertex_input_attribute_description_s =
             &[vulkan_vertex_input_position_attribute_description, vulkan_vertex_input_color_attribute_description,
               vulkan_vertex_input_texture_coordinate];

@@ -7,7 +7,7 @@ use ::vulkan::VulkanFenceCreateFlagS;
 use ::vulkan::VulkanFenceCreateInformation;
 use ::vulkan::VulkanImage;
 
-use crate::config::VULKAN_FRAME_IN_FLIGHT_MAX;
+use crate::config::vulkan::VULKAN_FRAME_IN_FLIGHT_MAX;
 use crate::termination::TerminationProcessMain;
 
 
