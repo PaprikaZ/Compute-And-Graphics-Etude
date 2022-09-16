@@ -45,14 +45,27 @@ impl Hash for Vertex {
 
 
 #[derive(Copy, Clone, Debug)]
-pub struct VertexIndex(u16);
+pub struct VertexIndexU16(u16);
 
-impl VertexIndex {
+impl VertexIndexU16 {
     pub fn new(index: u16) -> Self {
         Self(index)
     }
 
     pub fn as_raw(&self) -> u16 {
+        self.0
+    }
+}
+
+#[derive(Copy, Clone, Debug)]
+pub struct VertexIndexU32(u32);
+
+impl VertexIndexU32 {
+    pub fn new(index: u32) -> Self {
+        Self(index)
+    }
+
+    pub fn as_raw(&self) -> u32 {
         self.0
     }
 }
