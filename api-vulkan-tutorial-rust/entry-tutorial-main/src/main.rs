@@ -12,8 +12,8 @@ use crate::application::main::Application;
 use crate::initialization::Initialization;
 use crate::initialization::window::InitializationWindow;
 use crate::composition::execution::CompositionExecution;
-use crate::config::VULKAN_VALIDATION_LAYER;
-use crate::config::VULKAN_DEVICE_PHYSICAL_EXTENSION_S;
+use crate::config::vulkan::VULKAN_VALIDATION_LAYER;
+use crate::config::vulkan::VULKAN_DEVICE_PHYSICAL_EXTENSION_S;
 
 
 fn main() -> TerminationProcessMain {

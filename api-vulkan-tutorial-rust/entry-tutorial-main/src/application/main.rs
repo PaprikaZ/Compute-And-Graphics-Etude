@@ -38,8 +38,7 @@ use ::vulkan::VulkanDescriptorPool;
 use ::vulkan::VulkanDescriptorSet;
 use ::vulkan::VulkanSampler;
 
-use crate::config::VULKAN_FRAME_IN_FLIGHT_MAX;
-use crate::lib::vertex::Vertex;
+use crate::config::vulkan::VULKAN_FRAME_IN_FLIGHT_MAX;
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_instance_swapchain::ApplicationVulkanInstanceSwapchain;
 use crate::application::vulkan_instance_swapchain_image_view::ApplicationInstanceSwapchainImageView;

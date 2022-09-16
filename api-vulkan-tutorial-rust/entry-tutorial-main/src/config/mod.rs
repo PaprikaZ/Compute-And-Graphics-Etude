@@ -1,6 +1,2 @@
-mod path;
-mod vulkan;
-
-
-pub use crate::config::path::*;
-pub use crate::config::vulkan::*;
+pub mod path;
+pub mod vulkan;
