@@ -220,6 +220,8 @@ pub use ::vulkanalia::vk::FormatFeatureFlags as VulkanFormatFeatureFlagS;
 pub use ::vulkanalia::vk::ClearDepthStencilValue as VulkanClearDepthStencilValue;
 pub use ::vulkanalia::vk::ClearDepthStencilValueBuilder as VulkanClearDepthStencilValueBuilder;
 
+pub use ::vulkanalia::vk::ImageBlit as VulkanImageBlit;
+
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
 pub use ::vulkanalia::vk::LOD_CLAMP_NONE as VULKAN_LOD_CLAMP_NONE;
@@ -344,6 +346,19 @@ pub struct VulkanMemoryTypeIndex(u32);
 impl VulkanMemoryTypeIndex {
     pub fn new(index: u32) -> Self {
         Self(index)
+    }
+
+    pub fn as_raw(&self) -> u32 {
+        self.0
+    }
+}
+
+#[derive(Clone, Copy)]
+pub struct VulkanMipLevel(u32);
+
+impl VulkanMipLevel {
+    pub fn new(level: u32) -> Self {
+        Self(level)
     }
 
     pub fn as_raw(&self) -> u32 {

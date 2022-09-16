@@ -11,6 +11,7 @@ use ::vulkan::VulkanImageAspectFlagS;
 use ::vulkan::VulkanImage;
 use ::vulkan::VulkanImageView;
 use ::vulkan::VulkanDeviceMemory;
+use ::vulkan::VulkanMipLevel;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_image::ApplicationVulkanImage;
@@ -36,6 +37,7 @@ impl ApplicationVulkanDepth {
                 vulkan_logical_device,
                 vulkan_swapchain_extent.width,
                 vulkan_swapchain_extent.height,
+                VulkanMipLevel::new(1),
                 selected_vulkan_depth_format,
                 VulkanImageTiling::OPTIMAL,
                 VulkanImageUsageFlagS::DEPTH_STENCIL_ATTACHMENT,
@@ -45,7 +47,8 @@ impl ApplicationVulkanDepth {
                 vulkan_logical_device,
                 vulkan_depth_image,
                 selected_vulkan_depth_format,
-                VulkanImageAspectFlagS::DEPTH)?;
+                VulkanImageAspectFlagS::DEPTH,
+                VulkanMipLevel::new(1))?;
         Ok((vulkan_depth_image, vulkan_depth_image_memory, vulkan_depth_image_view))
     }
 

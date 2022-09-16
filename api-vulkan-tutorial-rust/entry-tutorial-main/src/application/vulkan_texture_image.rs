@@ -41,12 +41,14 @@ use ::vulkan::VulkanSampler;
 use ::vulkan::VulkanDescriptorSetLayoutBinding;
 use ::vulkan::VulkanDescriptorType;
 use ::vulkan::VulkanShaderStageFlagS;
+use ::vulkan::VulkanMipLevel;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_buffer::ApplicationVulkanBuffer;
 use crate::application::vulkan_image::ApplicationVulkanImage;
 use crate::application::vulkan_command_buffer::ApplicationVulkanCommandBufferOneTime;
 use crate::application::vulkan_image::ApplicationVulkanImageView;
+use crate::application::vulkan_mipmap::ApplicationVulkanMipmap;
 
 
 pub struct ApplicationVulkanTextureImage {}
@@ -59,7 +61,8 @@ impl ApplicationVulkanTextureImage {
         vulkan_command_pool: VulkanCommandPool,
         vulkan_graphic_queue: VulkanQueue,
         texture_file_pixel_s: Vec<u8>,
-        texture_image_information: FormatPngOutputInfomration)
+        texture_image_information: FormatPngOutputInfomration,
+        vulkan_mip_level: VulkanMipLevel)
      -> Result<(VulkanImage, VulkanDeviceMemory), TerminationProcessMain>
     {
         let texture_file_buffer_size = texture_image_information.buffer_size() as u64;
@@ -92,9 +95,12 @@ impl ApplicationVulkanTextureImage {
                 vulkan_logical_device,
                 texture_image_information.width,
                 texture_image_information.height,
+                vulkan_mip_level,
                 VulkanFormat::R8G8B8A8_SRGB,
                 VulkanImageTiling::OPTIMAL,
-                VulkanImageUsageFlagS::SAMPLED | VulkanImageUsageFlagS::TRANSFER_DST,
+                VulkanImageUsageFlagS::SAMPLED
+                | VulkanImageUsageFlagS::TRANSFER_DST
+                | VulkanImageUsageFlagS::TRANSFER_SRC,
                 VulkanMemoryPropertyFlagS::DEVICE_LOCAL)?;
         Self::transition_layout(
             vulkan_logical_device,
@@ -103,7 +109,8 @@ impl ApplicationVulkanTextureImage {
             vulkan_texture_image,
             VulkanFormat::R8G8B8A8_SRGB,
             VulkanImageLayout::UNDEFINED,
-            VulkanImageLayout::TRANSFER_DST_OPTIMAL)?;
+            VulkanImageLayout::TRANSFER_DST_OPTIMAL,
+            vulkan_mip_level)?;
         Self::copy_from_buffer(
             vulkan_logical_device,
             vulkan_command_pool,
@@ -112,16 +119,21 @@ impl ApplicationVulkanTextureImage {
             vulkan_texture_image,
             texture_image_information.width,
             texture_image_information.height)?;
-        Self::transition_layout(
+        vulkan_logical_device.destroy_buffer(vulkan_texture_staging_buffer, None);
+        vulkan_logical_device.free_memory(vulkan_texture_staging_buffer_memory, None);
+        ApplicationVulkanMipmap::generate(
+            vulkan_instance,
+            vulkan_physical_device,
             vulkan_logical_device,
             vulkan_command_pool,
             vulkan_graphic_queue,
             vulkan_texture_image,
             VulkanFormat::R8G8B8A8_SRGB,
-            VulkanImageLayout::TRANSFER_DST_OPTIMAL,
-            VulkanImageLayout::SHADER_READ_ONLY_OPTIMAL)?;
-        vulkan_logical_device.destroy_buffer(vulkan_texture_staging_buffer, None);
-        vulkan_logical_device.free_memory(vulkan_texture_staging_buffer_memory, None);
+            texture_image_information.width,
+            texture_image_information.height,
+            vulkan_mip_level
+        )?;
+
         Ok((vulkan_texture_image, vulkan_texture_image_memory))
     }
 
@@ -132,7 +144,8 @@ impl ApplicationVulkanTextureImage {
         vulkan_texture_image: VulkanImage,
         _vulkan_texture_image_format: VulkanFormat,
         old_vulkan_texture_image_layout: VulkanImageLayout,
-        new_vulkan_texture_image_layout: VulkanImageLayout)
+        new_vulkan_texture_image_layout: VulkanImageLayout,
+        vulkan_mip_level: VulkanMipLevel)
      -> Result<(), TerminationProcessMain>
     {
         let (source_access_mask, destination_access_mask,
@@ -156,7 +169,7 @@ impl ApplicationVulkanTextureImage {
             VulkanImageSubResourceRange::builder()
             .aspect_mask(VulkanImageAspectFlagS::COLOR)
             .base_mip_level(0)
-            .level_count(1)
+            .level_count(vulkan_mip_level.as_raw())
             .base_array_layer(0)
             .layer_count(1);
         let vulkan_image_memory_barrier =
@@ -223,17 +236,22 @@ impl ApplicationVulkanTextureImage {
         Ok(())
     }
 
-    pub unsafe fn create_view(vulkan_logical_device: &VulkanDeviceLogical, vulkan_texture_image: VulkanImage)
+    pub unsafe fn create_view(
+        vulkan_logical_device: &VulkanDeviceLogical,
+        vulkan_texture_image: VulkanImage,
+        vulkan_mip_level: VulkanMipLevel)
      -> Result<VulkanImageView, TerminationProcessMain>
     {
         let vulkan_image_view =
             ApplicationVulkanImageView::create(
                 vulkan_logical_device, vulkan_texture_image,
-                VulkanFormat::R8G8B8A8_SRGB, VulkanImageAspectFlagS::COLOR)?;
+                VulkanFormat::R8G8B8A8_SRGB,
+                VulkanImageAspectFlagS::COLOR,
+                vulkan_mip_level)?;
         Ok(vulkan_image_view)
     }
 
-    pub unsafe fn create_sampler(vulkan_logical_device: &VulkanDeviceLogical)
+    pub unsafe fn create_sampler(vulkan_logical_device: &VulkanDeviceLogical, vulkan_mip_level: VulkanMipLevel)
      -> Result<VulkanSampler, TerminationProcessMain>
     {
         let vulkan_sampler_create_information =
@@ -249,7 +267,10 @@ impl ApplicationVulkanTextureImage {
             .unnormalized_coordinates(false)
             .compare_enable(false)
             .compare_op(VulkanCompareOperation::ALWAYS)
-            .mipmap_mode(VulkanSamplerMipmapMode::LINEAR);
+            .mipmap_mode(VulkanSamplerMipmapMode::LINEAR)
+            .min_lod(0.0)
+            .max_lod(vulkan_mip_level.as_raw() as f32)
+            .mip_lod_bias(0.0);
         let create_vulkan_sampler_result =
             vulkan_logical_device.create_sampler(&vulkan_sampler_create_information, None);
         match create_vulkan_sampler_result {

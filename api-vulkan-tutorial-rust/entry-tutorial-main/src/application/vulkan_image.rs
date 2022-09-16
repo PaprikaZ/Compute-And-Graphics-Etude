@@ -20,6 +20,7 @@ use ::vulkan::VulkanImageLayout;
 use ::vulkan::VulkanSampleCountFlagS;
 use ::vulkan::VulkanSharingMode;
 use ::vulkan::VulkanMemoryAllocateInformation;
+use ::vulkan::VulkanMipLevel;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_memory::ApplicationVulkanMemory;
@@ -34,6 +35,7 @@ impl ApplicationVulkanImage {
         vulkan_logical_device: &VulkanDeviceLogical,
         vulkan_image_width: u32,
         vulkan_image_height: u32,
+        vulkan_mip_level: VulkanMipLevel,
         vulkan_image_format: VulkanFormat,
         vulkan_image_tiling: VulkanImageTiling,
         vulkan_image_usage: VulkanImageUsageFlagS,
@@ -44,7 +46,7 @@ impl ApplicationVulkanImage {
             VulkanImageCreateInformation::builder()
             .image_type(VulkanImageType::_2D)
             .extent(VulkanExtentD3 { width: vulkan_image_width, height: vulkan_image_height, depth: 1 })
-            .mip_levels(1)
+            .mip_levels(vulkan_mip_level.as_raw())
             .array_layers(1)
             .format(vulkan_image_format)
             .tiling(vulkan_image_tiling)
@@ -104,14 +106,15 @@ impl ApplicationVulkanImageView {
         vulkan_logical_device: &VulkanDeviceLogical,
         vulkan_image: VulkanImage,
         vulkan_format: VulkanFormat,
-        vulkan_image_aspect_flag_s: VulkanImageAspectFlagS)
+        vulkan_image_aspect_flag_s: VulkanImageAspectFlagS,
+        vulkan_mip_level: VulkanMipLevel)
      -> Result<VulkanImageView, TerminationProcessMain>
     {
         let vulkan_image_sub_resource_range =
             VulkanImageSubResourceRange::builder()
             .aspect_mask(vulkan_image_aspect_flag_s)
             .base_mip_level(0)
-            .level_count(1)
+            .level_count(vulkan_mip_level.as_raw())
             .base_array_layer(0)
             .layer_count(1);
         let vulkan_image_view_create_information =
