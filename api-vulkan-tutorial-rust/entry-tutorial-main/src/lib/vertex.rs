@@ -1,3 +1,4 @@
+use std::hash::{Hash, Hasher};
 use ::nalgebra_glm as glm;
 
 
@@ -18,6 +19,30 @@ impl Vertex {
         }
     }
 }
+
+impl PartialEq for Vertex {
+    fn eq(&self, other: &Self) -> bool {
+        self.position == other.position &&
+        self.color == other.color &&
+        self.texture_coordinate == other.texture_coordinate
+    }
+}
+
+impl Eq for Vertex {}
+
+impl Hash for Vertex {
+    fn hash<TH: Hasher>(&self, hasher: &mut TH) -> () {
+        self.position[0].to_bits().hash(hasher);
+        self.position[1].to_bits().hash(hasher);
+        self.position[2].to_bits().hash(hasher);
+        self.color[0].to_bits().hash(hasher);
+        self.color[1].to_bits().hash(hasher);
+        self.color[2].to_bits().hash(hasher);
+        self.texture_coordinate[0].to_bits().hash(hasher);
+        self.texture_coordinate[1].to_bits().hash(hasher);
+    }
+}
+
 
 #[derive(Copy, Clone, Debug)]
 pub struct VertexIndex(u16);
