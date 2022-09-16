@@ -2,6 +2,7 @@ use ::png::DecodingError as FormatPngDecodingError;
 use ::libloading::Error as LibraryLoadingError;
 use ::window_uniform::WindowUniformErrorOperationSystem;
 use ::vulkan::VulkanErrorCode;
+use ::tobj::LoadError as ModelFormatObjLoadError;
 
 
 pub enum TerminationProcessMain {
@@ -56,6 +57,7 @@ pub enum TerminationProcessMain {
     InitializationVulkanSamplerCreateFail(VulkanErrorCode),
     InitializationVulkanPhysicalDeviceFeatureSamplerAnisotropyNotSupport,
     InitializationVulkanFormatFeatureNotSupport,
+    InitializationModelFormatObjLoadingError(ModelFormatObjLoadError),
 }
 
 impl TerminationProcessMain {
@@ -112,6 +114,7 @@ impl TerminationProcessMain {
             Self::InitializationVulkanSamplerCreateFail(_) => 48u8,
             Self::InitializationVulkanPhysicalDeviceFeatureSamplerAnisotropyNotSupport => 49u8,
             Self::InitializationVulkanFormatFeatureNotSupport => 50u8,
+            Self::InitializationModelFormatObjLoadingError(_) => 51u8,
         }
     }
 }
