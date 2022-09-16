@@ -58,6 +58,7 @@ pub enum TerminationProcessMain {
     InitializationVulkanPhysicalDeviceFeatureSamplerAnisotropyNotSupport,
     InitializationVulkanFormatFeatureNotSupport,
     InitializationModelFormatObjLoadingError(ModelFormatObjLoadError),
+    InitializationVulkanDevicePhysicalSampledImageFilterLinearNotSupport,
 }
 
 impl TerminationProcessMain {
@@ -115,6 +116,7 @@ impl TerminationProcessMain {
             Self::InitializationVulkanPhysicalDeviceFeatureSamplerAnisotropyNotSupport => 49u8,
             Self::InitializationVulkanFormatFeatureNotSupport => 50u8,
             Self::InitializationModelFormatObjLoadingError(_) => 51u8,
+            Self::InitializationVulkanDevicePhysicalSampledImageFilterLinearNotSupport => 52u8,
         }
     }
 }
