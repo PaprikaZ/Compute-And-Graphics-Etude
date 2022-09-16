@@ -15,6 +15,7 @@ use ::vulkan::VulkanQueue;
 
 use crate::termination::TerminationProcessMain;
 use crate::lib::vertex::Vertex;
+use crate::lib::d3_model_mesh::D3ModelMesh;
 use crate::application::vulkan_buffer::ApplicationVulkanBuffer;
 
 
@@ -29,11 +30,15 @@ impl ApplicationVulkanVertexBuffer {
         vulkan_logical_device: &VulkanDeviceLogical,
         vulkan_command_pool: VulkanCommandPool,
         vulkan_graphic_queue: VulkanQueue,
-        input_vertex_s: &Vec<Vertex>,
-     )
+        d3_model_mesh: &D3ModelMesh)
      -> Result<(VulkanBuffer, VulkanDeviceMemory), TerminationProcessMain>
     {
-        let vulkan_vertex_buffer_size = (size_of::<Vertex>() * input_vertex_s.len()) as u64;
+        let input_vertex_s = match d3_model_mesh {
+            D3ModelMesh::TutorialSimple(mesh) => &mesh.vertex_s,
+            D3ModelMesh::TutorialFormatObj(mesh) => &mesh.vertex_s,
+        };
+        let input_vertex_number = input_vertex_s.len();
+        let vulkan_vertex_buffer_size = (size_of::<Vertex>() * input_vertex_number) as u64;
         //
         let (vulkan_vertex_staging_buffer, vulkan_vertex_staging_buffer_memory) =
             ApplicationVulkanBuffer::create_with_memory(
