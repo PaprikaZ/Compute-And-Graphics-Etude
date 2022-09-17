@@ -48,6 +48,7 @@ use crate::application::vulkan_texture_image::ApplicationVulkanTextureImage;
 use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorSetLayout;
 use crate::application::vulkan_depth::ApplicationVulkanDepth;
 use crate::application::vulkan_mipmap::ApplicationVulkanMipmap;
+use crate::application::vulkan_anti_aliasing_multisampling::ApplicationVulkanAntiAliasingMultiSampling;
 
 
 pub struct ApplicationVulkanInstanceValidationWi {}
@@ -125,6 +126,8 @@ impl ApplicationVulkanInstanceValidationWi {
                 Err(error) => return Err(error),
                 Ok(device_and_queue) => device_and_queue,
             };
+        let vulkan_anti_aliasing_multisampling_number =
+            ApplicationVulkanAntiAliasingMultiSampling::get_sample_count_max(&vulkan_instance, vulkan_physical_device);
         let (vulkan_surface_format, vulkan_extent, vulkan_swapchain, vulkan_image_s) =
             ApplicationVulkanInstanceSwapchain::create(
                 window, &vulkan_instance, vulkan_surface, &vulkan_logical_device,
@@ -135,7 +138,8 @@ impl ApplicationVulkanInstanceValidationWi {
                 &vulkan_logical_device, vulkan_surface_format, &vulkan_image_s)?;
         let vulkan_render_pass =
             ApplicationVulkanRenderPass::create(
-                &vulkan_instance, vulkan_physical_device, &vulkan_logical_device, vulkan_surface_format)?;
+                &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
+                vulkan_surface_format, vulkan_anti_aliasing_multisampling_number)?;
         let vulkan_3d_transform_descriptor_set_layout_binding =
             ApplicationVulkanTransformD3Descriptor::create_set_layout_binding()?;
         let vulkan_texture_sampler_transform_descriptor_set_layout_binding =
@@ -147,15 +151,25 @@ impl ApplicationVulkanInstanceValidationWi {
                 vulkan_texture_sampler_transform_descriptor_set_layout_binding)?;
         let (vulkan_pipeline, vulkan_pipeline_layout) =
             ApplicationVulkanPipeline::create_layout(
-                &vulkan_logical_device, vulkan_extent, vulkan_render_pass, vulkan_descriptor_set_layout)?;
+                &vulkan_logical_device, vulkan_extent, vulkan_render_pass,
+                vulkan_descriptor_set_layout, vulkan_anti_aliasing_multisampling_number)?;
         let vulkan_command_pool =
             ApplicationVulkanCommandPool::create(&vulkan_logical_device, vulkan_graphic_queue_family_index)?;
+        let (vulkan_anti_aliasing_multisampling_image,
+             vulkan_anti_aliasing_multisampling_image_memory,
+             vulkan_anti_aliasing_multisampling_image_view) =
+            ApplicationVulkanAntiAliasingMultiSampling::get_image_memory_view(
+                &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
+                vulkan_extent, vulkan_surface_format,
+                vulkan_anti_aliasing_multisampling_number)?;
         let (vulkan_depth_image, vulkan_depth_image_memory, vulkan_depth_image_view) =
             ApplicationVulkanDepth::create_image_memory_view(
-                &vulkan_instance, vulkan_physical_device, &vulkan_logical_device, vulkan_extent)?;
+                &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
+                vulkan_extent, vulkan_anti_aliasing_multisampling_number)?;
         let vulkan_frame_buffer_s =
             ApplicationVulkanFrameBuffer::create_all(
-                &vulkan_logical_device, &vulkan_image_view_s, vulkan_depth_image_view,
+                &vulkan_logical_device, &vulkan_image_view_s,
+                vulkan_depth_image_view, vulkan_anti_aliasing_multisampling_image_view,
                 vulkan_render_pass, vulkan_extent)?;
         let (vulkan_texture_image, vulkan_texture_image_memory) =
             ApplicationVulkanTextureImage::create_buffer_with_memory(
@@ -239,6 +253,10 @@ impl ApplicationVulkanInstanceValidationWi {
             vulkan_depth_image_memory: vulkan_depth_image_memory,
             vulkan_depth_image_view: vulkan_depth_image_view,
             vulkan_mip_level: vulkan_mip_level,
+            vulkan_anti_aliasing_multisampling_number: vulkan_anti_aliasing_multisampling_number,
+            vulkan_anti_aliasing_multisampling_image: vulkan_anti_aliasing_multisampling_image,
+            vulkan_anti_aliasing_multisampling_image_memory: vulkan_anti_aliasing_multisampling_image_memory,
+            vulkan_anti_aliasing_multisampling_image_view: vulkan_anti_aliasing_multisampling_image_view,
             d3_model_mesh: d3_model_mesh,
         })
     }

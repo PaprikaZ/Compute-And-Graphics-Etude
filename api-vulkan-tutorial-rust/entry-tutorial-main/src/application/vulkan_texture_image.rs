@@ -42,6 +42,7 @@ use ::vulkan::VulkanDescriptorSetLayoutBinding;
 use ::vulkan::VulkanDescriptorType;
 use ::vulkan::VulkanShaderStageFlagS;
 use ::vulkan::VulkanMipLevel;
+use ::vulkan::VulkanSampleCountFlagS;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_buffer::ApplicationVulkanBuffer;
@@ -96,6 +97,7 @@ impl ApplicationVulkanTextureImage {
                 texture_image_information.width,
                 texture_image_information.height,
                 vulkan_mip_level,
+                VulkanSampleCountFlagS::_1,
                 VulkanFormat::R8G8B8A8_SRGB,
                 VulkanImageTiling::OPTIMAL,
                 VulkanImageUsageFlagS::SAMPLED

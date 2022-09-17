@@ -47,7 +47,9 @@ impl ApplicationVulkanInstanceDeviceLogical {
             .collect::<Vec<_>>();
         let vulkan_physical_device_feature_s =
             VulkanDevicePhysicalFeatureS::builder()
-            .sampler_anisotropy(true);
+            .sampler_anisotropy(true)
+            .sample_rate_shading(true);
+
         let vulkan_logical_device_create_information =
             VulkanDeviceLogicalCreateInformation::builder()
             .queue_create_infos(&vulkan_graphic_queue_create_information_s)

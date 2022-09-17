@@ -43,7 +43,8 @@ impl ApplicationVulkanPipeline {
         vulkan_logical_device: &VulkanDeviceLogical,
         vulkan_2d_extent: VulkanExtentD2,
         vulkan_render_pass: VulkanRenderPass,
-        vulkan_descriptor_set_layout: VulkanDescriptorSetLayout)
+        vulkan_descriptor_set_layout: VulkanDescriptorSetLayout,
+        vulkan_anti_aliasing_multisampling_number: VulkanSampleCountFlagS)
      -> Result<(VulkanPipeline, VulkanPipelineLayout), TerminationProcessMain>
     {
         let vulkan_vertex_shader_bytecode_data = include_bytes!("../../shader/vert.spv");
@@ -107,8 +108,9 @@ impl ApplicationVulkanPipeline {
             .depth_bias_enable(false);
         let vulkan_pipeline_multisample_state_create_information =
             VulkanPipelineMultisampleStateCreateInformation::builder()
-            .sample_shading_enable(false)
-            .rasterization_samples(VulkanSampleCountFlagS::_1);
+            .sample_shading_enable(true)
+            .min_sample_shading(0.2)
+            .rasterization_samples(vulkan_anti_aliasing_multisampling_number);
         let vulkan_depth_stencil_state =
             VulkanPipelineDepthStencilStateCreateInformation::builder()
             .depth_test_enable(true)
