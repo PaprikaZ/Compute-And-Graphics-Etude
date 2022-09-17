@@ -36,6 +36,7 @@ impl ApplicationVulkanImage {
         vulkan_image_width: u32,
         vulkan_image_height: u32,
         vulkan_mip_level: VulkanMipLevel,
+        vulkan_sample_count: VulkanSampleCountFlagS,
         vulkan_image_format: VulkanFormat,
         vulkan_image_tiling: VulkanImageTiling,
         vulkan_image_usage: VulkanImageUsageFlagS,
@@ -52,7 +53,7 @@ impl ApplicationVulkanImage {
             .tiling(vulkan_image_tiling)
             .initial_layout(VulkanImageLayout::UNDEFINED)
             .usage(vulkan_image_usage)
-            .samples(VulkanSampleCountFlagS::_1)
+            .samples(vulkan_sample_count)
             .sharing_mode(VulkanSharingMode::EXCLUSIVE);
         let create_vulkan_texture_image_result =
             vulkan_logical_device.create_image(&vulkan_texture_image_create_information, None);

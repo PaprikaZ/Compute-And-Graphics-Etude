@@ -12,6 +12,7 @@ use ::vulkan::VulkanImage;
 use ::vulkan::VulkanImageView;
 use ::vulkan::VulkanDeviceMemory;
 use ::vulkan::VulkanMipLevel;
+use ::vulkan::VulkanSampleCountFlagS;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_image::ApplicationVulkanImage;
@@ -25,7 +26,8 @@ impl ApplicationVulkanDepth {
         vulkan_instance: &VulkanInstance,
         vulkan_physical_device: VulkanDevicePhysical,
         vulkan_logical_device: &VulkanDeviceLogical,
-        vulkan_swapchain_extent: VulkanExtentD2)
+        vulkan_swapchain_extent: VulkanExtentD2,
+        vulkan_anti_aliasing_multisampling_number: VulkanSampleCountFlagS)
      -> Result<(VulkanImage, VulkanDeviceMemory, VulkanImageView), TerminationProcessMain>
     {
         let selected_vulkan_depth_format =
@@ -38,6 +40,7 @@ impl ApplicationVulkanDepth {
                 vulkan_swapchain_extent.width,
                 vulkan_swapchain_extent.height,
                 VulkanMipLevel::new(1),
+                vulkan_anti_aliasing_multisampling_number,
                 selected_vulkan_depth_format,
                 VulkanImageTiling::OPTIMAL,
                 VulkanImageUsageFlagS::DEPTH_STENCIL_ATTACHMENT,

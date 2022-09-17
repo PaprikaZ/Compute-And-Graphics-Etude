@@ -38,6 +38,7 @@ use ::vulkan::VulkanDescriptorPool;
 use ::vulkan::VulkanDescriptorSet;
 use ::vulkan::VulkanSampler;
 use ::vulkan::VulkanMipLevel;
+use ::vulkan::VulkanSampleCountFlagS;
 
 use crate::config::vulkan::VULKAN_FRAME_IN_FLIGHT_MAX;
 use crate::lib::d3_model_mesh::D3ModelMesh;
@@ -56,6 +57,7 @@ use crate::application::vulkan_transform_d3_buffer::ApplicationVulkanTransformD3
 use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorPool;
 use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorSet;
 use crate::application::vulkan_depth::ApplicationVulkanDepth;
+use crate::application::vulkan_anti_aliasing_multisampling::ApplicationVulkanAntiAliasingMultiSampling;
 
 
 pub struct Application {
@@ -104,6 +106,10 @@ pub struct Application {
     pub vulkan_depth_image_memory: VulkanDeviceMemory,
     pub vulkan_depth_image_view: VulkanImageView,
     pub vulkan_mip_level: VulkanMipLevel,
+    pub vulkan_anti_aliasing_multisampling_number: VulkanSampleCountFlagS,
+    pub vulkan_anti_aliasing_multisampling_image: VulkanImage,
+    pub vulkan_anti_aliasing_multisampling_image_memory: VulkanDeviceMemory,
+    pub vulkan_anti_aliasing_multisampling_image_view: VulkanImageView,
     pub d3_model_mesh: D3ModelMesh,
 }
 
@@ -246,17 +252,29 @@ impl Application {
                 &vulkan_image_s)?;
         let vulkan_render_pass =
             ApplicationVulkanRenderPass::create(
-                &self.vulkan_instance, self.vulkan_device_physical, &self.vulkan_device_logical, vulkan_format)?;
+                &self.vulkan_instance, self.vulkan_device_physical, &self.vulkan_device_logical,
+                vulkan_format, self.vulkan_anti_aliasing_multisampling_number)?;
         let (vulkan_pipeline, vulkan_pipeline_layout) =
             ApplicationVulkanPipeline::create_layout(
-                &self.vulkan_device_logical, vulkan_extent, vulkan_render_pass, self.vulkan_descriptor_set_layout)?;
+                &self.vulkan_device_logical, vulkan_extent, vulkan_render_pass, self.vulkan_descriptor_set_layout, self.vulkan_anti_aliasing_multisampling_number)?;
+        let (vulkan_anti_aliasing_multisampling_image,
+             vulkan_anti_aliasing_multisampling_image_memory,
+             vulkan_anti_aliasing_multisampling_image_view) =
+            ApplicationVulkanAntiAliasingMultiSampling::get_image_memory_view(
+                &self.vulkan_instance,
+                self.vulkan_device_physical,
+                &self.vulkan_device_logical,
+                vulkan_extent,
+                vulkan_format,
+                self.vulkan_anti_aliasing_multisampling_number)?;
         let (vulkan_depth_image, vulkan_depth_image_memory, vulkan_depth_image_view) =
             ApplicationVulkanDepth::create_image_memory_view(
-                &self.vulkan_instance, self.vulkan_device_physical, &self.vulkan_device_logical, self.vulkan_swapchain_extent)?;
+                &self.vulkan_instance, self.vulkan_device_physical, &self.vulkan_device_logical, vulkan_extent, self.vulkan_anti_aliasing_multisampling_number)?;
         let vulkan_frame_buffer_s =
             ApplicationVulkanFrameBuffer::create_all(
                 &self.vulkan_device_logical, &vulkan_image_view_s,
-                self.vulkan_depth_image_view, vulkan_render_pass, vulkan_extent)?;
+                vulkan_depth_image_view, vulkan_anti_aliasing_multisampling_image_view,
+                vulkan_render_pass, vulkan_extent)?;
         let (vulkan_main_3d_transform_buffer_s, vulkan_main_3d_transform_buffer_memory_s) =
             ApplicationVulkanTransformD3Buffer::create_main_all(
                 &self.vulkan_instance, self.vulkan_device_physical, &self.vulkan_device_logical, &vulkan_image_s)?;
@@ -269,10 +287,10 @@ impl Application {
                 self.vulkan_texture_image_view, self.vulkan_texture_sampler)?;
         let vulkan_command_buffer_s =
             ApplicationVulkanCommandBuffer::create_all(
-                &self.vulkan_device_logical, self.vulkan_pipeline_layout, self.vulkan_command_pool,
+                &self.vulkan_device_logical, vulkan_pipeline_layout, self.vulkan_command_pool,
                 &vulkan_frame_buffer_s, vulkan_extent, vulkan_render_pass, vulkan_pipeline,
                 self.vulkan_vertex_buffer, self.vulkan_vertex_index_buffer,
-                &self.d3_model_mesh, &self.vulkan_descriptor_set_s)?;
+                &self.d3_model_mesh, &vulkan_descriptor_set_s)?;
         self.vulkan_swapchain_format = vulkan_format;
         self.vulkan_swapchain_extent = vulkan_extent;
         self.vulkan_swapchain = vulkan_swapchain;
@@ -290,6 +308,9 @@ impl Application {
         self.vulkan_depth_image = vulkan_depth_image;
         self.vulkan_depth_image_memory = vulkan_depth_image_memory;
         self.vulkan_depth_image_view = vulkan_depth_image_view;
+        self.vulkan_anti_aliasing_multisampling_image = vulkan_anti_aliasing_multisampling_image;
+        self.vulkan_anti_aliasing_multisampling_image_memory = vulkan_anti_aliasing_multisampling_image_memory;
+        self.vulkan_anti_aliasing_multisampling_image_view = vulkan_anti_aliasing_multisampling_image_view;
         self.vulkan_fence_s_in_flight_image.resize(self.vulkan_swapchain_image_s.len(), VulkanFence::null());
         Ok(())
     }
@@ -345,6 +366,9 @@ impl Application {
         self.vulkan_device_logical.destroy_image_view(self.vulkan_depth_image_view, None);
         self.vulkan_device_logical.free_memory(self.vulkan_depth_image_memory, None);
         self.vulkan_device_logical.destroy_image(self.vulkan_depth_image, None);
+        self.vulkan_device_logical.destroy_image_view(self.vulkan_anti_aliasing_multisampling_image_view, None);
+        self.vulkan_device_logical.free_memory(self.vulkan_anti_aliasing_multisampling_image_memory, None);
+        self.vulkan_device_logical.destroy_image(self.vulkan_anti_aliasing_multisampling_image, None);
         self.vulkan_frame_buffer_s
         .iter()
         .for_each(|f| self.vulkan_device_logical.destroy_framebuffer(*f, None));
