@@ -23,4 +23,5 @@ pub mod vulkan_texture_image;
 pub mod vulkan_image;
 pub mod vulkan_depth;
 pub mod vulkan_mipmap;
+pub mod vulkan_anti_aliasing_multisampling;
 pub mod evolution;
