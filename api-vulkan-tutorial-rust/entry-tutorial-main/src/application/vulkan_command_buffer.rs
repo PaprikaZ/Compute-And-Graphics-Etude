@@ -1,3 +1,4 @@
+use ::nalgebra_glm as glm;
 use ::vulkan::prelude::version1_2::*;
 use ::vulkan::VulkanRenderPass;
 use ::vulkan::VulkanExtentD2;
@@ -25,6 +26,7 @@ use ::vulkan::VulkanSubmitInformation;
 use ::vulkan::VulkanQueue;
 use ::vulkan::VulkanFence;
 use ::vulkan::VulkanClearDepthStencilValue;
+use ::vulkan::VulkanShaderStageFlagS;
 
 use crate::termination::TerminationProcessMain;
 use crate::lib::d3_model_mesh::D3ModelMesh;
@@ -67,6 +69,13 @@ impl ApplicationVulkanCommandBuffer {
                 },
                 Ok(buffer_s) => buffer_s,
             };
+
+        let model_3d_transform =
+            glm::rotate(&glm::identity(), 0.0f32, &glm::vec3(0.0, 0.0, 1.0));
+        let (_, model_3d_transform_byte_s, _) = model_3d_transform.as_slice().align_to::<u8>();
+        let opacity = 0.25f32;
+        let opacity_byte_s = &opacity.to_ne_bytes()[..];
+
         for (index, vulkan_command_buffer) in vulkan_command_buffer_s.iter().enumerate() {
             let vulkan_command_buffer_begin_information = VulkanCommandBufferBeginInformation::builder();
             let begin_vulkan_command_buffer_result =
@@ -109,6 +118,18 @@ impl ApplicationVulkanCommandBuffer {
             vulkan_logical_device.cmd_bind_descriptor_sets(
                 *vulkan_command_buffer, VulkanPipelineBindPoint::GRAPHICS,
                 vulkan_pipeline_layout, 0, &[vulkan_descriptor_set_s[index]], &[]);
+            vulkan_logical_device.cmd_push_constants(
+                *vulkan_command_buffer,
+                vulkan_pipeline_layout,
+                VulkanShaderStageFlagS::VERTEX,
+                0,
+                model_3d_transform_byte_s);
+            vulkan_logical_device.cmd_push_constants(
+                *vulkan_command_buffer,
+                vulkan_pipeline_layout,
+                VulkanShaderStageFlagS::FRAGMENT,
+                64,
+                opacity_byte_s);
             vulkan_logical_device.cmd_draw_indexed(
                 *vulkan_command_buffer, input_vertex_index_number as u32, 1, 0, 0, 0);
             vulkan_logical_device.cmd_end_render_pass(*vulkan_command_buffer);
