@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use ::nalgebra_glm as glm;
 use ::vulkan::prelude::version1_2::*;
 use ::vulkan::VulkanRenderPass;
@@ -27,14 +29,16 @@ use ::vulkan::VulkanQueue;
 use ::vulkan::VulkanFence;
 use ::vulkan::VulkanClearDepthStencilValue;
 use ::vulkan::VulkanShaderStageFlagS;
+use ::vulkan::VulkanImage;
+use ::vulkan::VulkanCommandPoolResetFlagS;
 
 use crate::termination::TerminationProcessMain;
 use crate::lib::d3_model_mesh::D3ModelMesh;
 
 
-pub struct ApplicationVulkanCommandBuffer {}
+pub struct ApplicationVulkanCommandBufferOld {}
 
-impl ApplicationVulkanCommandBuffer {
+impl ApplicationVulkanCommandBufferOld {
     pub unsafe fn create_all(
         vulkan_logical_device: &VulkanDeviceLogical,
         vulkan_pipeline_layout: VulkanPipelineLayout,
@@ -119,17 +123,11 @@ impl ApplicationVulkanCommandBuffer {
                 *vulkan_command_buffer, VulkanPipelineBindPoint::GRAPHICS,
                 vulkan_pipeline_layout, 0, &[vulkan_descriptor_set_s[index]], &[]);
             vulkan_logical_device.cmd_push_constants(
-                *vulkan_command_buffer,
-                vulkan_pipeline_layout,
-                VulkanShaderStageFlagS::VERTEX,
-                0,
-                model_3d_transform_byte_s);
+                *vulkan_command_buffer, vulkan_pipeline_layout,
+                VulkanShaderStageFlagS::VERTEX, 0, model_3d_transform_byte_s);
             vulkan_logical_device.cmd_push_constants(
-                *vulkan_command_buffer,
-                vulkan_pipeline_layout,
-                VulkanShaderStageFlagS::FRAGMENT,
-                64,
-                opacity_byte_s);
+                *vulkan_command_buffer, vulkan_pipeline_layout,
+                VulkanShaderStageFlagS::FRAGMENT, 64, opacity_byte_s);
             vulkan_logical_device.cmd_draw_indexed(
                 *vulkan_command_buffer, input_vertex_index_number as u32, 1, 0, 0, 0);
             vulkan_logical_device.cmd_end_render_pass(*vulkan_command_buffer);
