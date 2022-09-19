@@ -49,7 +49,7 @@ use crate::application::vulkan_instance_swapchain_image_view::ApplicationInstanc
 use crate::application::vulkan_render_pass::ApplicationVulkanRenderPass;
 use crate::application::vulkan_pipeline::ApplicationVulkanPipeline;
 use crate::application::vulkan_frame_buffer::ApplicationVulkanFrameBuffer;
-use crate::application::vulkan_command_buffer::ApplicationVulkanCommandBuffer;
+use crate::application::vulkan_command_buffer::ApplicationVulkanCommandBufferSwapchainImage;
 use crate::application::vulkan_instance_validation_wi::ApplicationVulkanInstanceValidationWi;
 use crate::application::vulkan_instance_validation_wo::ApplicationVulkanInstanceValidationWo;
 use crate::application::evolution::ApplicationEvolution;
@@ -82,8 +82,9 @@ pub struct Application {
     pub vulkan_pipeline_layout: VulkanPipelineLayout,
     pub vulkan_pipeline: VulkanPipeline,
     pub vulkan_frame_buffer_s: Vec<VulkanFrameBuffer>,
-    pub vulkan_command_pool: VulkanCommandPool,
-    pub vulkan_command_buffer_s: Vec<VulkanCommandBuffer>,
+    pub vulkan_command_pool_main: VulkanCommandPool,
+    pub vulkan_command_pool_swapchain_image_s: Vec<VulkanCommandPool>,
+    pub vulkan_command_buffer_swapchain_image_s: Vec<VulkanCommandBuffer>,
     pub vulkan_semaphore_s_image_available: Vec<VulkanSemaphore>,
     pub vulkan_semaphore_s_render_finished: Vec<VulkanSemaphore>,
     pub vulkan_fence_s_in_flight_slide: Vec<VulkanFence>,
@@ -168,10 +169,26 @@ impl Application {
         }
         self.vulkan_fence_s_in_flight_image[vulkan_next_image_index] = vulkan_slide_in_flight_fence;
         //
+
+        ApplicationVulkanCommandBufferSwapchainImage::update_by_swapchain_image_index(
+            &self.vulkan_device_logical,
+            self.vulkan_pipeline,
+            &mut self.vulkan_command_pool_swapchain_image_s,
+            &mut self.vulkan_command_buffer_swapchain_image_s,
+            self.vulkan_swapchain_extent,
+            vulkan_next_image_index,
+            self.vulkan_render_pass,
+            &self.vulkan_frame_buffer_s,
+            self.vulkan_vertex_buffer,
+            self.vulkan_vertex_index_buffer,
+            self.vulkan_pipeline_layout,
+            self.instant_start,
+            &self.d3_model_mesh,
+            &self.vulkan_descriptor_set_s)?;
         ApplicationEvolution::update_state_transform_d3_view_projection(self)?;
         let wait_vulkan_semaphore_s = &[self.vulkan_semaphore_s_image_available[self.vulkan_frame_index_current]];
         let wait_vulkan_pipeline_stage_flag_s = &[VulkanPipelineStageFlagS::COLOR_ATTACHMENT_OUTPUT];
-        let vulkan_command_buffer_s = &[self.vulkan_command_buffer_s[vulkan_next_image_index]];
+        let vulkan_command_buffer_s = &[self.vulkan_command_buffer_swapchain_image_s[vulkan_next_image_index]];
         let vulkan_signal_semaphore_s = &[self.vulkan_semaphore_s_render_finished[self.vulkan_frame_index_current]];
         let vulkan_submit_information =
             VulkanSubmitInformation::builder()
@@ -285,12 +302,9 @@ impl Application {
                 &self.vulkan_device_logical, &vulkan_image_s,
                 self.vulkan_descriptor_set_layout, &vulkan_main_3d_transform_buffer_s, vulkan_descriptor_pool,
                 self.vulkan_texture_image_view, self.vulkan_texture_sampler)?;
-        let vulkan_command_buffer_s =
-            ApplicationVulkanCommandBuffer::create_all(
-                &self.vulkan_device_logical, vulkan_pipeline_layout, self.vulkan_command_pool,
-                &vulkan_frame_buffer_s, vulkan_extent, vulkan_render_pass, vulkan_pipeline,
-                self.vulkan_vertex_buffer, self.vulkan_vertex_index_buffer,
-                &self.d3_model_mesh, &vulkan_descriptor_set_s)?;
+        let vulkan_swapchain_image_command_buffer_s =
+            ApplicationVulkanCommandBufferSwapchainImage::create_blank_all(
+                &self.vulkan_device_logical, &vulkan_image_s, &self.vulkan_command_pool_swapchain_image_s)?;
         self.vulkan_swapchain_format = vulkan_format;
         self.vulkan_swapchain_extent = vulkan_extent;
         self.vulkan_swapchain = vulkan_swapchain;
@@ -304,7 +318,7 @@ impl Application {
         self.vulkan_transform_d3_main_buffer_memory_s = vulkan_main_3d_transform_buffer_memory_s;
         self.vulkan_descriptor_pool = vulkan_descriptor_pool;
         self.vulkan_descriptor_set_s = vulkan_descriptor_set_s;
-        self.vulkan_command_buffer_s = vulkan_command_buffer_s;
+        self.vulkan_command_buffer_swapchain_image_s = vulkan_swapchain_image_command_buffer_s;
         self.vulkan_depth_image = vulkan_depth_image;
         self.vulkan_depth_image_memory = vulkan_depth_image_memory;
         self.vulkan_depth_image_view = vulkan_depth_image_view;
@@ -333,6 +347,9 @@ impl Application {
         self.vulkan_semaphore_s_image_available
         .iter()
         .for_each(|s| self.vulkan_device_logical.destroy_semaphore(*s, None));
+        self.vulkan_command_pool_swapchain_image_s
+        .iter()
+        .for_each(|p| self.vulkan_device_logical.destroy_command_pool(*p, None));
         //
         self.vulkan_device_logical.free_memory(self.vulkan_vertex_index_buffer_memory, None);
         self.vulkan_device_logical.destroy_buffer(self.vulkan_vertex_index_buffer, None);
@@ -343,7 +360,6 @@ impl Application {
         self.vulkan_device_logical.destroy_image_view(self.vulkan_texture_image_view, None);
         self.vulkan_device_logical.free_memory(self.vulkan_texture_image_memory, None);
         self.vulkan_device_logical.destroy_image(self.vulkan_texture_image, None);
-        self.vulkan_device_logical.destroy_command_pool(self.vulkan_command_pool, None);
         self.vulkan_device_logical.destroy_descriptor_set_layout(self.vulkan_descriptor_set_layout, None);
         self.vulkan_device_logical.destroy_device(None);
         self.vulkan_instance.destroy_surface_khr(self.vulkan_surface, None);
@@ -355,7 +371,6 @@ impl Application {
     }
 
     unsafe fn destroy_swapchain(&mut self) -> () {
-        self.vulkan_device_logical.free_command_buffers(self.vulkan_command_pool, &self.vulkan_command_buffer_s);
         self.vulkan_device_logical.destroy_descriptor_pool(self.vulkan_descriptor_pool, None);
         self.vulkan_transform_d3_main_buffer_memory_s
         .iter()

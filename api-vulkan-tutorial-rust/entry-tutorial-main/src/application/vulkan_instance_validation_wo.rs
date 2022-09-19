@@ -26,7 +26,7 @@ use crate::application::vulkan_pipeline::ApplicationVulkanPipeline;
 use crate::application::vulkan_render_pass::ApplicationVulkanRenderPass;
 use crate::application::vulkan_frame_buffer::ApplicationVulkanFrameBuffer;
 use crate::application::vulkan_command_pool::ApplicationVulkanCommandPool;
-use crate::application::vulkan_command_buffer::ApplicationVulkanCommandBuffer;
+use crate::application::vulkan_command_buffer::ApplicationVulkanCommandBufferSwapchainImage;
 use crate::application::vulkan_synchronization::ApplicationVulkanSynchronization;
 use crate::application::vulkan_vertex::ApplicationVulkanVertexBuffer;
 use crate::application::vulkan_vertex_index::ApplicationVulkanVertexIndexBuffer;
@@ -140,9 +140,14 @@ impl ApplicationVulkanInstanceValidationWo {
             ApplicationVulkanPipeline::create_layout(
                 &vulkan_logical_device, vulkan_extent, vulkan_render_pass,
                 vulkan_descriptor_set_layout, vulkan_anti_aliasing_multisampling_number)?;
-        let vulkan_command_pool =
-            ApplicationVulkanCommandPool::create(&vulkan_logical_device, vulkan_graphic_queue_family_index)?;
-        let (vulkan_anti_aliasing_multisampling_image, vulkan_anti_aliasing_multisampling_image_memory, vulkan_anti_aliasing_multisampling_image_view) =
+        let vulkan_main_command_pool =
+            ApplicationVulkanCommandPool::create_main(&vulkan_logical_device, vulkan_graphic_queue_family_index)?;
+        let vulkan_swapchain_image_command_pool_s =
+            ApplicationVulkanCommandPool::create_swapchain_image_all(
+                &vulkan_logical_device, &vulkan_image_s, vulkan_graphic_queue_family_index)?;
+        let (vulkan_anti_aliasing_multisampling_image,
+             vulkan_anti_aliasing_multisampling_image_memory,
+             vulkan_anti_aliasing_multisampling_image_view) =
             ApplicationVulkanAntiAliasingMultiSampling::get_image_memory_view(
                 &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
                 vulkan_extent, vulkan_surface_format,
@@ -159,7 +164,7 @@ impl ApplicationVulkanInstanceValidationWo {
         let (vulkan_texture_image, vulkan_texture_image_memory) =
             ApplicationVulkanTextureImage::create_buffer_with_memory(
                 &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
-                vulkan_command_pool, vulkan_graphic_queue,
+                vulkan_main_command_pool, vulkan_graphic_queue,
                 texture_image_data, texture_image_information, vulkan_mip_level)?;
         let vulkan_texture_image_view =
             ApplicationVulkanTextureImage::create_view(&vulkan_logical_device, vulkan_texture_image, vulkan_mip_level)?;
@@ -168,11 +173,11 @@ impl ApplicationVulkanInstanceValidationWo {
         let (vulkan_vertex_buffer, vulkan_vertex_buffer_memory) =
             ApplicationVulkanVertexBuffer::create(
                 &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
-                vulkan_command_pool, vulkan_graphic_queue, &d3_model_mesh)?;
+                vulkan_main_command_pool, vulkan_graphic_queue, &d3_model_mesh)?;
         let (vulkan_vertex_index_buffer, vulkan_vertex_index_buffer_memory) =
             ApplicationVulkanVertexIndexBuffer::create(
                 &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
-                vulkan_command_pool, vulkan_graphic_queue, &d3_model_mesh)?;
+                vulkan_main_command_pool, vulkan_graphic_queue, &d3_model_mesh)?;
         let (vulkan_main_3d_transform_buffer_s, vulkan_main_3d_transform_buffer_memory_s) =
             ApplicationVulkanTransformD3Buffer::create_main_all(
                 &vulkan_instance, vulkan_physical_device, &vulkan_logical_device, &vulkan_image_s)?;
@@ -183,12 +188,9 @@ impl ApplicationVulkanInstanceValidationWo {
                 &vulkan_logical_device, &vulkan_image_s,
                 vulkan_descriptor_set_layout, &vulkan_main_3d_transform_buffer_s, vulkan_descriptor_pool,
                 vulkan_texture_image_view, vulkan_texture_sampler)?;
-        let vulkan_command_buffer_s =
-            ApplicationVulkanCommandBuffer::create_all(
-                &vulkan_logical_device, vulkan_pipeline_layout, vulkan_command_pool,
-                &vulkan_frame_buffer_s, vulkan_extent, vulkan_render_pass, vulkan_pipeline,
-                vulkan_vertex_buffer, vulkan_vertex_index_buffer, &d3_model_mesh,
-                &vulkan_descriptor_set_s)?;
+        let vulkan_swapchain_image_command_buffer_s =
+            ApplicationVulkanCommandBufferSwapchainImage::create_blank_all(
+                &vulkan_logical_device, &vulkan_image_s, &vulkan_swapchain_image_command_pool_s)?;
         let (vulkan_image_available_semaphore_s, vulkan_render_finished_semaphore_s,
              vulkan_slide_in_flight_fence_s, vulkan_image_in_flight_fence_s) =
             ApplicationVulkanSynchronization::create_all(&vulkan_logical_device, &vulkan_image_s)?;
@@ -214,8 +216,9 @@ impl ApplicationVulkanInstanceValidationWo {
             vulkan_pipeline_layout: vulkan_pipeline_layout,
             vulkan_pipeline: vulkan_pipeline,
             vulkan_frame_buffer_s: vulkan_frame_buffer_s,
-            vulkan_command_pool: vulkan_command_pool,
-            vulkan_command_buffer_s: vulkan_command_buffer_s,
+            vulkan_command_pool_main: vulkan_main_command_pool,
+            vulkan_command_pool_swapchain_image_s: vulkan_swapchain_image_command_pool_s,
+            vulkan_command_buffer_swapchain_image_s: vulkan_swapchain_image_command_buffer_s,
             vulkan_semaphore_s_image_available: vulkan_image_available_semaphore_s,
             vulkan_semaphore_s_render_finished: vulkan_render_finished_semaphore_s,
             vulkan_fence_s_in_flight_slide: vulkan_slide_in_flight_fence_s,
