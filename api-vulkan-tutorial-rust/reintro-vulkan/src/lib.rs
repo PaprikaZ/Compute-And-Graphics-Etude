@@ -221,6 +221,8 @@ pub use ::vulkanalia::vk::ClearDepthStencilValue as VulkanClearDepthStencilValue
 pub use ::vulkanalia::vk::ClearDepthStencilValueBuilder as VulkanClearDepthStencilValueBuilder;
 
 pub use ::vulkanalia::vk::ImageBlit as VulkanImageBlit;
+pub use ::vulkanalia::vk::PushConstantRange as VulkanPushConstantRange;
+pub use ::vulkanalia::vk::PushConstantRangeBuilder as VulkanPushConstantRangeBuilder;
 
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
