@@ -59,6 +59,7 @@ pub enum TerminationProcessMain {
     InitializationVulkanFormatFeatureNotSupport,
     InitializationModelFormatObjLoadingError(ModelFormatObjLoadError),
     InitializationVulkanDevicePhysicalSampledImageFilterLinearNotSupport,
+    InitializationVulkanResetCommandPoolFail(VulkanErrorCode),
 }
 
 impl TerminationProcessMain {
@@ -117,6 +118,7 @@ impl TerminationProcessMain {
             Self::InitializationVulkanFormatFeatureNotSupport => 50u8,
             Self::InitializationModelFormatObjLoadingError(_) => 51u8,
             Self::InitializationVulkanDevicePhysicalSampledImageFilterLinearNotSupport => 52u8,
+            Self::InitializationVulkanResetCommandPoolFail(_) => 53u8,
         }
     }
 }

@@ -224,6 +224,8 @@ pub use ::vulkanalia::vk::ImageBlit as VulkanImageBlit;
 pub use ::vulkanalia::vk::PushConstantRange as VulkanPushConstantRange;
 pub use ::vulkanalia::vk::PushConstantRangeBuilder as VulkanPushConstantRangeBuilder;
 
+pub use ::vulkanalia::vk::CommandPoolResetFlags as VulkanCommandPoolResetFlagS;
+
 pub use ::vulkanalia::vk::ATTACHMENT_UNUSED as VULKAN_ATTACHMENT_UNUSED;
 pub use ::vulkanalia::vk::FALSE as VULKAN_FALSE;
 pub use ::vulkanalia::vk::LOD_CLAMP_NONE as VULKAN_LOD_CLAMP_NONE;
