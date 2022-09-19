@@ -31,6 +31,9 @@ use ::vulkan::VulkanPipeline;
 use ::vulkan::VulkanDescriptorSetLayout;
 use ::vulkan::VulkanPipelineDepthStencilStateCreateInformation;
 use ::vulkan::VulkanCompareOperation;
+use ::vulkan::VulkanBlendFactor;
+use ::vulkan::VulkanBlendOperation;
+use ::vulkan::VulkanPushConstantRange;
 
 use crate::termination::TerminationProcessMain;
 use crate::data::d3_model_vertex::DataD3ModelVulkanVertexInput;
@@ -121,7 +124,13 @@ impl ApplicationVulkanPipeline {
         let vulkan_color_blend_attachment_state =
             VulkanPipelineColorBlendAttachmentState::builder()
             .color_write_mask(VulkanColorComponentFlagS::all())
-            .blend_enable(false);
+            .blend_enable(true)
+            .src_color_blend_factor(VulkanBlendFactor::SRC_ALPHA)
+            .dst_color_blend_factor(VulkanBlendFactor::ONE_MINUS_SRC_ALPHA)
+            .color_blend_op(VulkanBlendOperation::ADD)
+            .src_alpha_blend_factor(VulkanBlendFactor::ONE)
+            .dst_alpha_blend_factor(VulkanBlendFactor::ZERO)
+            .alpha_blend_op(VulkanBlendOperation::ADD);
         let vulkan_color_blend_attachment_state_s = &[vulkan_color_blend_attachment_state];
         let vulkan_color_blend_state_create_information =
             VulkanPipelineColorBlendStateCreateInformation::builder()
@@ -129,10 +138,23 @@ impl ApplicationVulkanPipeline {
             .logic_op(VulkanLogicOperation::COPY)
             .attachments(vulkan_color_blend_attachment_state_s)
             .blend_constants([0.0, 0.0, 0.0, 0.0]);
+        let vulkan_vertex_push_constant_range =
+            VulkanPushConstantRange::builder()
+            .stage_flags(VulkanShaderStageFlagS::VERTEX)
+            .offset(0)
+            .size(64);
+        let vulkan_fragment_push_constant_range =
+            VulkanPushConstantRange::builder()
+            .stage_flags(VulkanShaderStageFlagS::FRAGMENT)
+            .offset(64)
+            .size(4);
         let vulkan_descriptor_set_layout_s = &[vulkan_descriptor_set_layout];
+        let vulkan_push_constant_range_s =
+            &[vulkan_vertex_push_constant_range, vulkan_fragment_push_constant_range];
         let vulkan_pipeline_layout_create_infomation =
             VulkanPipelineLayoutCreateInformation::builder()
-            .set_layouts(vulkan_descriptor_set_layout_s);
+            .set_layouts(vulkan_descriptor_set_layout_s)
+            .push_constant_ranges(vulkan_push_constant_range_s);
         let create_vulkan_pipeline_layout_result =
             vulkan_logical_device.create_pipeline_layout(&vulkan_pipeline_layout_create_infomation, None);
         let vulkan_pipeline_layout =

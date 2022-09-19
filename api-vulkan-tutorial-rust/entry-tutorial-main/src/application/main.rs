@@ -168,7 +168,7 @@ impl Application {
         }
         self.vulkan_fence_s_in_flight_image[vulkan_next_image_index] = vulkan_slide_in_flight_fence;
         //
-        ApplicationEvolution::update_state_transform_d3_main(self)?;
+        ApplicationEvolution::update_state_transform_d3_view_projection(self)?;
         let wait_vulkan_semaphore_s = &[self.vulkan_semaphore_s_image_available[self.vulkan_frame_index_current]];
         let wait_vulkan_pipeline_stage_flag_s = &[VulkanPipelineStageFlagS::COLOR_ATTACHMENT_OUTPUT];
         let vulkan_command_buffer_s = &[self.vulkan_command_buffer_s[vulkan_next_image_index]];
