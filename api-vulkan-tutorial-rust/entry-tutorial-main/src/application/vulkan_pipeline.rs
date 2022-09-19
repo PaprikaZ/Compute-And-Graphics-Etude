@@ -31,6 +31,9 @@ use ::vulkan::VulkanPipeline;
 use ::vulkan::VulkanDescriptorSetLayout;
 use ::vulkan::VulkanPipelineDepthStencilStateCreateInformation;
 use ::vulkan::VulkanCompareOperation;
+use ::vulkan::VulkanBlendFactor;
+use ::vulkan::VulkanBlendOperation;
+use ::vulkan::VulkanPushConstantRange;
 
 use crate::termination::TerminationProcessMain;
 use crate::data::d3_model_vertex::DataD3ModelVulkanVertexInput;
@@ -121,7 +124,13 @@ impl ApplicationVulkanPipeline {
         let vulkan_color_blend_attachment_state =
             VulkanPipelineColorBlendAttachmentState::builder()
             .color_write_mask(VulkanColorComponentFlagS::all())
-            .blend_enable(false);
+            .blend_enable(true)
+            .src_color_blend_factor(VulkanBlendFactor::SRC_ALPHA)
+            .dst_color_blend_factor(VulkanBlendFactor::ONE_MINUS_SRC_ALPHA)
+            .color_blend_op(VulkanBlendOperation::ADD)
+            .src_alpha_blend_factor(VulkanBlendFactor::ONE)
+            .dst_alpha_blend_factor(VulkanBlendFactor::ZERO)
+            .alpha_blend_op(VulkanBlendOperation::ADD);
         let vulkan_color_blend_attachment_state_s = &[vulkan_color_blend_attachment_state];
         let vulkan_color_blend_state_create_information =
             VulkanPipelineColorBlendStateCreateInformation::builder()
