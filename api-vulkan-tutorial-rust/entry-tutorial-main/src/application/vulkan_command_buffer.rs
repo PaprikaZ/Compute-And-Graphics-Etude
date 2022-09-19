@@ -145,6 +145,37 @@ impl ApplicationVulkanCommandBufferOld {
     }
 }
 
+pub struct ApplicationVulkanCommandBufferSwapchainImage {}
+
+impl ApplicationVulkanCommandBufferSwapchainImage {
+    pub unsafe fn create_blank_all(
+        vulkan_logical_device: &VulkanDeviceLogical,
+        vulkan_swapchain_image_s: &Vec<VulkanImage>,
+        vulkan_command_pool_s: &Vec<VulkanCommandPool>)
+     -> Result<Vec<VulkanCommandBuffer>, TerminationProcessMain> {
+        let mut vulkan_command_buffer_s: Vec<VulkanCommandBuffer> = Vec::new();
+        vulkan_command_buffer_s.reserve_exact(vulkan_swapchain_image_s.len());
+        for image_index in 0..vulkan_swapchain_image_s.len() {
+            let vulkan_command_buffer_allocate_information =
+                VulkanCommandBufferAllocateInformation::builder()
+                .command_pool(vulkan_command_pool_s[image_index])
+                .level(VulkanCommandBufferLevel::PRIMARY)
+                .command_buffer_count(1);
+            let allocate_vulkan_command_buffer_s_result =
+                vulkan_logical_device.allocate_command_buffers(&vulkan_command_buffer_allocate_information);
+            let vulkan_command_buffer =
+                match allocate_vulkan_command_buffer_s_result {
+                    Err(error) => {
+                        let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                        return Err(TerminationProcessMain::InitializationVulkanCommandBufferSAllocateFail(vulkan_error_code));
+                    },
+                    Ok(buffer_s) => buffer_s[0],
+                };
+            vulkan_command_buffer_s.push(vulkan_command_buffer);
+        }
+        Ok(vulkan_command_buffer_s)
+    }
+}
 pub struct ApplicationVulkanCommandBufferOneTime {}
 
 impl ApplicationVulkanCommandBufferOneTime {
