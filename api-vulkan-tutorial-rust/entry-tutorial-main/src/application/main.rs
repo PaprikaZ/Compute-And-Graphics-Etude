@@ -86,6 +86,7 @@ pub struct Application {
     pub vulkan_command_pool_main: VulkanCommandPool,
     pub vulkan_command_pool_swapchain_image_s: Vec<VulkanCommandPool>,
     pub vulkan_command_buffer_swapchain_image_s: Vec<VulkanCommandBuffer>,
+    pub vulkan_command_buffer_swapchain_image_logical_viewport_tt: Vec<Vec<VulkanCommandBuffer>>,
     pub vulkan_semaphore_s_image_available: Vec<VulkanSemaphore>,
     pub vulkan_semaphore_s_render_finished: Vec<VulkanSemaphore>,
     pub vulkan_fence_s_in_flight_slide: Vec<VulkanFence>,
@@ -176,7 +177,8 @@ impl Application {
             &self.vulkan_device_logical,
             self.vulkan_pipeline,
             &mut self.vulkan_command_pool_swapchain_image_s,
-            &mut self.vulkan_command_buffer_swapchain_image_s,
+            &self.vulkan_command_buffer_swapchain_image_s,
+            &mut self.vulkan_command_buffer_swapchain_image_logical_viewport_tt,
             self.vulkan_swapchain_extent,
             vulkan_next_image_index,
             self.vulkan_render_pass,
@@ -186,7 +188,8 @@ impl Application {
             self.vulkan_pipeline_layout,
             self.instant_start,
             &self.d3_model_mesh,
-            &self.vulkan_descriptor_set_s)?;
+            &self.vulkan_descriptor_set_s,
+            &self.window_viewport_logical_number)?;
         ApplicationEvolution::update_state_transform_d3_view_projection(self)?;
         let wait_vulkan_semaphore_s = &[self.vulkan_semaphore_s_image_available[self.vulkan_frame_index_current]];
         let wait_vulkan_pipeline_stage_flag_s = &[VulkanPipelineStageFlagS::COLOR_ATTACHMENT_OUTPUT];

@@ -8,9 +8,14 @@ use ::vulkan::VulkanInstanceCreateInformation;
 use ::vulkan::VulkanWindow;
 use ::vulkan::prelude::version1_2::*;
 use ::vulkan::VulkanExtensionName;
+use ::vulkan::VulkanCommandBuffer;
+use ::vulkan::VulkanCommandBufferLevel;
+use ::vulkan::VulkanCommandBufferAllocateInformation;
 
 use crate::termination::TerminationProcessMain;
+use crate::lib::window_viewport::WINDOW_VIEWPORT_LOGICAL_NUMBER_MAX;
 use crate::lib::d3_model_mesh::D3ModelMesh;
+use crate::lib::window_viewport::WindowViewportLogicalNumber;
 use crate::data::d3_model_resource::DataD3ModelResource;
 use crate::data::d3_model_mesh_tutorial_simple::DataD3ModelMeshTutorialSimple;
 use crate::data::d3_model_mesh_tutorial_format_obj::DataD3ModelMeshTutorialFormatObj;
@@ -194,6 +199,34 @@ impl ApplicationVulkanInstanceValidationWo {
         let (vulkan_image_available_semaphore_s, vulkan_render_finished_semaphore_s,
              vulkan_slide_in_flight_fence_s, vulkan_image_in_flight_fence_s) =
             ApplicationVulkanSynchronization::create_all(&vulkan_logical_device, &vulkan_image_s)?;
+        let mut vulkan_swapchain_image_logical_viewport_command_buffer_tt: Vec<Vec<VulkanCommandBuffer>> = Vec::new();
+        vulkan_swapchain_image_logical_viewport_command_buffer_tt.reserve_exact(vulkan_image_s.len());
+        for image_index in 0..vulkan_image_s.len() {
+            let vulkan_swapchain_image_command_pool =
+                vulkan_swapchain_image_command_pool_s[image_index];
+            let vulkan_logical_viewport_command_buffer_allocate_information =
+                VulkanCommandBufferAllocateInformation::builder()
+                .command_pool(vulkan_swapchain_image_command_pool)
+                .level(VulkanCommandBufferLevel::SECONDARY)
+                .command_buffer_count(1);
+            let mut vulkan_logical_viewport_command_buffer_s: Vec<VulkanCommandBuffer> = Vec::new();
+            vulkan_logical_viewport_command_buffer_s.reserve_exact(WINDOW_VIEWPORT_LOGICAL_NUMBER_MAX);
+            for _viewport_index in 0..WINDOW_VIEWPORT_LOGICAL_NUMBER_MAX {
+                let allocate_vulkan_command_buffer_result =
+                    vulkan_logical_device.allocate_command_buffers(
+                        &vulkan_logical_viewport_command_buffer_allocate_information);
+                let vulkan_logical_viewport_command_buffer =
+                    match allocate_vulkan_command_buffer_result {
+                        Err(error) => {
+                            let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                            return Err(TerminationProcessMain::InitializationVulkanCommandBufferSAllocateFail(vulkan_error_code));
+                        },
+                        Ok(buffer_s) => buffer_s[0],
+                    };
+                vulkan_logical_viewport_command_buffer_s.push(vulkan_logical_viewport_command_buffer);
+            }
+            vulkan_swapchain_image_logical_viewport_command_buffer_tt.push(vulkan_logical_viewport_command_buffer_s);
+        }
         Ok(Application {
             instant_start: Instant::now(),
             signal_window_resized: false,
@@ -219,6 +252,7 @@ impl ApplicationVulkanInstanceValidationWo {
             vulkan_command_pool_main: vulkan_main_command_pool,
             vulkan_command_pool_swapchain_image_s: vulkan_swapchain_image_command_pool_s,
             vulkan_command_buffer_swapchain_image_s: vulkan_swapchain_image_command_buffer_s,
+            vulkan_command_buffer_swapchain_image_logical_viewport_tt: vulkan_swapchain_image_logical_viewport_command_buffer_tt,
             vulkan_semaphore_s_image_available: vulkan_image_available_semaphore_s,
             vulkan_semaphore_s_render_finished: vulkan_render_finished_semaphore_s,
             vulkan_fence_s_in_flight_slide: vulkan_slide_in_flight_fence_s,
