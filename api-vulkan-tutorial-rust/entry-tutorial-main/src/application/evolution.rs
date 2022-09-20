@@ -20,7 +20,7 @@ impl ApplicationEvolution {
     {
         let main_view_3d_transform =
             glm::look_at(
-                &glm::vec3(2.0, 2.0, 2.0),
+                &glm::vec3(6.0, 0.0, 2.0),
                 &glm::vec3(0.0, 0.0, 0.0),
                 &glm::vec3(0.0, 0.0, 1.0));
         let mut main_projection_3d_transform =

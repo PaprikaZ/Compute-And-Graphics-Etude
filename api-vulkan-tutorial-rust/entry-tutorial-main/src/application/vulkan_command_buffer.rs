@@ -31,9 +31,12 @@ use ::vulkan::VulkanClearDepthStencilValue;
 use ::vulkan::VulkanShaderStageFlagS;
 use ::vulkan::VulkanImage;
 use ::vulkan::VulkanCommandPoolResetFlagS;
+use ::vulkan::VulkanCommandBufferInheritanceInformation;
 
 use crate::termination::TerminationProcessMain;
 use crate::lib::d3_model_mesh::D3ModelMesh;
+use crate::lib::window_viewport::WindowViewportLogicalNumber;
+use crate::lib::window_viewport::WindowViewportLogicalIndex;
 
 
 pub struct ApplicationVulkanCommandBufferOld {}
@@ -180,7 +183,8 @@ impl ApplicationVulkanCommandBufferSwapchainImage {
         vulkan_logical_device: &VulkanDeviceLogical,
         vulkan_pipeline: VulkanPipeline,
         vulkan_command_pool_s: &mut Vec<VulkanCommandPool>,
-        vulkan_command_buffer_s: &mut Vec<VulkanCommandBuffer>,
+        vulkan_swapchain_image_command_buffer_s: &Vec<VulkanCommandBuffer>,
+        vulkan_swapchain_image_logical_viewport_command_buffer_tt: &mut Vec<Vec<VulkanCommandBuffer>>,
         vulkan_swapchain_extent: VulkanExtentD2,
         vulkan_swapchain_image_index: usize,
         vulkan_render_pass: VulkanRenderPass,
@@ -190,17 +194,13 @@ impl ApplicationVulkanCommandBufferSwapchainImage {
         vulkan_pipeline_layout: VulkanPipelineLayout,
         start_instant: Instant,
         d3_model_mesh: &D3ModelMesh,
-        vulkan_descriptor_set_s: &Vec<VulkanDescriptorSet>)
+        vulkan_descriptor_set_s: &Vec<VulkanDescriptorSet>,
+        window_logical_viewport_number: &WindowViewportLogicalNumber)
      -> Result<(), TerminationProcessMain>
     {
-        let input_vertex_index_number =
-            match d3_model_mesh {
-                D3ModelMesh::TutorialSimple(mesh) => mesh.vertex_index_s.len(),
-                D3ModelMesh::TutorialFormatObj(mesh) => mesh.vertex_index_s.len(),
-            };
-        let target_vulkan_command_pool = vulkan_command_pool_s[vulkan_swapchain_image_index];
+        let vulkan_swapchain_image_command_pool = vulkan_command_pool_s[vulkan_swapchain_image_index];
         let reset_vulkan_command_pool_result =
-            vulkan_logical_device.reset_command_pool(target_vulkan_command_pool, VulkanCommandPoolResetFlagS::empty());
+            vulkan_logical_device.reset_command_pool(vulkan_swapchain_image_command_pool, VulkanCommandPoolResetFlagS::empty());
         match reset_vulkan_command_pool_result {
             Err(error) => {
                 let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
@@ -208,26 +208,18 @@ impl ApplicationVulkanCommandBufferSwapchainImage {
             },
             Ok(()) => (),
         };
-        let target_vulkan_command_buffer = vulkan_command_buffer_s[vulkan_swapchain_image_index];
-        let target_vulkan_frame_buffer = vulkan_frame_buffer_s[vulkan_swapchain_image_index];
-        let target_vulkan_descriptor_set = vulkan_descriptor_set_s[vulkan_swapchain_image_index];
-        //
-        let elapsed_time = start_instant.elapsed().as_secs_f32();
-        let model_3d_transform =
-            glm::rotate(
-                &glm::identity(),
-                elapsed_time * glm::radians(&glm::vec1(90.0))[0],
-                &glm::vec3(0.0, 0.0, 1.0));
-        let (_, model_3d_transform_byte_s, _) = model_3d_transform.as_slice().align_to::<u8>();
-        let opacity = 0.25f32;
-        let opacity_byte_s = &opacity.to_ne_bytes()[..];
+        let vulkan_logical_viewport_command_buffer_t =
+            &mut vulkan_swapchain_image_logical_viewport_command_buffer_tt[vulkan_swapchain_image_index];
+        let vulkan_swapchain_image_command_buffer = vulkan_swapchain_image_command_buffer_s[vulkan_swapchain_image_index];
+        let vulkan_swapchain_image_frame_buffer = vulkan_frame_buffer_s[vulkan_swapchain_image_index];
+        let vulkan_swapchain_image_descriptor_set = vulkan_descriptor_set_s[vulkan_swapchain_image_index];
         //
         let vulkan_command_buffer_begin_information =
             VulkanCommandBufferBeginInformation::builder()
             .flags(VulkanCommandBufferUsageFlagS::ONE_TIME_SUBMIT);
         let begin_vulkan_command_buffer_result =
             vulkan_logical_device.begin_command_buffer(
-                target_vulkan_command_buffer, &vulkan_command_buffer_begin_information);
+                vulkan_swapchain_image_command_buffer, &vulkan_command_buffer_begin_information);
         match begin_vulkan_command_buffer_result {
             Err(error) => {
                 let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
@@ -247,35 +239,34 @@ impl ApplicationVulkanCommandBufferSwapchainImage {
         let vulkan_render_pass_begin_information =
             VulkanRenderPassBeginInformation::builder()
             .render_pass(vulkan_render_pass)
-            .framebuffer(target_vulkan_frame_buffer)
+            .framebuffer(vulkan_swapchain_image_frame_buffer)
             .render_area(vulkan_render_area)
             .clear_values(vulkan_clear_value_s);
         vulkan_logical_device.cmd_begin_render_pass(
-            target_vulkan_command_buffer, &vulkan_render_pass_begin_information, VulkanSubpassContents::INLINE);
-        vulkan_logical_device.cmd_bind_pipeline(
-            target_vulkan_command_buffer, VulkanPipelineBindPoint::GRAPHICS, vulkan_pipeline);
-        vulkan_logical_device.cmd_bind_vertex_buffers(
-            target_vulkan_command_buffer, 0, &[vulkan_vertex_buffer], &[0]);
-        match d3_model_mesh {
-            D3ModelMesh::TutorialSimple(_) => vulkan_logical_device.cmd_bind_index_buffer(
-                target_vulkan_command_buffer, vulkan_vertex_index_buffer, 0, VulkanIndexType::UINT16),
-            D3ModelMesh::TutorialFormatObj(_) => vulkan_logical_device.cmd_bind_index_buffer(
-                target_vulkan_command_buffer, vulkan_vertex_index_buffer, 0, VulkanIndexType::UINT32),
-        };
-        vulkan_logical_device.cmd_bind_descriptor_sets(
-            target_vulkan_command_buffer, VulkanPipelineBindPoint::GRAPHICS,
-            vulkan_pipeline_layout, 0, &[target_vulkan_descriptor_set], &[]);
-        vulkan_logical_device.cmd_push_constants(
-            target_vulkan_command_buffer, vulkan_pipeline_layout,
-            VulkanShaderStageFlagS::VERTEX, 0, model_3d_transform_byte_s);
-        vulkan_logical_device.cmd_push_constants(
-            target_vulkan_command_buffer, vulkan_pipeline_layout,
-            VulkanShaderStageFlagS::FRAGMENT, 64, opacity_byte_s);
-        vulkan_logical_device.cmd_draw_indexed(
-            target_vulkan_command_buffer, input_vertex_index_number as u32, 1, 0, 0, 0);
-        vulkan_logical_device.cmd_end_render_pass(target_vulkan_command_buffer);
+            vulkan_swapchain_image_command_buffer, &vulkan_render_pass_begin_information, VulkanSubpassContents::SECONDARY_COMMAND_BUFFERS);
+        let vulkan_logical_viewport_command_buffer_s =
+            (0..window_logical_viewport_number.as_raw())
+            .map(|viewport_index| {
+                Self::record_window_logical_viewport(
+                    vulkan_logical_device,
+                    vulkan_pipeline,
+                    vulkan_logical_viewport_command_buffer_t,
+                    WindowViewportLogicalIndex::new(viewport_index),
+                    vulkan_render_pass,
+                    vulkan_swapchain_image_frame_buffer,
+                    vulkan_vertex_buffer,
+                    vulkan_vertex_index_buffer,
+                    vulkan_pipeline_layout,
+                    start_instant,
+                    d3_model_mesh,
+                    vulkan_swapchain_image_descriptor_set)
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        vulkan_logical_device.cmd_execute_commands(
+            vulkan_swapchain_image_command_buffer, &vulkan_logical_viewport_command_buffer_s[..]);
+        vulkan_logical_device.cmd_end_render_pass(vulkan_swapchain_image_command_buffer);
         let end_vulkan_command_buffer_result =
-            vulkan_logical_device.end_command_buffer(target_vulkan_command_buffer);
+            vulkan_logical_device.end_command_buffer(vulkan_swapchain_image_command_buffer);
         match end_vulkan_command_buffer_result {
             Err(error) => {
                 let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
@@ -284,6 +275,92 @@ impl ApplicationVulkanCommandBufferSwapchainImage {
             Ok(()) => (),
         };
         Ok(())
+    }
+
+    unsafe fn record_window_logical_viewport(
+        vulkan_logical_device: &VulkanDeviceLogical,
+        vulkan_pipeline: VulkanPipeline,
+        vulkan_logical_viewport_command_buffer_t: &mut Vec<VulkanCommandBuffer>,
+        window_logical_viewport_index: WindowViewportLogicalIndex,
+        vulkan_render_pass: VulkanRenderPass,
+        vulkan_frame_buffer: VulkanFrameBuffer,
+        vulkan_vertex_buffer: VulkanBuffer,
+        vulkan_vertex_index_buffer: VulkanBuffer,
+        vulkan_pipeline_layout: VulkanPipelineLayout,
+        start_instant: Instant,
+        d3_model_mesh: &D3ModelMesh,
+        vulkan_descriptor_set: VulkanDescriptorSet)
+     -> Result<VulkanCommandBuffer, TerminationProcessMain>
+    {
+        let input_vertex_index_number =
+            match d3_model_mesh {
+                D3ModelMesh::TutorialSimple(mesh) => mesh.vertex_index_s.len(),
+                D3ModelMesh::TutorialFormatObj(mesh) => mesh.vertex_index_s.len(),
+            };
+        //
+        let vulkan_logical_viewport_command_buffer =
+            vulkan_logical_viewport_command_buffer_t[window_logical_viewport_index.as_raw()];
+        //
+        let y_axis_modification = (((window_logical_viewport_index.as_raw() % 2) as f32) * 2.5) - 1.25;
+        let z_axis_modification = (((window_logical_viewport_index.as_raw() / 2) as f32) * -2.0) + 1.0;
+        let model_3d_transform =
+            glm::translate( &glm::identity(), &glm::vec3(0.0, y_axis_modification, z_axis_modification));
+        let elapsed_time = start_instant.elapsed().as_secs_f32();
+        let model_3d_transform =
+            glm::rotate(
+                &model_3d_transform,
+                elapsed_time * glm::radians(&glm::vec1(90.0))[0],
+                &glm::vec3(0.0, 0.0, 1.0));
+        let (_, model_3d_transform_byte_s, _) = model_3d_transform.as_slice().align_to::<u8>();
+        let opacity = (window_logical_viewport_index.as_raw() + 1) as f32 * 0.25;
+        let opacity_byte_s = &opacity.to_ne_bytes()[..];
+        //
+        let vulkan_command_buffer_inheritance_information =
+            VulkanCommandBufferInheritanceInformation::builder()
+            .render_pass(vulkan_render_pass)
+            .subpass(0)
+            .framebuffer(vulkan_frame_buffer);
+        let vulkan_command_buffer_begin_information =
+            VulkanCommandBufferBeginInformation::builder()
+            .flags(VulkanCommandBufferUsageFlagS::RENDER_PASS_CONTINUE)
+            .inheritance_info(&vulkan_command_buffer_inheritance_information);
+        let begin_vulkan_command_buffer_result =
+            vulkan_logical_device.begin_command_buffer(
+                vulkan_logical_viewport_command_buffer, &vulkan_command_buffer_begin_information);
+        match begin_vulkan_command_buffer_result {
+            Err(error) => {
+                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                return Err(TerminationProcessMain::InitializationVulkanCommandBufferBeginFail(vulkan_error_code));
+            },
+            Ok(()) => (),
+        };
+        vulkan_logical_device.cmd_bind_pipeline(
+            vulkan_logical_viewport_command_buffer, VulkanPipelineBindPoint::GRAPHICS, vulkan_pipeline);
+        vulkan_logical_device.cmd_bind_vertex_buffers(
+            vulkan_logical_viewport_command_buffer, 0, &[vulkan_vertex_buffer], &[0]);
+        vulkan_logical_device.cmd_bind_index_buffer(
+            vulkan_logical_viewport_command_buffer, vulkan_vertex_index_buffer, 0, VulkanIndexType::UINT32);
+        vulkan_logical_device.cmd_bind_descriptor_sets(
+            vulkan_logical_viewport_command_buffer, VulkanPipelineBindPoint::GRAPHICS,
+            vulkan_pipeline_layout, 0, &[vulkan_descriptor_set], &[]);
+        vulkan_logical_device.cmd_push_constants(
+            vulkan_logical_viewport_command_buffer, vulkan_pipeline_layout,
+            VulkanShaderStageFlagS::VERTEX, 0, model_3d_transform_byte_s);
+        vulkan_logical_device.cmd_push_constants(
+            vulkan_logical_viewport_command_buffer, vulkan_pipeline_layout,
+            VulkanShaderStageFlagS::FRAGMENT, 64, opacity_byte_s);
+        vulkan_logical_device.cmd_draw_indexed(
+            vulkan_logical_viewport_command_buffer, input_vertex_index_number as u32, 1, 0, 0, 0);
+        let end_vulkan_command_buffer_result =
+            vulkan_logical_device.end_command_buffer(vulkan_logical_viewport_command_buffer);
+        match end_vulkan_command_buffer_result {
+            Err(error) => {
+                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                return Err(TerminationProcessMain::InitializationVulkanCommandBufferEndFail(vulkan_error_code));
+            },
+            Ok(()) => (),
+        };
+        Ok(vulkan_logical_viewport_command_buffer)
     }
 }
 
