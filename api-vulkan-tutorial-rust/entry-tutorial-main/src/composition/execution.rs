@@ -3,6 +3,7 @@ use ::window_uniform::prelude::*;
 use crate::window::Window;
 use crate::application::main::Application;
 use crate::termination::TerminationProcessMain;
+use crate::lib::window_viewport::WindowViewportLogicalNumber;
 
 
 pub struct CompositionExecution {}
@@ -32,6 +33,17 @@ impl CompositionExecution {
                     be_destroying = true;
                     *control_flow = WindowUniformEventLoopControlFlow::Exit;
                     let _destroy_result = unsafe { application.destroy() };
+                },
+                WindowUniformEvent::WindowEvent {
+                    event: WindowUniformEventWindow::KeyboardInput { input: keyboard_input, .. }, ..  } =>
+                {
+                    match (keyboard_input.state, keyboard_input.virtual_keycode) {
+                        (WindowUniformKeyState::Pressed, Some(WindowUniformKeyVirtualCode::Left)) =>
+                            application.window_viewport_logical_number.decrease_one(),
+                        (WindowUniformKeyState::Pressed, Some(WindowUniformKeyVirtualCode::Right)) =>
+                            application.window_viewport_logical_number.increase_one(),
+                        _ => (),
+                    }
                 },
                 _ => {}
             }

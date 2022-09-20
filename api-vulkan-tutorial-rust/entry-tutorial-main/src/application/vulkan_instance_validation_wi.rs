@@ -259,6 +259,7 @@ impl ApplicationVulkanInstanceValidationWi {
             vulkan_anti_aliasing_multisampling_image: vulkan_anti_aliasing_multisampling_image,
             vulkan_anti_aliasing_multisampling_image_memory: vulkan_anti_aliasing_multisampling_image_memory,
             vulkan_anti_aliasing_multisampling_image_view: vulkan_anti_aliasing_multisampling_image_view,
+            window_viewport_logical_number: WindowViewportLogicalNumber::new(1),
             d3_model_mesh: d3_model_mesh,
         })
     }

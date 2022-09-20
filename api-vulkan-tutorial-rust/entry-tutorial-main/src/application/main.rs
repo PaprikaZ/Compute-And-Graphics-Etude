@@ -42,6 +42,7 @@ use ::vulkan::VulkanSampleCountFlagS;
 
 use crate::config::vulkan::VULKAN_FRAME_IN_FLIGHT_MAX;
 use crate::lib::d3_model_mesh::D3ModelMesh;
+use crate::lib::window_viewport::WindowViewportLogicalNumber;
 use crate::data::d3_model_resource::DataD3ModelResource;
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_instance_swapchain::ApplicationVulkanInstanceSwapchain;
@@ -111,6 +112,7 @@ pub struct Application {
     pub vulkan_anti_aliasing_multisampling_image: VulkanImage,
     pub vulkan_anti_aliasing_multisampling_image_memory: VulkanDeviceMemory,
     pub vulkan_anti_aliasing_multisampling_image_view: VulkanImageView,
+    pub window_viewport_logical_number: WindowViewportLogicalNumber,
     pub d3_model_mesh: D3ModelMesh,
 }
 
