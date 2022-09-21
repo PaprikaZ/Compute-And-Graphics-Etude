@@ -128,3 +128,24 @@ impl std::process::Termination for TerminationProcessMain {
         std::process::ExitCode::from(self.to_exit_code())
     }
 }
+
+macro_rules! termination_vulkan_error {
+    (normal1, $result_identifier:ident, $termination_enum_item:expr) => {
+        match $result_identifier {
+            Err(error) => {
+                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                Err($termination_enum_item(vulkan_error_code))
+            },
+            Ok(value) => Ok(value),
+        }
+    };
+    (return1, $result_identifier:ident, $termination_enum_item:expr) => {
+        match $result_identifier {
+            Err(error) => {
+                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
+                return Err($termination_enum_item(vulkan_error_code))
+            },
+            Ok(value) => value,
+        }
+    };
+}
