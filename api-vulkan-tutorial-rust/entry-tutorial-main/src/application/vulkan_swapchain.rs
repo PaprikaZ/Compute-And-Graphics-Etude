@@ -13,14 +13,14 @@ use ::vulkan::VulkanImage;
 use ::vulkan::VulkanSurfaceCapabilitySKhr;
 use ::vulkan::VulkanSurfaceFormatKhr;
 use ::vulkan::VulkanPresentModeKhr;
-use ::vulkan::VulkanQueueFamilyIndexGraphic;
-use ::vulkan::VulkanQueueFamilyIndexSurface;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanQueueFamilyIndexGraphic;
+use ::vulkan::extend::VulkanQueueFamilyIndexSurface;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanSharingMode;
 use ::vulkan::VulkanSwapchainCreateInformationKhr;
 use ::vulkan::VulkanImageUsageFlagS;
 use ::vulkan::VulkanCompositeAlphaFlagSKhr;
-use ::vulkan::VulkanSwapchainImageCount;
+use ::vulkan::extend::VulkanSwapchainImageCount;
 
 use crate::termination::TerminationProcessMain;
 

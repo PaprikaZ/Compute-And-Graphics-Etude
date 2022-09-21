@@ -2,7 +2,7 @@ use std::mem::size_of;
 use std::ptr::copy_nonoverlapping;
 
 use ::vulkan::prelude::version1_2::*;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanDevicePhysical;
 use ::vulkan::VulkanInstance;
 use ::vulkan::VulkanBufferUsageFlagS;

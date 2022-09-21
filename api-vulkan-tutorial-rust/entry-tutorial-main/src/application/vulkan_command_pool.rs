@@ -1,6 +1,6 @@
 use ::vulkan::prelude::version1_2::*;
-use ::vulkan::VulkanErrorCode;
-use ::vulkan::VulkanQueueFamilyIndexGraphic;
+use ::vulkan::extend::VulkanErrorCode;
+use ::vulkan::extend::VulkanQueueFamilyIndexGraphic;
 use ::vulkan::VulkanCommandPool;
 use ::vulkan::VulkanCommandPoolCreateInformation;
 use ::vulkan::VulkanCommandPoolCreateFlagS;

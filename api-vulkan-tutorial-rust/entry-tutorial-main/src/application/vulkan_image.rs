@@ -1,5 +1,5 @@
 use ::vulkan::prelude::version1_2::*;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanDevicePhysical;
 use ::vulkan::VulkanInstance;
 use ::vulkan::VulkanFormat;
@@ -20,7 +20,7 @@ use ::vulkan::VulkanImageLayout;
 use ::vulkan::VulkanSampleCountFlagS;
 use ::vulkan::VulkanSharingMode;
 use ::vulkan::VulkanMemoryAllocateInformation;
-use ::vulkan::VulkanMipLevel;
+use ::vulkan::extend::VulkanMipLevel;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_memory::ApplicationVulkanMemory;

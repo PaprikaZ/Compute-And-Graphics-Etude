@@ -11,7 +11,7 @@ use ::vulkan::VulkanImageAspectFlagS;
 use ::vulkan::VulkanImage;
 use ::vulkan::VulkanImageView;
 use ::vulkan::VulkanDeviceMemory;
-use ::vulkan::VulkanMipLevel;
+use ::vulkan::extend::VulkanMipLevel;
 use ::vulkan::VulkanSampleCountFlagS;
 
 use crate::termination::TerminationProcessMain;

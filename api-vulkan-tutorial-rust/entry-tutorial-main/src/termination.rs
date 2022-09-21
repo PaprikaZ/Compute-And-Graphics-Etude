@@ -1,7 +1,7 @@
 use ::png::DecodingError as FormatPngDecodingError;
 use ::libloading::Error as LibraryLoadingError;
 use ::window_uniform::WindowUniformErrorOperationSystem;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::tobj::LoadError as ModelFormatObjLoadError;
 
 

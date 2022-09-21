@@ -1,4 +1,4 @@
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::prelude::version1_2::*;
 use ::vulkan::VulkanExtentD2;
 use ::vulkan::VulkanShaderModule;

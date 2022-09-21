@@ -3,7 +3,7 @@ use std::ptr::copy_nonoverlapping;
 use ::png::OutputInfo as FormatPngOutputInfomration;
 use ::vulkan::VULKAN_QUEUE_FAMILY_IGNORED;
 use ::vulkan::prelude::version1_2::*;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanInstance;
 use ::vulkan::VulkanDevicePhysical;
 use ::vulkan::VulkanBufferUsageFlagS;
@@ -41,7 +41,7 @@ use ::vulkan::VulkanSampler;
 use ::vulkan::VulkanDescriptorSetLayoutBinding;
 use ::vulkan::VulkanDescriptorType;
 use ::vulkan::VulkanShaderStageFlagS;
-use ::vulkan::VulkanMipLevel;
+use ::vulkan::extend::VulkanMipLevel;
 use ::vulkan::VulkanSampleCountFlagS;
 
 use crate::termination::TerminationProcessMain;

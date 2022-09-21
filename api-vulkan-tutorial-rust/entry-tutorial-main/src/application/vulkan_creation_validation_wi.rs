@@ -6,7 +6,7 @@ use std::time::Instant;
 use ::console_log::prelude::*;
 use ::window_uniform::prelude::*;
 use ::vulkan::VULKAN_LIBRARY_FILE_NAME;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanLibraryLoader;
 use ::vulkan::VulkanInstanceCreateInformation;
 use ::vulkan::VulkanExtensionName;

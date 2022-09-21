@@ -1,7 +1,7 @@
 use std::mem::size_of;
 
 use ::vulkan::prelude::version1_2::*;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanBuffer;
 use ::vulkan::VulkanImage;
 use ::vulkan::VulkanDescriptorPool;

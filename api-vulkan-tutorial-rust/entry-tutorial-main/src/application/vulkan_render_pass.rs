@@ -1,5 +1,5 @@
 use ::vulkan::prelude::version1_2::*;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanFormat;
 use ::vulkan::VulkanAttachmentDescription;
 use ::vulkan::VulkanAttachmentLoadOperation;

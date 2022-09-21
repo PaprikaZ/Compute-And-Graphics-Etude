@@ -3,7 +3,7 @@ use std::ptr::copy_nonoverlapping;
 
 use ::nalgebra_glm as glm;
 use ::vulkan::prelude::version1_2::*;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanMemoryMapFlagS;
 
 use crate::termination::TerminationProcessMain;

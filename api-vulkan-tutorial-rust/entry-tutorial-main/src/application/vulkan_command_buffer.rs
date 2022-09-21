@@ -5,7 +5,7 @@ use ::vulkan::prelude::version1_2::*;
 use ::vulkan::VulkanRenderPass;
 use ::vulkan::VulkanExtentD2;
 use ::vulkan::VulkanPipeline;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanFrameBuffer;
 use ::vulkan::VulkanCommandPool;
 use ::vulkan::VulkanCommandBufferAllocateInformation;

@@ -1,14 +1,14 @@
 use std::collections::HashSet;
 
-use vulkan::VulkanQueueFamilyIndexSurface;
+use ::vulkan::extend::VulkanQueueFamilyIndexSurface;
 use ::vulkan::prelude::version1_2::*;
 use ::vulkan::VulkanInstance;
 use ::vulkan::VulkanDevicePhysical;
-use ::vulkan::VulkanQueueFamilyIndexGraphic;
+use ::vulkan::extend::VulkanQueueFamilyIndexGraphic;
 use ::vulkan::VulkanDeviceLogicalCreateInformation;
 use ::vulkan::VulkanDeviceLogicalQueueCreateInformation;
 use ::vulkan::VulkanDevicePhysicalFeatureS;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanQueue;
 use ::vulkan::VulkanExtensionName;
 

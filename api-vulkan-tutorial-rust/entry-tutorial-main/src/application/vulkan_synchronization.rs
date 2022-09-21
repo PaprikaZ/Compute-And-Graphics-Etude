@@ -1,5 +1,5 @@
 use ::vulkan::prelude::version1_2::*;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanSemaphore;
 use ::vulkan::VulkanSemaphoreCreateInformation;
 use ::vulkan::VulkanFence;
