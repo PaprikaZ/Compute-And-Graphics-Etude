@@ -39,14 +39,10 @@ impl ApplicationVulkanDevicePhysical {
         vulkan_extension_s: &[VulkanExtensionName])
      -> Result<(VulkanDevicePhysical, VulkanQueueFamilyIndexGraphic, VulkanQueueFamilyIndexSurface), TerminationProcessMain>
     {
-        let vulkan_physical_device_s =
-            match vulkan_instance.enumerate_physical_devices() {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanEnumeratePhysicalDeviceFail(vulkan_error_code));
-                },
-                Ok(device_s) => device_s,
-            };
+        let enumerate_vulkan_physical_device_s_result = vulkan_instance.enumerate_physical_devices();
+        let vulkan_physical_device_s = termination_vulkan_error!(return1,
+            enumerate_vulkan_physical_device_s_result,
+            TerminationProcessMain::InitializationVulkanEnumeratePhysicalDeviceFail);
         for vulkan_physical_device in vulkan_physical_device_s {
             let physical_device_property_s = vulkan_instance.get_physical_device_properties(vulkan_physical_device);
             let check_result =

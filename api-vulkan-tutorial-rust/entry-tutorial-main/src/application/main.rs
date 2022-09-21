@@ -139,14 +139,8 @@ impl Application {
         let vulkan_available_image_semaphore = self.vulkan_semaphore_s_image_available[self.vulkan_frame_index_current];
         let wait_vulkan_in_flight_fence_result =
             self.vulkan_device_logical.wait_for_fences(&[vulkan_slide_in_flight_fence], true, u64::max_value());
-        let _ =
-            match wait_vulkan_in_flight_fence_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanFenceWaitFail(vulkan_error_code));
-                },
-                Ok(success_code) => success_code,
-            };
+        let _ = termination_vulkan_error!(return1,
+            wait_vulkan_in_flight_fence_result, TerminationProcessMain::InitializationVulkanFenceWaitFail);
         let acquire_vulkan_next_image_index_result =
             self.vulkan_device_logical.acquire_next_image_khr(
                 self.vulkan_swapchain, u64::max_value(), vulkan_available_image_semaphore, VulkanFence::null());
@@ -162,17 +156,11 @@ impl Application {
         if !vulkan_image_in_flight_fence.is_null() {
             let wait_vulkan_unknown_fence_result =
                 self.vulkan_device_logical.wait_for_fences(&[vulkan_image_in_flight_fence], true, u64::max_value());
-            match wait_vulkan_unknown_fence_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanFenceWaitFail(vulkan_error_code));
-                },
-                Ok(_success_code) => (),
-            }
+            let _ = termination_vulkan_error!(return1,
+                wait_vulkan_unknown_fence_result, TerminationProcessMain::InitializationVulkanFenceWaitFail);
         }
         self.vulkan_fence_s_in_flight_image[vulkan_next_image_index] = vulkan_slide_in_flight_fence;
         //
-
         ApplicationVulkanCommandBufferSwapchainImage::update_by_swapchain_image_index(
             &self.vulkan_device_logical,
             self.vulkan_pipeline,
@@ -203,22 +191,12 @@ impl Application {
             .signal_semaphores(vulkan_signal_semaphore_s);
         let reset_vulkan_fence_s_result =
             self.vulkan_device_logical.reset_fences(&[vulkan_slide_in_flight_fence]);
-        match reset_vulkan_fence_s_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanFenceResetFail(vulkan_error_code));
-            },
-            Ok(()) => (),
-        };
+        termination_vulkan_error!(return1,
+            reset_vulkan_fence_s_result, TerminationProcessMain::InitializationVulkanFenceResetFail);
         let submit_vulkan_queue_result =
             self.vulkan_device_logical.queue_submit(self.vulkan_queue_graphic, &[vulkan_submit_information], vulkan_slide_in_flight_fence);
-        match submit_vulkan_queue_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanQueueSubmitFail(vulkan_error_code));
-            },
-            Ok(()) => (),
-        };
+        termination_vulkan_error!(return1,
+            submit_vulkan_queue_result, TerminationProcessMain::InitializationVulkanQueueSubmitFail);
         let vulkan_swapchain_s = &[self.vulkan_swapchain];
         let vulkan_image_index_s = &[vulkan_next_image_index as u32];
         let vulkan_present_information =
@@ -250,13 +228,9 @@ impl Application {
     }
 
     unsafe fn recreate_swapchain(&mut self, window: &WindowUniformWindow) -> Result<(), TerminationProcessMain> {
-        match self.vulkan_device_logical.device_wait_idle() {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanDeviceWaitIdleFail(vulkan_error_code));
-            },
-            Ok(()) => (),
-        };
+        let wait_vulkan_logical_device_idle_result = self.vulkan_device_logical.device_wait_idle();
+        termination_vulkan_error!(return1,
+            wait_vulkan_logical_device_idle_result, TerminationProcessMain::InitializationVulkanDeviceWaitIdleFail);
         self.destroy_swapchain();
         let (vulkan_format, vulkan_extent, vulkan_swapchain, vulkan_image_s) =
             ApplicationVulkanSwapchain::create(
@@ -335,13 +309,9 @@ impl Application {
     }
 
     pub unsafe fn destroy(&mut self) -> Result<(), TerminationProcessMain> {
-        match self.vulkan_device_logical.device_wait_idle() {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanDeviceWaitIdleFail(vulkan_error_code));
-            },
-            Ok(()) => (),
-        };
+        let wait_vulkan_logical_device_idle_result = self.vulkan_device_logical.device_wait_idle();
+        termination_vulkan_error!(return1,
+            wait_vulkan_logical_device_idle_result, TerminationProcessMain::InitializationVulkanDeviceWaitIdleFail);
         self.destroy_swapchain();
         self.vulkan_fence_s_in_flight_slide
         .iter()

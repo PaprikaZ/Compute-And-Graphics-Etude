@@ -55,14 +55,8 @@ impl ApplicationVulkanVertexBuffer {
                 vulkan_vertex_buffer_size,
                 VulkanMemoryMapFlagS::empty(),
             );
-        let vulkan_vertex_staging_buffer_memory_address =
-            match map_vulkan_vertex_staging_buffer_memory_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanMemoryMapFail(vulkan_error_code));
-                },
-                Ok(address) => address,
-            };
+        let vulkan_vertex_staging_buffer_memory_address = termination_vulkan_error!(return1,
+            map_vulkan_vertex_staging_buffer_memory_result, TerminationProcessMain::InitializationVulkanMemoryMapFail);
         copy_nonoverlapping(
             input_vertex_s.as_ptr(),
             vulkan_vertex_staging_buffer_memory_address.cast(),

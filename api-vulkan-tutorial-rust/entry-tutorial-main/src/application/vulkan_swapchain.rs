@@ -66,24 +66,12 @@ impl ApplicationVulkanSwapchain {
             .old_swapchain(VulkanSwapchainKhr::null());
         let create_vulkan_swapchain_result =
             vulkan_logical_device.create_swapchain_khr(&vulkan_swapchain_create_information, None);
-        let vulkan_swapchain =
-            match create_vulkan_swapchain_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanSwapchainCreateFail(vulkan_error_code));
-                },
-                Ok(swapchain) => swapchain,
-            };
+        let vulkan_swapchain = termination_vulkan_error!(return1,
+            create_vulkan_swapchain_result, TerminationProcessMain::InitializationVulkanSwapchainCreateFail);
         let get_vulkan_swapchain_image_s_result =
             vulkan_logical_device.get_swapchain_images_khr(vulkan_swapchain);
-        let vulkan_swapchain_image_s =
-            match get_vulkan_swapchain_image_s_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanSwapchainImageSGetFail(vulkan_error_code));
-                },
-                Ok(image_s) => image_s,
-            };
+        let vulkan_swapchain_image_s = termination_vulkan_error!(return1,
+            get_vulkan_swapchain_image_s_result, TerminationProcessMain::InitializationVulkanSwapchainImageSGetFail);
         Ok((vulkan_surface_format.format, vulkan_extent, vulkan_swapchain, vulkan_swapchain_image_s))
     }
 
@@ -96,34 +84,19 @@ impl ApplicationVulkanSwapchain {
     {
         let get_vulkan_physical_device_surface_capability_s_result =
             vulkan_instance.get_physical_device_surface_capabilities_khr(vulkan_physical_device, vulkan_surface);
-        let vulkan_physical_device_capability_s =
-            match get_vulkan_physical_device_surface_capability_s_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanDevicePhysicalSurfaceCapabilitySGetFail(vulkan_error_code));
-                },
-                Ok(capability_s) => capability_s,
-            };
+        let vulkan_physical_device_capability_s = termination_vulkan_error!(return1,
+            get_vulkan_physical_device_surface_capability_s_result,
+            TerminationProcessMain::InitializationVulkanDevicePhysicalSurfaceCapabilitySGetFail);
         let get_vulkan_physical_device_surface_format_s_result =
             vulkan_instance.get_physical_device_surface_formats_khr(vulkan_physical_device, vulkan_surface);
-        let vulkan_physical_device_surface_format_s =
-            match get_vulkan_physical_device_surface_format_s_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanDevicePhysicalSurfaceFormatSGetFail(vulkan_error_code));
-                },
-                Ok(format_s) => format_s,
-            };
+        let vulkan_physical_device_surface_format_s = termination_vulkan_error!(return1,
+            get_vulkan_physical_device_surface_format_s_result,
+            TerminationProcessMain::InitializationVulkanDevicePhysicalSurfaceFormatSGetFail);
         let get_vulkan_physical_device_surface_present_mode_s_result =
             vulkan_instance.get_physical_device_surface_present_modes_khr(vulkan_physical_device, vulkan_surface);
-        let vulkan_physical_device_surface_present_mode_s =
-            match get_vulkan_physical_device_surface_present_mode_s_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanDevicePhysicalSurfacePresentModeSGetFail(vulkan_error_code));
-                },
-                Ok(present_mode_s) => present_mode_s,
-            };
+        let vulkan_physical_device_surface_present_mode_s = termination_vulkan_error!(return1,
+            get_vulkan_physical_device_surface_present_mode_s_result,
+            TerminationProcessMain::InitializationVulkanDevicePhysicalSurfacePresentModeSGetFail);
         Ok((vulkan_physical_device_capability_s,
             vulkan_physical_device_surface_format_s,
             vulkan_physical_device_surface_present_mode_s))

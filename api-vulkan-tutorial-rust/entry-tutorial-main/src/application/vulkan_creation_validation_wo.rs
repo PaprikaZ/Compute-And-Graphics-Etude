@@ -91,14 +91,8 @@ impl ApplicationVulkanCreationValidationWo {
                 Ok(instance) => instance,
             };
         let create_vulkan_surface_result = VulkanWindow::create_surface(&vulkan_instance, window);
-        let vulkan_surface =
-            match create_vulkan_surface_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanSurfaceCreateFail(vulkan_error_code));
-                },
-                Ok(surface) => surface,
-            };
+        let vulkan_surface = termination_vulkan_error!(return1,
+            create_vulkan_surface_result, TerminationProcessMain::InitializationVulkanSurfaceCreateFail);
         let (vulkan_physical_device,
              vulkan_graphic_queue_family_index,
              vulkan_surface_queue_family_index) =
@@ -215,14 +209,8 @@ impl ApplicationVulkanCreationValidationWo {
                 let allocate_vulkan_command_buffer_result =
                     vulkan_logical_device.allocate_command_buffers(
                         &vulkan_logical_viewport_command_buffer_allocate_information);
-                let vulkan_logical_viewport_command_buffer =
-                    match allocate_vulkan_command_buffer_result {
-                        Err(error) => {
-                            let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                            return Err(TerminationProcessMain::InitializationVulkanCommandBufferSAllocateFail(vulkan_error_code));
-                        },
-                        Ok(buffer_s) => buffer_s[0],
-                    };
+                let vulkan_logical_viewport_command_buffer = termination_vulkan_error!(return1,
+                    allocate_vulkan_command_buffer_result, TerminationProcessMain::InitializationVulkanCommandBufferSAllocateFail)[0];
                 vulkan_logical_viewport_command_buffer_s.push(vulkan_logical_viewport_command_buffer);
             }
             vulkan_swapchain_image_logical_viewport_command_buffer_tt.push(vulkan_logical_viewport_command_buffer_s);
@@ -294,14 +282,10 @@ impl ApplicationVulkanCreationValidationWo {
             VulkanInstanceCreateInformation::builder()
             .application_info(&vulkan_application_information)
             .enabled_extension_names(&vulkan_application_extension_s);
-        let vulkan_instance =
-            match vulkan_entry.create_instance(&vulkan_instance_create_information, None) {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanInstanceCreateFail(vulkan_error_code));
-                } ,
-                Ok(instance) => instance,
-            };
+        let create_vulkan_instance_result =
+            vulkan_entry.create_instance(&vulkan_instance_create_information, None);
+        let vulkan_instance = termination_vulkan_error!(return1,
+            create_vulkan_instance_result, TerminationProcessMain::InitializationVulkanInstanceCreateFail);
         Ok(vulkan_instance)
     }
 }

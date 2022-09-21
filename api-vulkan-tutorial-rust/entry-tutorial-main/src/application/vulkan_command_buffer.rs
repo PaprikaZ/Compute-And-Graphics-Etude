@@ -68,15 +68,8 @@ impl ApplicationVulkanCommandBufferOld {
             .command_buffer_count(vulkan_frame_buffer_s.len() as u32);
         let allocate_vulkan_command_buffer_s_result =
             vulkan_logical_device.allocate_command_buffers(&vulkan_command_buffer_allocate_information);
-        let vulkan_command_buffer_s =
-            match allocate_vulkan_command_buffer_s_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanCommandBufferSAllocateFail(vulkan_error_code));
-                },
-                Ok(buffer_s) => buffer_s,
-            };
-
+        let vulkan_command_buffer_s = termination_vulkan_error!(return1,
+            allocate_vulkan_command_buffer_s_result, TerminationProcessMain::InitializationVulkanCommandBufferSAllocateFail);
         let model_3d_transform =
             glm::rotate(&glm::identity(), 0.0f32, &glm::vec3(0.0, 0.0, 1.0));
         let (_, model_3d_transform_byte_s, _) = model_3d_transform.as_slice().align_to::<u8>();
@@ -88,13 +81,8 @@ impl ApplicationVulkanCommandBufferOld {
             let begin_vulkan_command_buffer_result =
                 vulkan_logical_device.begin_command_buffer(
                     *vulkan_command_buffer, &vulkan_command_buffer_begin_information);
-            match begin_vulkan_command_buffer_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanCommandBufferBeginFail(vulkan_error_code));
-                },
-                Ok(()) => (),
-            };
+            termination_vulkan_error!(return1,
+                begin_vulkan_command_buffer_result, TerminationProcessMain::InitializationVulkanCommandBufferBeginFail);
             let vulkan_render_area =
                 VulkanRectangleD2::builder()
                 .offset(VulkanOffsetD2::default())
@@ -136,13 +124,8 @@ impl ApplicationVulkanCommandBufferOld {
             vulkan_logical_device.cmd_end_render_pass(*vulkan_command_buffer);
             let end_vulkan_command_buffer_result =
                 vulkan_logical_device.end_command_buffer(*vulkan_command_buffer);
-            match end_vulkan_command_buffer_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanCommandBufferEndFail(vulkan_error_code));
-                },
-                Ok(()) => (),
-            };
+            termination_vulkan_error!(return1,
+                end_vulkan_command_buffer_result, TerminationProcessMain::InitializationVulkanCommandBufferEndFail);
         };
         Ok(vulkan_command_buffer_s)
     }
@@ -166,14 +149,9 @@ impl ApplicationVulkanCommandBufferSwapchainImage {
                 .command_buffer_count(1);
             let allocate_vulkan_command_buffer_s_result =
                 vulkan_logical_device.allocate_command_buffers(&vulkan_command_buffer_allocate_information);
-            let vulkan_command_buffer =
-                match allocate_vulkan_command_buffer_s_result {
-                    Err(error) => {
-                        let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                        return Err(TerminationProcessMain::InitializationVulkanCommandBufferSAllocateFail(vulkan_error_code));
-                    },
-                    Ok(buffer_s) => buffer_s[0],
-                };
+            let vulkan_command_buffer = termination_vulkan_error!(return1,
+                allocate_vulkan_command_buffer_s_result,
+                TerminationProcessMain::InitializationVulkanCommandBufferSAllocateFail)[0];
             vulkan_command_buffer_s.push(vulkan_command_buffer);
         }
         Ok(vulkan_command_buffer_s)
@@ -201,13 +179,8 @@ impl ApplicationVulkanCommandBufferSwapchainImage {
         let vulkan_swapchain_image_command_pool = vulkan_command_pool_s[vulkan_swapchain_image_index];
         let reset_vulkan_command_pool_result =
             vulkan_logical_device.reset_command_pool(vulkan_swapchain_image_command_pool, VulkanCommandPoolResetFlagS::empty());
-        match reset_vulkan_command_pool_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanResetCommandPoolFail(vulkan_error_code));
-            },
-            Ok(()) => (),
-        };
+        termination_vulkan_error!(return1,
+            reset_vulkan_command_pool_result, TerminationProcessMain::InitializationVulkanResetCommandPoolFail);
         let vulkan_logical_viewport_command_buffer_t =
             &mut vulkan_swapchain_image_logical_viewport_command_buffer_tt[vulkan_swapchain_image_index];
         let vulkan_swapchain_image_command_buffer = vulkan_swapchain_image_command_buffer_s[vulkan_swapchain_image_index];
@@ -220,13 +193,8 @@ impl ApplicationVulkanCommandBufferSwapchainImage {
         let begin_vulkan_command_buffer_result =
             vulkan_logical_device.begin_command_buffer(
                 vulkan_swapchain_image_command_buffer, &vulkan_command_buffer_begin_information);
-        match begin_vulkan_command_buffer_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanCommandBufferBeginFail(vulkan_error_code));
-            },
-            Ok(()) => (),
-        };
+        termination_vulkan_error!(return1,
+            begin_vulkan_command_buffer_result, TerminationProcessMain::InitializationVulkanCommandBufferBeginFail);
         let vulkan_render_area =
             VulkanRectangleD2::builder()
             .offset(VulkanOffsetD2::default())
@@ -267,13 +235,8 @@ impl ApplicationVulkanCommandBufferSwapchainImage {
         vulkan_logical_device.cmd_end_render_pass(vulkan_swapchain_image_command_buffer);
         let end_vulkan_command_buffer_result =
             vulkan_logical_device.end_command_buffer(vulkan_swapchain_image_command_buffer);
-        match end_vulkan_command_buffer_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanCommandBufferEndFail(vulkan_error_code));
-            },
-            Ok(()) => (),
-        };
+        termination_vulkan_error!(return1,
+            end_vulkan_command_buffer_result, TerminationProcessMain::InitializationVulkanCommandBufferEndFail);
         Ok(())
     }
 
@@ -327,13 +290,8 @@ impl ApplicationVulkanCommandBufferSwapchainImage {
         let begin_vulkan_command_buffer_result =
             vulkan_logical_device.begin_command_buffer(
                 vulkan_logical_viewport_command_buffer, &vulkan_command_buffer_begin_information);
-        match begin_vulkan_command_buffer_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanCommandBufferBeginFail(vulkan_error_code));
-            },
-            Ok(()) => (),
-        };
+        termination_vulkan_error!(return1,
+            begin_vulkan_command_buffer_result, TerminationProcessMain::InitializationVulkanCommandBufferBeginFail);
         vulkan_logical_device.cmd_bind_pipeline(
             vulkan_logical_viewport_command_buffer, VulkanPipelineBindPoint::GRAPHICS, vulkan_pipeline);
         vulkan_logical_device.cmd_bind_vertex_buffers(
@@ -353,13 +311,8 @@ impl ApplicationVulkanCommandBufferSwapchainImage {
             vulkan_logical_viewport_command_buffer, input_vertex_index_number as u32, 1, 0, 0, 0);
         let end_vulkan_command_buffer_result =
             vulkan_logical_device.end_command_buffer(vulkan_logical_viewport_command_buffer);
-        match end_vulkan_command_buffer_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanCommandBufferEndFail(vulkan_error_code));
-            },
-            Ok(()) => (),
-        };
+        termination_vulkan_error!(return1,
+            end_vulkan_command_buffer_result, TerminationProcessMain::InitializationVulkanCommandBufferEndFail);
         Ok(vulkan_logical_viewport_command_buffer)
     }
 }
@@ -379,27 +332,17 @@ impl ApplicationVulkanCommandBufferOneTime {
             .command_buffer_count(1);
         let allocate_vulkan_command_buffer_result =
             vulkan_logical_device.allocate_command_buffers(&vulkan_command_buffer_allocate_information);
-        let vulkan_command_buffer =
-            match allocate_vulkan_command_buffer_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanCommandBufferSAllocateFail(vulkan_error_code));
-                },
-                Ok(buffer_s) => buffer_s[0],
-            };
+        let vulkan_command_buffer = termination_vulkan_error!(return1,
+            allocate_vulkan_command_buffer_result,
+            TerminationProcessMain::InitializationVulkanCommandBufferSAllocateFail)[0];
         //
         let vulkan_command_buffer_begin_information =
             VulkanCommandBufferBeginInformation::builder()
             .flags(VulkanCommandBufferUsageFlagS::ONE_TIME_SUBMIT);
         let begin_vulkan_command_buffer_result =
             vulkan_logical_device.begin_command_buffer(vulkan_command_buffer, &vulkan_command_buffer_begin_information);
-        match begin_vulkan_command_buffer_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanCommandBufferBeginFail(vulkan_error_code));
-            },
-            Ok(()) => (),
-        };
+        termination_vulkan_error!(return1,
+            begin_vulkan_command_buffer_result, TerminationProcessMain::InitializationVulkanCommandBufferBeginFail);
         Ok(vulkan_command_buffer)
     }
 
@@ -410,13 +353,9 @@ impl ApplicationVulkanCommandBufferOneTime {
         vulkan_graphic_queue: VulkanQueue)
      -> Result<(), TerminationProcessMain>
     {
-        match vulkan_logical_device.end_command_buffer(vulkan_command_buffer) {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanCommandBufferEndFail(vulkan_error_code));
-            },
-            Ok(()) => (),
-        };
+        let end_vulkan_command_buffer_result = vulkan_logical_device.end_command_buffer(vulkan_command_buffer);
+        termination_vulkan_error!(return1,
+            end_vulkan_command_buffer_result, TerminationProcessMain::InitializationVulkanCommandBufferEndFail);
         let vulkan_command_buffer_s = &[vulkan_command_buffer];
         let vulkan_submit_information =
             VulkanSubmitInformation::builder()
@@ -424,20 +363,11 @@ impl ApplicationVulkanCommandBufferOneTime {
         let vulkan_submit_result =
             vulkan_logical_device.queue_submit(
                 vulkan_graphic_queue, &[vulkan_submit_information], VulkanFence::null());
-        match vulkan_submit_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanQueueSubmitFail(vulkan_error_code));
-            },
-            Ok(()) => (),
-        };
-        match vulkan_logical_device.queue_wait_idle(vulkan_graphic_queue) {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanDeviceWaitIdleFail(vulkan_error_code));
-            },
-            Ok(()) => (),
-        };
+        termination_vulkan_error!(return1,
+            vulkan_submit_result, TerminationProcessMain::InitializationVulkanQueueSubmitFail);
+        let wait_vulkan_queue_idle_result = vulkan_logical_device.queue_wait_idle(vulkan_graphic_queue);
+        termination_vulkan_error!(return1,
+            wait_vulkan_queue_idle_result, TerminationProcessMain::InitializationVulkanDeviceWaitIdleFail);
         vulkan_logical_device.free_command_buffers(vulkan_command_pool, vulkan_command_buffer_s);
         Ok(())
     }

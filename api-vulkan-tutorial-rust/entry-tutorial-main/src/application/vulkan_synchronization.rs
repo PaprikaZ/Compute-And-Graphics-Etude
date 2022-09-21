@@ -50,13 +50,8 @@ impl ApplicationVulkanSynchronization {
     {
         let create_vulkan_semaphore_result =
             vulkan_logical_device.create_semaphore(vulkan_semaphore_create_information, None);
-        match create_vulkan_semaphore_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                Err(TerminationProcessMain::InitializationVulkanSemaphoreCreateFail(vulkan_error_code))
-            },
-            Ok(semaphore) => Ok(semaphore),
-        }
+        termination_vulkan_error!(normal1,
+            create_vulkan_semaphore_result, TerminationProcessMain::InitializationVulkanSemaphoreCreateFail)
     }
 
     unsafe fn create_fence(
@@ -66,12 +61,7 @@ impl ApplicationVulkanSynchronization {
     {
         let create_vulkan_fence_result =
             vulkan_logical_device.create_fence(vulkan_fence_create_information, None);
-        match create_vulkan_fence_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                Err(TerminationProcessMain::InitializationVulkanFenceCreateFail(vulkan_error_code))
-            },
-            Ok(fence) => Ok(fence),
-        }
+        termination_vulkan_error!(normal1,
+            create_vulkan_fence_result, TerminationProcessMain::InitializationVulkanFenceCreateFail)
     }
 }

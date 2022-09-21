@@ -66,13 +66,8 @@ impl ApplicationVulkanRenderPass {
             .dependencies(vulkan_subpass_dependency_s);
         let create_vulkan_render_pass_result =
             vulkan_logical_device.create_render_pass(&vulkan_render_pass_create_infomation, None);
-        match create_vulkan_render_pass_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanRenderPassCreateFail(vulkan_error_code));
-            },
-            Ok(render_pass) => Ok(render_pass),
-        }
+        termination_vulkan_error!(normal1,
+            create_vulkan_render_pass_result, TerminationProcessMain::InitializationVulkanRenderPassCreateFail)
     }
 
     unsafe fn create_attachment_color(
