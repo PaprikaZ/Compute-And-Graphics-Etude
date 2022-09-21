@@ -32,11 +32,11 @@ use crate::data::d3_model_mesh_tutorial_format_obj::DataD3ModelMeshTutorialForma
 use crate::data::d3_model_texture_tutorial_simple::DataD3ModelTextureTutorialSimple;
 use crate::data::d3_model_texture_tutorial_format_obj::DataD3ModelTextureTutorialFormatObj;
 use crate::application::main::Application;
-use crate::application::vulkan_instance_share::ApplicationVulkanInstanceShare;
-use crate::application::vulkan_instance_device_physical::ApplicationVulkanInstanceDevicePhysical;
-use crate::application::vulkan_instance_device_logical::ApplicationVulkanInstanceDeviceLogical;
-use crate::application::vulkan_instance_swapchain::ApplicationVulkanInstanceSwapchain;
-use crate::application::vulkan_instance_swapchain_image_view::ApplicationInstanceSwapchainImageView;
+use crate::application::vulkan_share::ApplicationVulkanShare;
+use crate::application::vulkan_device_physical::ApplicationVulkanDevicePhysical;
+use crate::application::vulkan_device_logical::ApplicationVulkanDeviceLogical;
+use crate::application::vulkan_swapchain::ApplicationVulkanSwapchain;
+use crate::application::vulkan_swapchain_image_view::ApplicationSwapchainImageView;
 use crate::application::vulkan_pipeline::ApplicationVulkanPipeline;
 use crate::application::vulkan_render_pass::ApplicationVulkanRenderPass;
 use crate::application::vulkan_frame_buffer::ApplicationVulkanFrameBuffer;
@@ -56,9 +56,9 @@ use crate::application::vulkan_mipmap::ApplicationVulkanMipmap;
 use crate::application::vulkan_anti_aliasing_multisampling::ApplicationVulkanAntiAliasingMultiSampling;
 
 
-pub struct ApplicationVulkanInstanceValidationWi {}
+pub struct ApplicationVulkanCreationValidationWi {}
 
-impl ApplicationVulkanInstanceValidationWi {
+impl ApplicationVulkanCreationValidationWi {
     pub unsafe fn create(
         window: &WindowUniformWindow,
         vulkan_validation_layer: &VulkanExtensionName,
@@ -115,12 +115,12 @@ impl ApplicationVulkanInstanceValidationWi {
         let (vulkan_physical_device,
              vulkan_graphic_queue_family_index,
              vulkan_surface_queue_family_index) =
-            match ApplicationVulkanInstanceDevicePhysical::pick(&vulkan_instance, vulkan_surface, vulkan_extension_s) {
+            match ApplicationVulkanDevicePhysical::pick(&vulkan_instance, vulkan_surface, vulkan_extension_s) {
                 Err(error) => return Err(error),
                 Ok(device_and_queue_index) => device_and_queue_index,
             };
         let create_vulkan_logical_device_result =
-            ApplicationVulkanInstanceDeviceLogical::create(
+            ApplicationVulkanDeviceLogical::create(
                 &vulkan_instance,
                 vulkan_physical_device,
                 vulkan_extension_s,
@@ -134,12 +134,12 @@ impl ApplicationVulkanInstanceValidationWi {
         let vulkan_anti_aliasing_multisampling_number =
             ApplicationVulkanAntiAliasingMultiSampling::get_sample_count_max(&vulkan_instance, vulkan_physical_device);
         let (vulkan_surface_format, vulkan_extent, vulkan_swapchain, vulkan_image_s) =
-            ApplicationVulkanInstanceSwapchain::create(
+            ApplicationVulkanSwapchain::create(
                 window, &vulkan_instance, vulkan_surface, &vulkan_logical_device,
                 vulkan_physical_device, vulkan_graphic_queue_family_index, vulkan_surface_queue_family_index
             )?;
         let vulkan_image_view_s =
-            ApplicationInstanceSwapchainImageView::create_all(
+            ApplicationSwapchainImageView::create_all(
                 &vulkan_logical_device, vulkan_surface_format, &vulkan_image_s)?;
         let vulkan_render_pass =
             ApplicationVulkanRenderPass::create(
@@ -303,7 +303,7 @@ impl ApplicationVulkanInstanceValidationWi {
      -> Result<VulkanInstance, TerminationProcessMain>
     {
         let vulkan_application_information =
-            ApplicationVulkanInstanceShare::create_vulkan_instance_application_information();
+            ApplicationVulkanShare::create_vulkan_instance_application_information();
         let available_vulkan_layer_s =
             match vulkan_entry.enumerate_instance_layer_properties() {
                 Err(error) => {
@@ -321,7 +321,7 @@ impl ApplicationVulkanInstanceValidationWi {
                 true => vec![vulkan_validation_layer.as_ptr()],
             };
         let vulkan_application_extension_s = {
-            let mut extension_s = ApplicationVulkanInstanceShare::create_vulkan_instance_application_extension_s(window);
+            let mut extension_s = ApplicationVulkanShare::create_vulkan_instance_application_extension_s(window);
             extension_s.push(VULKAN_EXTENSION_DEBUG_UTILITY.name.as_ptr());
             extension_s
         };

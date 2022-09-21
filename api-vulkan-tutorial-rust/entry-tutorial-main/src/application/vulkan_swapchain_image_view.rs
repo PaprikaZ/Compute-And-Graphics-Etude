@@ -15,9 +15,9 @@ use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_image::ApplicationVulkanImageView;
 
 
-pub struct ApplicationInstanceSwapchainImageView {}
+pub struct ApplicationSwapchainImageView {}
 
-impl ApplicationInstanceSwapchainImageView {
+impl ApplicationSwapchainImageView {
     pub unsafe fn create_all(
         vulkan_logical_device: &VulkanDeviceLogical,
         vulkan_format: VulkanFormat,

@@ -14,9 +14,9 @@ use ::vulkan::VulkanExtensionName;
 
 use crate::termination::TerminationProcessMain;
 
-pub struct ApplicationVulkanInstanceDeviceLogical {}
+pub struct ApplicationVulkanDeviceLogical {}
 
-impl ApplicationVulkanInstanceDeviceLogical {
+impl ApplicationVulkanDeviceLogical {
     pub unsafe fn create(
         vulkan_instance: &VulkanInstance,
         vulkan_physical_device: VulkanDevicePhysical,

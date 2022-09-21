@@ -45,14 +45,14 @@ use crate::lib::d3_model_mesh::D3ModelMesh;
 use crate::lib::window_viewport::WindowViewportLogicalNumber;
 use crate::data::d3_model_resource::DataD3ModelResource;
 use crate::termination::TerminationProcessMain;
-use crate::application::vulkan_instance_swapchain::ApplicationVulkanInstanceSwapchain;
-use crate::application::vulkan_instance_swapchain_image_view::ApplicationInstanceSwapchainImageView;
+use crate::application::vulkan_swapchain::ApplicationVulkanSwapchain;
+use crate::application::vulkan_swapchain_image_view::ApplicationSwapchainImageView;
 use crate::application::vulkan_render_pass::ApplicationVulkanRenderPass;
 use crate::application::vulkan_pipeline::ApplicationVulkanPipeline;
 use crate::application::vulkan_frame_buffer::ApplicationVulkanFrameBuffer;
 use crate::application::vulkan_command_buffer::ApplicationVulkanCommandBufferSwapchainImage;
-use crate::application::vulkan_instance_validation_wi::ApplicationVulkanInstanceValidationWi;
-use crate::application::vulkan_instance_validation_wo::ApplicationVulkanInstanceValidationWo;
+use crate::application::vulkan_creation_validation_wi::ApplicationVulkanCreationValidationWi;
+use crate::application::vulkan_creation_validation_wo::ApplicationVulkanCreationValidationWo;
 use crate::application::evolution::ApplicationEvolution;
 use crate::application::vulkan_transform_d3_buffer::ApplicationVulkanTransformD3Buffer;
 use crate::application::vulkan_descriptor::ApplicationVulkanDescriptorPool;
@@ -126,9 +126,9 @@ impl Application {
      -> Result<Self, TerminationProcessMain>
     {
         match optional_validation_layer {
-            None => ApplicationVulkanInstanceValidationWo::create(
+            None => ApplicationVulkanCreationValidationWo::create(
                 window, vulkan_physical_device_extension_s, d3_model_resource_name),
-            Some(validation_layer) => ApplicationVulkanInstanceValidationWi::create(
+            Some(validation_layer) => ApplicationVulkanCreationValidationWi::create(
                 window, validation_layer, vulkan_physical_device_extension_s, d3_model_resource_name),
         }
     }
@@ -259,7 +259,7 @@ impl Application {
         };
         self.destroy_swapchain();
         let (vulkan_format, vulkan_extent, vulkan_swapchain, vulkan_image_s) =
-            ApplicationVulkanInstanceSwapchain::create(
+            ApplicationVulkanSwapchain::create(
                 window,
                 &self.vulkan_instance,
                 self.vulkan_surface,
@@ -268,7 +268,7 @@ impl Application {
                 self.vulkan_queue_family_index_graphic,
                 self.vulkan_queue_family_index_present)?;
         let vulkan_image_view_s =
-            ApplicationInstanceSwapchainImageView::create_all(
+            ApplicationSwapchainImageView::create_all(
                 &self.vulkan_device_logical,
                 vulkan_format,
                 &vulkan_image_s)?;

@@ -25,9 +25,9 @@ use ::vulkan::VulkanSwapchainImageCount;
 use crate::termination::TerminationProcessMain;
 
 
-pub struct ApplicationVulkanInstanceSwapchain {}
+pub struct ApplicationVulkanSwapchain {}
 
-impl ApplicationVulkanInstanceSwapchain {
+impl ApplicationVulkanSwapchain {
     pub unsafe fn create(
         window: &WindowUniformWindow,
         vulkan_instance: &VulkanInstance,
