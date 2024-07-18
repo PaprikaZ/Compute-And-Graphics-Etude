@@ -1,13 +1,23 @@
+use std::collections::HashSet;
+use std::ffi::CStr;
+use std::os::raw::c_void;
 use std::time::Instant;
 
+use ::console_log::prelude::*;
 use ::window_uniform::prelude::*;
 use ::vulkan::VULKAN_LIBRARY_FILE_NAME;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanLibraryLoader;
 use ::vulkan::VulkanInstanceCreateInformation;
-use ::vulkan::VulkanWindow;
-use ::vulkan::prelude::version1_2::*;
 use ::vulkan::VulkanExtensionName;
+use ::vulkan::VulkanExtensionDebugUtilityMessengerCreateInformation;
+use ::vulkan::VulkanExtensionDebugUtilityMessageSeverityFlagS;
+use ::vulkan::VulkanExtensionDebugUtilityMessageTypeFlagS;
+use ::vulkan::VulkanExtensionDebugUtilityMessengerCallbackData;
+use ::vulkan::VulkanWindow;
+use ::vulkan::VulkanBool32;
+use ::vulkan::VULKAN_EXTENSION_DEBUG_UTILITY;
+use ::vulkan::prelude::version1_2::*;
 use ::vulkan::VulkanCommandBuffer;
 use ::vulkan::VulkanCommandBufferLevel;
 use ::vulkan::VulkanCommandBufferAllocateInformation;
@@ -22,11 +32,11 @@ use crate::data::d3_model_mesh_tutorial_format_obj::DataD3ModelMeshTutorialForma
 use crate::data::d3_model_texture_tutorial_simple::DataD3ModelTextureTutorialSimple;
 use crate::data::d3_model_texture_tutorial_format_obj::DataD3ModelTextureTutorialFormatObj;
 use crate::application::main::Application;
-use crate::application::vulkan_instance_share::ApplicationVulkanInstanceShare;
-use crate::application::vulkan_instance_device_physical::ApplicationVulkanInstanceDevicePhysical;
-use crate::application::vulkan_instance_device_logical::ApplicationVulkanInstanceDeviceLogical;
-use crate::application::vulkan_instance_swapchain::ApplicationVulkanInstanceSwapchain;
-use crate::application::vulkan_instance_swapchain_image_view::ApplicationInstanceSwapchainImageView;
+use crate::application::vulkan_share::ApplicationVulkanShare;
+use crate::application::vulkan_device_physical::ApplicationVulkanDevicePhysical;
+use crate::application::vulkan_device_logical::ApplicationVulkanDeviceLogical;
+use crate::application::vulkan_swapchain::ApplicationVulkanSwapchain;
+use crate::application::vulkan_swapchain_image_view::ApplicationSwapchainImageView;
 use crate::application::vulkan_pipeline::ApplicationVulkanPipeline;
 use crate::application::vulkan_render_pass::ApplicationVulkanRenderPass;
 use crate::application::vulkan_frame_buffer::ApplicationVulkanFrameBuffer;
@@ -46,11 +56,12 @@ use crate::application::vulkan_mipmap::ApplicationVulkanMipmap;
 use crate::application::vulkan_anti_aliasing_multisampling::ApplicationVulkanAntiAliasingMultiSampling;
 
 
-pub struct ApplicationVulkanInstanceValidationWo {}
+pub struct ApplicationVulkanCreationValidationWi {}
 
-impl ApplicationVulkanInstanceValidationWo {
+impl ApplicationVulkanCreationValidationWi {
     pub unsafe fn create(
         window: &WindowUniformWindow,
+        vulkan_validation_layer: &VulkanExtensionName,
         vulkan_extension_s: &[VulkanExtensionName],
         d3_model_resource_name: DataD3ModelResource)
      -> Result<Application, TerminationProcessMain>
@@ -85,29 +96,25 @@ impl ApplicationVulkanInstanceValidationWo {
                 Err(error) => return Err(TerminationProcessMain::InitializationVulkanEntryCreateFail(error)),
                 Ok(entry) => entry,
             };
+        let create_vulkan_instance_result =
+            Self::create_vulkan_instance(window, &vulkan_entry, vulkan_validation_layer);
         let vulkan_instance =
-            match Self::create_vulkan_instance(window, &vulkan_entry) {
+            match create_vulkan_instance_result {
                 Err(error) => return Err(error),
                 Ok(instance) => instance,
             };
         let create_vulkan_surface_result = VulkanWindow::create_surface(&vulkan_instance, window);
-        let vulkan_surface =
-            match create_vulkan_surface_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanSurfaceCreateFail(vulkan_error_code));
-                },
-                Ok(surface) => surface,
-            };
+        let vulkan_surface = termination_vulkan_error!(return1,
+            create_vulkan_surface_result, TerminationProcessMain::InitializationVulkanSurfaceCreateFail);
         let (vulkan_physical_device,
              vulkan_graphic_queue_family_index,
              vulkan_surface_queue_family_index) =
-            match ApplicationVulkanInstanceDevicePhysical::pick(&vulkan_instance, vulkan_surface, vulkan_extension_s) {
+            match ApplicationVulkanDevicePhysical::pick(&vulkan_instance, vulkan_surface, vulkan_extension_s) {
                 Err(error) => return Err(error),
                 Ok(device_and_queue_index) => device_and_queue_index,
             };
         let create_vulkan_logical_device_result =
-            ApplicationVulkanInstanceDeviceLogical::create(
+            ApplicationVulkanDeviceLogical::create(
                 &vulkan_instance,
                 vulkan_physical_device,
                 vulkan_extension_s,
@@ -121,12 +128,12 @@ impl ApplicationVulkanInstanceValidationWo {
         let vulkan_anti_aliasing_multisampling_number =
             ApplicationVulkanAntiAliasingMultiSampling::get_sample_count_max(&vulkan_instance, vulkan_physical_device);
         let (vulkan_surface_format, vulkan_extent, vulkan_swapchain, vulkan_image_s) =
-            ApplicationVulkanInstanceSwapchain::create(
+            ApplicationVulkanSwapchain::create(
                 window, &vulkan_instance, vulkan_surface, &vulkan_logical_device,
                 vulkan_physical_device, vulkan_graphic_queue_family_index, vulkan_surface_queue_family_index
             )?;
         let vulkan_image_view_s =
-            ApplicationInstanceSwapchainImageView::create_all(
+            ApplicationSwapchainImageView::create_all(
                 &vulkan_logical_device, vulkan_surface_format, &vulkan_image_s)?;
         let vulkan_render_pass =
             ApplicationVulkanRenderPass::create(
@@ -146,7 +153,8 @@ impl ApplicationVulkanInstanceValidationWo {
                 &vulkan_logical_device, vulkan_extent, vulkan_render_pass,
                 vulkan_descriptor_set_layout, vulkan_anti_aliasing_multisampling_number)?;
         let vulkan_main_command_pool =
-            ApplicationVulkanCommandPool::create_main(&vulkan_logical_device, vulkan_graphic_queue_family_index)?;
+            ApplicationVulkanCommandPool::create_main(
+                &vulkan_logical_device, vulkan_graphic_queue_family_index)?;
         let vulkan_swapchain_image_command_pool_s =
             ApplicationVulkanCommandPool::create_swapchain_image_all(
                 &vulkan_logical_device, &vulkan_image_s, vulkan_graphic_queue_family_index)?;
@@ -215,14 +223,9 @@ impl ApplicationVulkanInstanceValidationWo {
                 let allocate_vulkan_command_buffer_result =
                     vulkan_logical_device.allocate_command_buffers(
                         &vulkan_logical_viewport_command_buffer_allocate_information);
-                let vulkan_logical_viewport_command_buffer =
-                    match allocate_vulkan_command_buffer_result {
-                        Err(error) => {
-                            let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                            return Err(TerminationProcessMain::InitializationVulkanCommandBufferSAllocateFail(vulkan_error_code));
-                        },
-                        Ok(buffer_s) => buffer_s[0],
-                    };
+                let vulkan_logical_viewport_command_buffer = termination_vulkan_error!(return1,
+                    allocate_vulkan_command_buffer_result,
+                    TerminationProcessMain::InitializationVulkanCommandBufferSAllocateFail)[0];
                 vulkan_logical_viewport_command_buffer_s.push(vulkan_logical_viewport_command_buffer);
             }
             vulkan_swapchain_image_logical_viewport_command_buffer_tt.push(vulkan_logical_viewport_command_buffer_s);
@@ -285,23 +288,68 @@ impl ApplicationVulkanInstanceValidationWo {
     }
 
     unsafe fn create_vulkan_instance(
-        window: &WindowUniformWindow, vulkan_entry: &VulkanEntry) -> Result<VulkanInstance, TerminationProcessMain> {
+        window: &WindowUniformWindow, vulkan_entry: &VulkanEntry, vulkan_validation_layer: &VulkanExtensionName)
+     -> Result<VulkanInstance, TerminationProcessMain>
+    {
         let vulkan_application_information =
-            ApplicationVulkanInstanceShare::create_vulkan_instance_application_information();
-        let vulkan_application_extension_s =
-            ApplicationVulkanInstanceShare::create_vulkan_instance_application_extension_s(window);
+            ApplicationVulkanShare::create_vulkan_instance_application_information();
+        let enumerate_vulkan_instance_layer_property_s_result =
+            vulkan_entry.enumerate_instance_layer_properties();
+        let available_vulkan_layer_s =
+            termination_vulkan_error!(return1,
+                enumerate_vulkan_instance_layer_property_s_result,
+                TerminationProcessMain::InitializationVulkanInstanceCreateFail)
+            .iter()
+            .map(|l| l.layer_name)
+            .collect::<HashSet<_>>();
+        let vulkan_validation_layer_s =
+            match available_vulkan_layer_s.contains(&vulkan_validation_layer) {
+                false => return Err(TerminationProcessMain::InitializationVulkanValidationLayerNotSupport),
+                true => vec![vulkan_validation_layer.as_ptr()],
+            };
+        let vulkan_application_extension_s = {
+            let mut extension_s = ApplicationVulkanShare::create_vulkan_instance_application_extension_s(window);
+            extension_s.push(VULKAN_EXTENSION_DEBUG_UTILITY.name.as_ptr());
+            extension_s
+        };
         let vulkan_instance_create_information =
             VulkanInstanceCreateInformation::builder()
             .application_info(&vulkan_application_information)
+            .enabled_layer_names(&vulkan_validation_layer_s)
             .enabled_extension_names(&vulkan_application_extension_s);
-        let vulkan_instance =
-            match vulkan_entry.create_instance(&vulkan_instance_create_information, None) {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanInstanceCreateFail(vulkan_error_code));
-                } ,
-                Ok(instance) => instance,
-            };
+        let mut vulkan_debug_messenger_create_information =
+            VulkanExtensionDebugUtilityMessengerCreateInformation::builder()
+            .message_severity(VulkanExtensionDebugUtilityMessageSeverityFlagS::all())
+            .message_type(VulkanExtensionDebugUtilityMessageTypeFlagS::all())
+            .user_callback(Some(vulkan_debug_callback));
+        let vulkan_instance_create_information =
+            vulkan_instance_create_information.push_next(&mut vulkan_debug_messenger_create_information);
+        let create_vulkan_instance_result = vulkan_entry.create_instance(&vulkan_instance_create_information, None);
+        let vulkan_instance = termination_vulkan_error!(return1,
+            create_vulkan_instance_result, TerminationProcessMain::InitializationVulkanInstanceCreateFail);
         Ok(vulkan_instance)
     }
+}
+
+
+extern "system" fn vulkan_debug_callback(
+    message_severity_flag_s: VulkanExtensionDebugUtilityMessageSeverityFlagS,
+    message_type_flag_s: VulkanExtensionDebugUtilityMessageTypeFlagS,
+    data: *const VulkanExtensionDebugUtilityMessengerCallbackData,
+    _: *mut c_void)
+ -> VulkanBool32 {
+    let data = unsafe { *data };
+    let message = unsafe { CStr::from_ptr(data.message) }.to_string_lossy();
+
+    if VulkanExtensionDebugUtilityMessageSeverityFlagS::ERROR <= message_severity_flag_s {
+        console_log_error!("({:?}) {}", message_type_flag_s, message);
+    } else if VulkanExtensionDebugUtilityMessageSeverityFlagS::WARNING <= message_severity_flag_s {
+        console_log_warn!("({:?}) {}", message_type_flag_s, message);
+    } else if VulkanExtensionDebugUtilityMessageSeverityFlagS::INFO <= message_severity_flag_s {
+        console_log_debug!("({:?}) {}", message_type_flag_s, message);
+    } else {
+        console_log_trace!("({:?}) {}", message_type_flag_s, message);
+    }
+
+    vulkan::VULKAN_FALSE
 }

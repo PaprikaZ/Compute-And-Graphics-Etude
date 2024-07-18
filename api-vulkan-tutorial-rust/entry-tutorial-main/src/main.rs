@@ -1,7 +1,7 @@
 mod lib;
 mod config;
 mod window;
-mod termination;
+#[macro_use] mod termination;
 mod application;
 mod initialization;
 mod composition;

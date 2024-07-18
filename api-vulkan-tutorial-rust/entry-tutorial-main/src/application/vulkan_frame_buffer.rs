@@ -1,5 +1,5 @@
 use ::vulkan::prelude::version1_2::*;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanExtentD2;
 use ::vulkan::VulkanImageView;
 use ::vulkan::VulkanRenderPass;
@@ -37,12 +37,7 @@ impl ApplicationVulkanFrameBuffer {
                 vulkan_logical_device.create_framebuffer(&vulkan_frame_buffer_create_information, None)
             })
             .collect::<Result<Vec<_>, _>>();
-        match create_vulkan_frame_buffer_s_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                Err(TerminationProcessMain::InitializationVulkanFrameBufferCreateFail(vulkan_error_code))
-            },
-            Ok(frame_buffer_s) => Ok(frame_buffer_s)
-        }
+        termination_vulkan_error!(normal1,
+            create_vulkan_frame_buffer_s_result, TerminationProcessMain::InitializationVulkanFrameBufferCreateFail)
     }
 }

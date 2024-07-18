@@ -3,7 +3,7 @@ use std::ptr::copy_nonoverlapping;
 use ::png::OutputInfo as FormatPngOutputInfomration;
 use ::vulkan::VULKAN_QUEUE_FAMILY_IGNORED;
 use ::vulkan::prelude::version1_2::*;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanInstance;
 use ::vulkan::VulkanDevicePhysical;
 use ::vulkan::VulkanBufferUsageFlagS;
@@ -41,7 +41,7 @@ use ::vulkan::VulkanSampler;
 use ::vulkan::VulkanDescriptorSetLayoutBinding;
 use ::vulkan::VulkanDescriptorType;
 use ::vulkan::VulkanShaderStageFlagS;
-use ::vulkan::VulkanMipLevel;
+use ::vulkan::extend::VulkanMipLevel;
 use ::vulkan::VulkanSampleCountFlagS;
 
 use crate::termination::TerminationProcessMain;
@@ -78,14 +78,8 @@ impl ApplicationVulkanTextureImage {
         let map_texture_staging_memory_result =
             vulkan_logical_device.map_memory(
                 vulkan_texture_staging_buffer_memory, 0, texture_file_buffer_size, VulkanMemoryMapFlagS::empty());
-        let texture_staging_memory_address =
-            match map_texture_staging_memory_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanMemoryMapFail(vulkan_error_code));
-                },
-                Ok(address) => address,
-            };
+        let texture_staging_memory_address = termination_vulkan_error!(return1,
+            map_texture_staging_memory_result, TerminationProcessMain::InitializationVulkanMemoryMapFail);
         copy_nonoverlapping(texture_file_pixel_s.as_ptr(), texture_staging_memory_address.cast(), texture_file_pixel_s.len());
         vulkan_logical_device.unmap_memory(vulkan_texture_staging_buffer_memory);
         //
@@ -275,13 +269,8 @@ impl ApplicationVulkanTextureImage {
             .mip_lod_bias(0.0);
         let create_vulkan_sampler_result =
             vulkan_logical_device.create_sampler(&vulkan_sampler_create_information, None);
-        match create_vulkan_sampler_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                Err(TerminationProcessMain::InitializationVulkanSamplerCreateFail(vulkan_error_code))
-            },
-            Ok(sampler) => Ok(sampler),
-        }
+        termination_vulkan_error!(normal1,
+            create_vulkan_sampler_result, TerminationProcessMain::InitializationVulkanSamplerCreateFail)
     }
 
     pub unsafe fn create_sampler_descriptor_set_layout_binding()

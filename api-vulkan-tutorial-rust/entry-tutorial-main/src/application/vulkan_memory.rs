@@ -2,7 +2,7 @@ use ::vulkan::prelude::version1_2::*;
 use ::vulkan::VulkanMemoryPropertyFlagS;
 use ::vulkan::VulkanDevicePhysical;
 use ::vulkan::VulkanMemoryRequirementS;
-use ::vulkan::VulkanMemoryTypeIndex;
+use ::vulkan::extend::VulkanMemoryTypeIndex;
 
 use crate::termination::TerminationProcessMain;
 

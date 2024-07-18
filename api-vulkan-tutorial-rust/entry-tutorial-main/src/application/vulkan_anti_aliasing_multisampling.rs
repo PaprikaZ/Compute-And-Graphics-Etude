@@ -6,7 +6,7 @@ use ::vulkan::VulkanDevicePhysical;
 use ::vulkan::VulkanSampleCountFlagS;
 use ::vulkan::VulkanExtentD2;
 use ::vulkan::VulkanFormat;
-use ::vulkan::VulkanMipLevel;
+use ::vulkan::extend::VulkanMipLevel;
 use ::vulkan::VulkanImageTiling;
 use ::vulkan::VulkanImageUsageFlagS;
 use ::vulkan::VulkanMemoryPropertyFlagS;

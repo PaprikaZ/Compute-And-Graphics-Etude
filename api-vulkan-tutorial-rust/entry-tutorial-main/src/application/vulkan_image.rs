@@ -1,5 +1,5 @@
 use ::vulkan::prelude::version1_2::*;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanDevicePhysical;
 use ::vulkan::VulkanInstance;
 use ::vulkan::VulkanFormat;
@@ -20,7 +20,7 @@ use ::vulkan::VulkanImageLayout;
 use ::vulkan::VulkanSampleCountFlagS;
 use ::vulkan::VulkanSharingMode;
 use ::vulkan::VulkanMemoryAllocateInformation;
-use ::vulkan::VulkanMipLevel;
+use ::vulkan::extend::VulkanMipLevel;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_memory::ApplicationVulkanMemory;
@@ -57,14 +57,8 @@ impl ApplicationVulkanImage {
             .sharing_mode(VulkanSharingMode::EXCLUSIVE);
         let create_vulkan_texture_image_result =
             vulkan_logical_device.create_image(&vulkan_texture_image_create_information, None);
-        let vulkan_texture_image =
-            match create_vulkan_texture_image_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanImageCreateFail(vulkan_error_code));
-                },
-                Ok(image) => image,
-            };
+        let vulkan_texture_image = termination_vulkan_error!(return1,
+            create_vulkan_texture_image_result, TerminationProcessMain::InitializationVulkanImageCreateFail);
         let vulkan_texture_image_memory_requirement_s =
             vulkan_logical_device.get_image_memory_requirements(vulkan_texture_image);
         let vulkan_texture_image_memory_type_index =
@@ -79,23 +73,13 @@ impl ApplicationVulkanImage {
             .memory_type_index(vulkan_texture_image_memory_type_index.as_raw());
         let allocate_vulkan_texture_image_memory_result =
             vulkan_logical_device.allocate_memory(&vulkan_texture_image_memory_allocate_information, None);
-        let vulkan_texture_image_memory =
-            match allocate_vulkan_texture_image_memory_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanMemoryAllocateFail(vulkan_error_code));
-                },
-                Ok(memory) => memory,
-            };
+        let vulkan_texture_image_memory = termination_vulkan_error!(return1,
+            allocate_vulkan_texture_image_memory_result,
+            TerminationProcessMain::InitializationVulkanMemoryAllocateFail);
         let bind_vulkan_texture_image_memory_result =
             vulkan_logical_device.bind_image_memory(vulkan_texture_image, vulkan_texture_image_memory, 0);
-        match bind_vulkan_texture_image_memory_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanMemoryBufferBindFail(vulkan_error_code));
-            },
-            Ok(()) => (),
-        };
+        termination_vulkan_error!(return1,
+            bind_vulkan_texture_image_memory_result, TerminationProcessMain::InitializationVulkanMemoryBufferBindFail);
         Ok((vulkan_texture_image, vulkan_texture_image_memory))
     }
 }
@@ -126,12 +110,7 @@ impl ApplicationVulkanImageView {
             .subresource_range(vulkan_image_sub_resource_range);
         let create_vulkan_image_view_result =
             vulkan_logical_device.create_image_view(&vulkan_image_view_create_information, None);
-        match create_vulkan_image_view_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanImageViewCreateFail(vulkan_error_code));
-            },
-            Ok(image_view) => Ok(image_view),
-        }
+        termination_vulkan_error!(normal1,
+            create_vulkan_image_view_result, TerminationProcessMain::InitializationVulkanImageViewCreateFail)
     }
 }

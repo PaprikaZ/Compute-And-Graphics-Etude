@@ -3,7 +3,7 @@ use std::ptr::copy_nonoverlapping;
 
 use ::nalgebra_glm as glm;
 use ::vulkan::prelude::version1_2::*;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanMemoryMapFlagS;
 
 use crate::termination::TerminationProcessMain;
@@ -45,21 +45,16 @@ impl ApplicationEvolution {
                 size_of::<TransformD3ModelViewProjection>() as u64,
                 VulkanMemoryMapFlagS::empty());
         let current_frame_main_3d_transform_vulkan_buffer_memory_address =
-            match map_current_frame_main_3d_transform_vulkan_buffer_memory_address_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanMemoryMapFail(vulkan_error_code));
-                },
-                Ok(address) => address,
-            };
+            termination_vulkan_error!(return1,
+                map_current_frame_main_3d_transform_vulkan_buffer_memory_address_result,
+                TerminationProcessMain::InitializationVulkanMemoryMapFail);
         copy_nonoverlapping(&new_main_3d_transform, current_frame_main_3d_transform_vulkan_buffer_memory_address.cast(), 1);
         application.vulkan_device_logical.unmap_memory(current_main_3d_transform_vulkan_buffer_memory);
         Ok(())
     }
 
-    pub unsafe fn update_state_transform_d3_model_view_projection(
-        application: &Application
-    ) -> Result<(), TerminationProcessMain>
+    pub unsafe fn update_state_transform_d3_model_view_projection(application: &Application)
+     -> Result<(), TerminationProcessMain>
     {
         let elapsed_time = application.instant_start.elapsed().as_secs_f32();
 
@@ -96,13 +91,9 @@ impl ApplicationEvolution {
                 size_of::<TransformD3ModelViewProjection>() as u64,
                 VulkanMemoryMapFlagS::empty());
         let current_frame_main_3d_transform_vulkan_buffer_memory_address =
-            match map_current_frame_main_3d_transform_vulkan_buffer_memory_address_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanMemoryMapFail(vulkan_error_code));
-                },
-                Ok(address) => address,
-            };
+            termination_vulkan_error!(return1,
+                map_current_frame_main_3d_transform_vulkan_buffer_memory_address_result,
+                TerminationProcessMain::InitializationVulkanMemoryMapFail);
         copy_nonoverlapping(&new_main_3d_transform, current_frame_main_3d_transform_vulkan_buffer_memory_address.cast(), 1);
         application.vulkan_device_logical.unmap_memory(current_main_3d_transform_vulkan_buffer_memory);
         Ok(())

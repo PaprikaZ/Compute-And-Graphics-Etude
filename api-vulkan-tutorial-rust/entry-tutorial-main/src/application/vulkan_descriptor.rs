@@ -1,7 +1,7 @@
 use std::mem::size_of;
 
 use ::vulkan::prelude::version1_2::*;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanBuffer;
 use ::vulkan::VulkanImage;
 use ::vulkan::VulkanDescriptorPool;
@@ -47,13 +47,8 @@ impl ApplicationVulkanDescriptorPool {
             .max_sets(vulkan_swapchain_image_s.len() as u32);
         let create_vulkan_descriptor_pool_result =
             vulkan_logical_device.create_descriptor_pool(&vulkan_descriptor_pool_create_information, None);
-        match create_vulkan_descriptor_pool_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanDescriptorPoolCreateFail(vulkan_error_code));
-            },
-            Ok(pool) => Ok(pool),
-        }
+        termination_vulkan_error!(normal1,
+            create_vulkan_descriptor_pool_result, TerminationProcessMain::InitializationVulkanDescriptorPoolCreateFail)
     }
 }
 
@@ -79,14 +74,8 @@ impl ApplicationVulkanDescriptorSet {
             .set_layouts(&vulkan_descriptor_set_layout_s);
         let allocate_vulkan_descriptor_set_s_result =
             vulkan_logical_device.allocate_descriptor_sets(&vulkan_descriptor_set_allocate_information);
-        let vulkan_descriptor_set_s =
-            match allocate_vulkan_descriptor_set_s_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanDescriptorSetSAllocateFail(vulkan_error_code));
-                },
-                Ok(set_s) => set_s,
-            };
+        let vulkan_descriptor_set_s = termination_vulkan_error!(return1,
+            allocate_vulkan_descriptor_set_s_result, TerminationProcessMain::InitializationVulkanDescriptorSetSAllocateFail);
         for index in 0..vulkan_swapchain_image_s.len() {
             let vulkan_descriptor_buffer_information =
                 VulkanDescriptorBufferInformation::builder()
@@ -140,12 +129,8 @@ impl ApplicationVulkanDescriptorSetLayout {
         let create_vulkan_descriptor_set_layout_result =
             vulkan_logical_device.create_descriptor_set_layout(
                 &vulkan_descriptor_set_layout_create_information, None);
-        match create_vulkan_descriptor_set_layout_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                Err(TerminationProcessMain::InitializationVulkanDescriptorSetLayoutCreateFail(vulkan_error_code))
-            },
-            Ok(layout) => Ok(layout),
-        }
+        termination_vulkan_error!(normal1,
+            create_vulkan_descriptor_set_layout_result,
+            TerminationProcessMain::InitializationVulkanDescriptorSetLayoutCreateFail)
     }
 }

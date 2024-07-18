@@ -1,6 +1,6 @@
 use ::vulkan::prelude::version1_2::*;
-use ::vulkan::VulkanErrorCode;
-use ::vulkan::VulkanQueueFamilyIndexGraphic;
+use ::vulkan::extend::VulkanErrorCode;
+use ::vulkan::extend::VulkanQueueFamilyIndexGraphic;
 use ::vulkan::VulkanCommandPool;
 use ::vulkan::VulkanCommandPoolCreateInformation;
 use ::vulkan::VulkanCommandPoolCreateFlagS;
@@ -55,12 +55,7 @@ impl ApplicationVulkanCommandPool {
             .queue_family_index(vulkan_graphic_queue_family_index.as_raw());
         let create_vulkan_command_pool_result =
             vulkan_logical_device.create_command_pool(&vulkan_command_pool_create_information, None);
-        match create_vulkan_command_pool_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                Err(TerminationProcessMain::InitializationVulkanCommandPoolCreateFail(vulkan_error_code))
-            },
-            Ok(command_pool) => Ok(command_pool),
-        }
+        termination_vulkan_error!(normal1,
+            create_vulkan_command_pool_result, TerminationProcessMain::InitializationVulkanCommandPoolCreateFail)
     }
 }

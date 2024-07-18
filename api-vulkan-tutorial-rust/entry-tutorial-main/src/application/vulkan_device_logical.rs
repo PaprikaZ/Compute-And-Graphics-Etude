@@ -1,22 +1,22 @@
 use std::collections::HashSet;
 
-use vulkan::VulkanQueueFamilyIndexSurface;
+use ::vulkan::extend::VulkanQueueFamilyIndexSurface;
 use ::vulkan::prelude::version1_2::*;
 use ::vulkan::VulkanInstance;
 use ::vulkan::VulkanDevicePhysical;
-use ::vulkan::VulkanQueueFamilyIndexGraphic;
+use ::vulkan::extend::VulkanQueueFamilyIndexGraphic;
 use ::vulkan::VulkanDeviceLogicalCreateInformation;
 use ::vulkan::VulkanDeviceLogicalQueueCreateInformation;
 use ::vulkan::VulkanDevicePhysicalFeatureS;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanQueue;
 use ::vulkan::VulkanExtensionName;
 
 use crate::termination::TerminationProcessMain;
 
-pub struct ApplicationVulkanInstanceDeviceLogical {}
+pub struct ApplicationVulkanDeviceLogical {}
 
-impl ApplicationVulkanInstanceDeviceLogical {
+impl ApplicationVulkanDeviceLogical {
     pub unsafe fn create(
         vulkan_instance: &VulkanInstance,
         vulkan_physical_device: VulkanDevicePhysical,
@@ -58,14 +58,8 @@ impl ApplicationVulkanInstanceDeviceLogical {
             .enabled_features(&vulkan_physical_device_feature_s);
         let create_vulkan_logical_device_result =
             vulkan_instance.create_device(vulkan_physical_device, &vulkan_logical_device_create_information, None);
-        let vulkan_logical_device =
-            match create_vulkan_logical_device_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanDeviceLogicalCreateFail(vulkan_error_code));
-                },
-                Ok(device) => device,
-            };
+        let vulkan_logical_device = termination_vulkan_error!(return1,
+            create_vulkan_logical_device_result, TerminationProcessMain::InitializationVulkanDeviceLogicalCreateFail);
         let vulkan_graphic_queue =
             vulkan_logical_device.get_device_queue(vulkan_graphic_queue_family_index.as_raw(), 0);
         let vulkan_present_queue =

@@ -1,4 +1,4 @@
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::prelude::version1_2::*;
 use ::vulkan::VulkanExtentD2;
 use ::vulkan::VulkanShaderModule;
@@ -157,14 +157,8 @@ impl ApplicationVulkanPipeline {
             .push_constant_ranges(vulkan_push_constant_range_s);
         let create_vulkan_pipeline_layout_result =
             vulkan_logical_device.create_pipeline_layout(&vulkan_pipeline_layout_create_infomation, None);
-        let vulkan_pipeline_layout =
-            match create_vulkan_pipeline_layout_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanPipelineLayoutCreateFail(vulkan_error_code));
-                },
-                Ok(layout) => layout,
-            };
+        let vulkan_pipeline_layout = termination_vulkan_error!(return1,
+            create_vulkan_pipeline_layout_result, TerminationProcessMain::InitializationVulkanPipelineLayoutCreateFail);
         let vulkan_stage_s =
             &[vulkan_vertex_shader_stage_create_information, vulkan_fragment_shader_stage_create_infomation];
         let vulkan_graphics_pipeline_create_information =
@@ -185,14 +179,9 @@ impl ApplicationVulkanPipeline {
                 VulkanPipelineCache::null(),
                 &[vulkan_graphics_pipeline_create_information],
                 None);
-        let (vulkan_graphics_pipeline, _) =
-            match create_vulkan_graphics_pipeline_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanGraphicsPipelineSCreateFail(vulkan_error_code));
-                },
-                Ok(pipeline_and_success_code) => pipeline_and_success_code,
-            };
+        let (vulkan_graphics_pipeline, _) = termination_vulkan_error!(return1,
+            create_vulkan_graphics_pipeline_result,
+            TerminationProcessMain::InitializationVulkanGraphicsPipelineSCreateFail);
         vulkan_logical_device.destroy_shader_module(vulkan_vertex_shader_module, None);
         vulkan_logical_device.destroy_shader_module(vulkan_fragment_shader_module, None);
         Ok((vulkan_graphics_pipeline, vulkan_pipeline_layout))
@@ -213,12 +202,7 @@ impl ApplicationVulkanPipeline {
             .code(byte_s);
         let create_vulkan_shader_module_result =
             vulkan_logical_device.create_shader_module(&vulkan_shader_module_create_information, None);
-        match create_vulkan_shader_module_result {
-            Err(error) => {
-                let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                return Err(TerminationProcessMain::InitializationVulkanShaderModuleCreateFail(vulkan_error_code));
-            },
-            Ok(module) => Ok(module),
-        }
+        termination_vulkan_error!(normal1,
+            create_vulkan_shader_module_result, TerminationProcessMain::InitializationVulkanShaderModuleCreateFail)
     }
 }

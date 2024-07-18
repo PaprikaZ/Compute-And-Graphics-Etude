@@ -1,5 +1,5 @@
 use ::vulkan::prelude::version1_2::*;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanImage;
 use ::vulkan::VulkanFormat;
 use ::vulkan::VulkanComponentMapping;
@@ -9,15 +9,15 @@ use ::vulkan::VulkanImageAspectFlagS;
 use ::vulkan::VulkanImageView;
 use ::vulkan::VulkanImageViewCreateInformation;
 use ::vulkan::VulkanImageViewType;
-use ::vulkan::VulkanMipLevel;
+use ::vulkan::extend::VulkanMipLevel;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_image::ApplicationVulkanImageView;
 
 
-pub struct ApplicationInstanceSwapchainImageView {}
+pub struct ApplicationSwapchainImageView {}
 
-impl ApplicationInstanceSwapchainImageView {
+impl ApplicationSwapchainImageView {
     pub unsafe fn create_all(
         vulkan_logical_device: &VulkanDeviceLogical,
         vulkan_format: VulkanFormat,

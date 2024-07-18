@@ -22,7 +22,7 @@ use ::vulkan::VulkanOffsetD3;
 use ::vulkan::VulkanImageBlit;
 use ::vulkan::VulkanFilter;
 use ::vulkan::VulkanQueue;
-use ::vulkan::VulkanMipLevel;
+use ::vulkan::extend::VulkanMipLevel;
 
 use crate::termination::TerminationProcessMain;
 use crate::application::vulkan_command_buffer::ApplicationVulkanCommandBufferOneTime;

@@ -2,7 +2,7 @@ use std::mem::size_of;
 use std::ptr::copy_nonoverlapping;
 
 use ::vulkan::prelude::version1_2::*;
-use ::vulkan::VulkanErrorCode;
+use ::vulkan::extend::VulkanErrorCode;
 use ::vulkan::VulkanDevicePhysical;
 use ::vulkan::VulkanInstance;
 use ::vulkan::VulkanBufferUsageFlagS;
@@ -58,14 +58,9 @@ impl ApplicationVulkanVertexIndexBuffer {
                 0,
                 vulkan_vertex_index_buffer_size,
                 VulkanMemoryMapFlagS::empty());
-        let vulkan_vertex_index_staging_buffer_memory_address =
-            match map_vulkan_vertex_index_staging_buffer_memory_result {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanMemoryMapFail(vulkan_error_code));
-                },
-                Ok(address) => address,
-            };
+        let vulkan_vertex_index_staging_buffer_memory_address = termination_vulkan_error!(return1,
+            map_vulkan_vertex_index_staging_buffer_memory_result,
+            TerminationProcessMain::InitializationVulkanMemoryMapFail);
         match d3_model_mesh {
             D3ModelMesh::TutorialSimple(mesh) => {
                 copy_nonoverlapping(

@@ -5,9 +5,9 @@ use ::vulkan::VulkanApplicationInformation;
 use ::vulkan::VulkanApplicationInformationBuilder;
 
 
-pub struct ApplicationVulkanInstanceShare {}
+pub struct ApplicationVulkanShare {}
 
-impl ApplicationVulkanInstanceShare {
+impl ApplicationVulkanShare {
     pub fn create_vulkan_instance_application_information() -> VulkanApplicationInformationBuilder<'static> {
         VulkanApplicationInformation::builder()
         .application_name(b"Vulkan Tutorial Rust\0")

@@ -5,19 +5,19 @@ use ::vulkan::VulkanExtensionName;
 use ::vulkan::VulkanInstance;
 use ::vulkan::VulkanInstanceVersion1_0;
 use ::vulkan::VulkanDevicePhysical;
-use ::vulkan::VulkanErrorCode;
-use ::vulkan::VulkanQueueFamilyIndexGraphic;
-use ::vulkan::VulkanQueueFamilyIndexSurface;
+use ::vulkan::extend::VulkanErrorCode;
+use ::vulkan::extend::VulkanQueueFamilyIndexGraphic;
+use ::vulkan::extend::VulkanQueueFamilyIndexSurface;
 use ::vulkan::VulkanQueueFlagS;
 use ::vulkan::VulkanSurfaceExtensionKhr;
 use ::vulkan::VulkanSurfaceKhr;
 use ::console_log::{console_log_info, console_log_warn};
 
 use crate::termination::TerminationProcessMain;
-use crate::application::vulkan_instance_swapchain::ApplicationVulkanInstanceSwapchain;
+use crate::application::vulkan_swapchain::ApplicationVulkanSwapchain;
 
 
-enum ApplicationVulkanInstanceDevicePhysicalPickRequirementNotMatch {
+enum ApplicationVulkanDevicePhysicalPickRequirementNotMatch {
     QueueFamilyGraphicMissing,
     QueueFamilySurfaceMissing,
     ExtensionMissing,
@@ -26,58 +26,54 @@ enum ApplicationVulkanInstanceDevicePhysicalPickRequirementNotMatch {
 }
 
 enum ApplicationVulkanInstanceDevicePhysicalPickError {
-    RequirementNotMatch(ApplicationVulkanInstanceDevicePhysicalPickRequirementNotMatch),
+    RequirementNotMatch(ApplicationVulkanDevicePhysicalPickRequirementNotMatch),
     Termination(TerminationProcessMain),
 }
 
-pub struct ApplicationVulkanInstanceDevicePhysical {}
+pub struct ApplicationVulkanDevicePhysical {}
 
-impl ApplicationVulkanInstanceDevicePhysical {
+impl ApplicationVulkanDevicePhysical {
     pub unsafe fn pick(
         vulkan_instance: &VulkanInstance,
         vulkan_surface: VulkanSurfaceKhr,
         vulkan_extension_s: &[VulkanExtensionName])
      -> Result<(VulkanDevicePhysical, VulkanQueueFamilyIndexGraphic, VulkanQueueFamilyIndexSurface), TerminationProcessMain>
     {
-        let vulkan_physical_device_s =
-            match vulkan_instance.enumerate_physical_devices() {
-                Err(error) => {
-                    let vulkan_error_code = VulkanErrorCode::new(error.as_raw());
-                    return Err(TerminationProcessMain::InitializationVulkanEnumeratePhysicalDeviceFail(vulkan_error_code));
-                },
-                Ok(device_s) => device_s,
-            };
+        let enumerate_vulkan_physical_device_s_result = vulkan_instance.enumerate_physical_devices();
+        let vulkan_physical_device_s = termination_vulkan_error!(return1,
+            enumerate_vulkan_physical_device_s_result,
+            TerminationProcessMain::InitializationVulkanEnumeratePhysicalDeviceFail);
         for vulkan_physical_device in vulkan_physical_device_s {
             let physical_device_property_s = vulkan_instance.get_physical_device_properties(vulkan_physical_device);
             let check_result =
                 Self::check(vulkan_instance, vulkan_physical_device, vulkan_surface, vulkan_extension_s);
             match check_result {
                 Err(ApplicationVulkanInstanceDevicePhysicalPickError::RequirementNotMatch(
-                    ApplicationVulkanInstanceDevicePhysicalPickRequirementNotMatch::QueueFamilyGraphicMissing)) => {
+                    ApplicationVulkanDevicePhysicalPickRequirementNotMatch::QueueFamilyGraphicMissing)) => {
                     console_log_warn!(
                         "Physical device (`{}`) skipping: missing graphic queue family",
                         physical_device_property_s.device_name);
                 },
                 Err(ApplicationVulkanInstanceDevicePhysicalPickError::RequirementNotMatch(
-                    ApplicationVulkanInstanceDevicePhysicalPickRequirementNotMatch::QueueFamilySurfaceMissing)) => {
+                    ApplicationVulkanDevicePhysicalPickRequirementNotMatch::QueueFamilySurfaceMissing)) => {
                     console_log_warn!(
                         "Physical device (`{}`) skipping: missing surface queue family",
                         physical_device_property_s.device_name);
                 },
                 Err(ApplicationVulkanInstanceDevicePhysicalPickError::RequirementNotMatch(
-                    ApplicationVulkanInstanceDevicePhysicalPickRequirementNotMatch::ExtensionMissing)) => {
+                    ApplicationVulkanDevicePhysicalPickRequirementNotMatch::ExtensionMissing)) => {
                     console_log_warn!(
                         "Physical device (`{}`) skipping: missing extension",
                         physical_device_property_s.device_name);
                 },
                 Err(ApplicationVulkanInstanceDevicePhysicalPickError::RequirementNotMatch(
-                    ApplicationVulkanInstanceDevicePhysicalPickRequirementNotMatch::SwapchainFormatMissing)) => {
+                    ApplicationVulkanDevicePhysicalPickRequirementNotMatch::SwapchainFormatMissing)) => {
                     console_log_warn!(
                         "Physical device (`{}`) skipping: missing swapchain format",
                         physical_device_property_s.device_name);
                 },
                 Err(ApplicationVulkanInstanceDevicePhysicalPickError::RequirementNotMatch(
-                    ApplicationVulkanInstanceDevicePhysicalPickRequirementNotMatch::SwapchainPresentModeMissing)) => {
+                    ApplicationVulkanDevicePhysicalPickRequirementNotMatch::SwapchainPresentModeMissing)) => {
                     console_log_warn!(
                         "Physical device (`{}`) skipping: missing swapchain present mode",
                         physical_device_property_s.device_name);
@@ -123,7 +119,7 @@ impl ApplicationVulkanInstanceDevicePhysical {
         vulkan_physical_device: VulkanDevicePhysical,
         vulkan_surface: VulkanSurfaceKhr)
      -> Result<(VulkanQueueFamilyIndexGraphic, VulkanQueueFamilyIndexSurface),
-               ApplicationVulkanInstanceDevicePhysicalPickRequirementNotMatch>
+               ApplicationVulkanDevicePhysicalPickRequirementNotMatch>
     {
         let vulkan_physical_device_queue_family_property_s =
             vulkan_instance.get_physical_device_queue_family_properties(vulkan_physical_device);
@@ -149,8 +145,8 @@ impl ApplicationVulkanInstanceDevicePhysical {
             })
             .map(|(index, _property_s)| VulkanQueueFamilyIndexSurface::new(index as u32));
         match (optional_graphic_queue_family_index, optional_surface_queue_family_index) {
-            (None, _) => Err(ApplicationVulkanInstanceDevicePhysicalPickRequirementNotMatch::QueueFamilyGraphicMissing),
-            (_, None) => Err(ApplicationVulkanInstanceDevicePhysicalPickRequirementNotMatch::QueueFamilySurfaceMissing),
+            (None, _) => Err(ApplicationVulkanDevicePhysicalPickRequirementNotMatch::QueueFamilyGraphicMissing),
+            (_, None) => Err(ApplicationVulkanDevicePhysicalPickRequirementNotMatch::QueueFamilySurfaceMissing),
             (Some(graphic_index), Some(surface_index)) =>
                 Ok((graphic_index, surface_index)),
         }
@@ -163,7 +159,7 @@ impl ApplicationVulkanInstanceDevicePhysical {
      -> Result<(), ApplicationVulkanInstanceDevicePhysicalPickError>
     {
         let get_vulkan_surface_support_result =
-            ApplicationVulkanInstanceSwapchain::get_surface_support(vulkan_instance, vulkan_surface, vulkan_physical_device);
+            ApplicationVulkanSwapchain::get_surface_support(vulkan_instance, vulkan_surface, vulkan_physical_device);
         let (_vulkan_surface_capability_s, vulkan_surface_format_s, vulkan_present_mode_s) =
             match get_vulkan_surface_support_result {
                 Err(error) => return Err(ApplicationVulkanInstanceDevicePhysicalPickError::Termination(error)),
@@ -171,9 +167,9 @@ impl ApplicationVulkanInstanceDevicePhysical {
             };
         match (vulkan_surface_format_s.is_empty(), vulkan_present_mode_s.is_empty()) {
             (true, _) => Err(ApplicationVulkanInstanceDevicePhysicalPickError::RequirementNotMatch(
-                ApplicationVulkanInstanceDevicePhysicalPickRequirementNotMatch::SwapchainFormatMissing)),
+                ApplicationVulkanDevicePhysicalPickRequirementNotMatch::SwapchainFormatMissing)),
             (_, true) => Err(ApplicationVulkanInstanceDevicePhysicalPickError::RequirementNotMatch(
-                ApplicationVulkanInstanceDevicePhysicalPickRequirementNotMatch::SwapchainPresentModeMissing)),
+                ApplicationVulkanDevicePhysicalPickRequirementNotMatch::SwapchainPresentModeMissing)),
             (false, false) => Ok(())
         }
     }
@@ -205,7 +201,7 @@ impl ApplicationVulkanInstanceDevicePhysical {
         match be_required_vulkan_physical_device_extension_s_supported {
             true => Ok(()),
             false => return Err(ApplicationVulkanInstanceDevicePhysicalPickError::RequirementNotMatch(
-                ApplicationVulkanInstanceDevicePhysicalPickRequirementNotMatch::ExtensionMissing)),
+                ApplicationVulkanDevicePhysicalPickRequirementNotMatch::ExtensionMissing)),
         }
     }
 
