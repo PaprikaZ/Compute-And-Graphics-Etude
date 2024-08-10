@@ -10,7 +10,7 @@ pub struct CompositionExecution {}
 
 impl CompositionExecution {
     pub fn bind_window_event_loop_default(window: Window, mut application: Application)
-     -> Result<(), TerminationProcessMain>
+    -> Result<(), TerminationProcessMain>
     {
         let mut be_destroying = false;
         let mut be_minimized = false;
