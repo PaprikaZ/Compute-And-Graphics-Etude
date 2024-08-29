@@ -1,4 +1,4 @@
-#[derive(Clone, Copy, Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct VulkanSwapchainImageNumber(u32);
 
 impl VulkanSwapchainImageNumber {
@@ -6,7 +6,7 @@ impl VulkanSwapchainImageNumber {
         Self(image_count)
     }
 
-    pub fn as_raw(&self) -> u32 {
+    pub fn as_raw(self) -> u32 {
         self.0
     }
 }
