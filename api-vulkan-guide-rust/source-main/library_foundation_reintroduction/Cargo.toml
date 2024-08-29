@@ -8,4 +8,5 @@ edition = "2021"
 [dependencies]
 winit = { version = "0.29" }
 tobj = { version = "2.0" }
+nalgebra-glm = { version = "0.10" }
 vulkanalia = { version = "=0.24.0", features = ["libloading", "provisional", "window"] }
