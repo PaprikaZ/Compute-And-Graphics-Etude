@@ -7,4 +7,4 @@ edition = "2021"
 
 [dependencies]
 winit = { version = "0.29" }
-vulkanalia = { version = "0.22.0", features = ["libloading", "provisional", "window"] }
+vulkanalia = { version = "=0.24.0", features = ["libloading", "provisional", "window"] }
