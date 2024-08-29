@@ -5,6 +5,7 @@ pub mod memory;
 pub mod swapchain;
 pub mod mipmap;
 pub mod version;
+pub mod layer;
 pub mod application;
 pub mod prelude;
 
