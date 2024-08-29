@@ -5,10 +5,10 @@ use crate::error::foundation_reintroduction::ErrorFoundationReintroduction;
 
 
 #[derive(Debug, Clone, Copy)]
-pub struct VulkanApplicationName<'t>(&'t CStr);
+pub struct VulkanEngineName<'t>(&'t CStr);
 
-impl<'t> VulkanApplicationName<'t> {
-    pub fn try_new(name_data: &'t [u8]) -> Result<Self, ErrorFoundationReintroduction> {
+impl<'t> VulkanEngineName<'t> {
+    pub fn new(name_data: &'t [u8]) -> Result<Self, ErrorFoundationReintroduction> {
         let c_str_r = CStr::from_bytes_with_nul(name_data);
         match c_str_r {
             Ok(c_str) => Ok(Self(c_str)),

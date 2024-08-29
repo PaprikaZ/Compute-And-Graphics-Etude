@@ -1,5 +1,7 @@
 #[derive(Debug)]
 pub enum ErrorFoundationReintroductionOwn {
+    VulkanApplicationNameInvalid,
+    VulkanEngineNameInvalid,
 }
 
 

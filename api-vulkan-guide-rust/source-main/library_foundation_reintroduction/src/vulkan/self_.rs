@@ -1,6 +1,7 @@
 pub use ::vulkanalia::Device as VulkanDeviceLogical;
 pub use ::vulkanalia::Entry as VulkanEntry;
 pub use ::vulkanalia::Instance as VulkanInstance;
+pub use ::vulkanalia::Version as VulkanVersionVanilla;
 pub use ::vulkanalia::VkResult as VulkanResult;
 pub use ::vulkanalia::VkSuccessResult as VulkanResultSuccess;
 pub use ::vulkanalia::loader::LIBRARY as VULKAN_LIBRARY_FILE_NAME;
@@ -37,6 +38,7 @@ pub use ::vulkanalia::vk::CommandBufferBeginInfo as VulkanCommandBufferBeginInfo
 pub use ::vulkanalia::vk::CommandBufferInheritanceInfo as VulkanCommandBufferInheritanceInformation;
 pub use ::vulkanalia::vk::CommandBufferInheritanceInfoBuilder as VulkanCommandBufferInheritanceInformationBuilder;
 pub use ::vulkanalia::vk::CommandBufferLevel as VulkanCommandBufferLevel;
+pub use ::vulkanalia::vk::CommandBufferResetFlags as VulkanCommandBufferResetFlagS;
 pub use ::vulkanalia::vk::CommandBufferUsageFlags as VulkanCommandBufferUsageFlagS;
 pub use ::vulkanalia::vk::CommandPool as VulkanCommandPool;
 pub use ::vulkanalia::vk::CommandPoolCreateFlags as VulkanCommandPoolCreateFlagS;
@@ -69,6 +71,7 @@ pub use ::vulkanalia::vk::DescriptorSetAllocateInfo as VulkanDescriptorSetAlloca
 pub use ::vulkanalia::vk::DescriptorSetAllocateInfoBuilder as VulkanDescriptorSetAllocateInformationBuilder;
 pub use ::vulkanalia::vk::DescriptorSetLayout as VulkanDescriptorSetLayout;
 pub use ::vulkanalia::vk::DescriptorSetLayoutBinding as VulkanDescriptorSetLayoutBinding;
+pub use ::vulkanalia::vk::DescriptorSetLayoutCreateFlags as VulkanDescriptorSetLayoutCreateFlagS;
 pub use ::vulkanalia::vk::DescriptorSetLayoutCreateInfo as VulkanDescriptorSetLayoutCreateInformation;
 pub use ::vulkanalia::vk::DescriptorSetLayoutCreateInfoBuilder as VulkanDescriptorSetLayoutCreateInformationBuilder;
 pub use ::vulkanalia::vk::DescriptorType as VulkanDescriptorType;
@@ -90,7 +93,10 @@ pub use ::vulkanalia::vk::EntryV1_2 as VulkanEntryVersion1_2;
 pub use ::vulkanalia::vk::EntryV1_3 as VulkanEntryVersion1_3;
 pub use ::vulkanalia::vk::ErrorCode as VulkanErrorCode_;
 pub use ::vulkanalia::vk::ExtDebugUtilsExtension as VulkanExtensionDebugUtility;
+pub use ::vulkanalia::vk::ExtendsDeviceCreateInfo as VulkanExtendDeviceCreateInformation;
+pub use ::vulkanalia::vk::Extension as VulkanExtension;
 pub use ::vulkanalia::vk::ExtensionName as VulkanExtensionName;
+pub use ::vulkanalia::vk::ExtensionName as VulkanLayerName;
 pub use ::vulkanalia::vk::ExtensionProperties as VulkanExtensionPropertyS;
 pub use ::vulkanalia::vk::Extent2D as VulkanExtentD2;
 pub use ::vulkanalia::vk::Extent3D as VulkanExtentD3;
@@ -169,6 +175,9 @@ pub use ::vulkanalia::vk::PhysicalDeviceProperties as VulkanDevicePhysicalProper
 pub use ::vulkanalia::vk::PhysicalDeviceProperties2 as VulkanDevicePhysicalPropertyS2;
 pub use ::vulkanalia::vk::PhysicalDeviceProperties2KHR as VulkanDevicePhysicalPropertyS2Khr;
 pub use ::vulkanalia::vk::PhysicalDeviceProperties2Builder as VulkanDevicePhysicalPropertyS2Builder;
+//pub use ::vulkanalia::vk::PhysicalDeviceShaderDrawParameterFeatures as VulkanDevicePhysicalShaderDrawParameterFeatures;
+pub use ::vulkanalia::vk::PhysicalDeviceShaderDrawParametersFeatures as VulkanDevicePhysicalShaderDrawParametersFeatures;
+pub use ::vulkanalia::vk::PhysicalDeviceType as VulkanDevicePhysicalType;
 pub use ::vulkanalia::vk::Pipeline as VulkanPipeline;
 pub use ::vulkanalia::vk::PipelineBindPoint as VulkanPipelineBindPoint;
 pub use ::vulkanalia::vk::PipelineCache as VulkanPipelineCache;
@@ -181,6 +190,7 @@ pub use ::vulkanalia::vk::PipelineDynamicStateCreateInfo as VulkanPipelineDynami
 pub use ::vulkanalia::vk::PipelineInputAssemblyStateCreateInfo as VulkanPipelineInputAssemblyStateCreateInformation;
 pub use ::vulkanalia::vk::PipelineInputAssemblyStateCreateInfoBuilder as VulkanPipelineInputAssemblyStateCreateInformationBuilder;
 pub use ::vulkanalia::vk::PipelineLayout as VulkanPipelineLayout;
+pub use ::vulkanalia::vk::PipelineLayoutCreateFlags as VulkanPipelineLayoutCreateFlagS;
 pub use ::vulkanalia::vk::PipelineLayoutCreateInfo as VulkanPipelineLayoutCreateInformation;
 pub use ::vulkanalia::vk::PipelineLayoutCreateInfoBuilder as VulkanPipelineLayoutCreateInformationBuilder;
 pub use ::vulkanalia::vk::PipelineMultisampleStateCreateInfo as VulkanPipelineMultisampleStateCreateInformation;
@@ -260,7 +270,7 @@ pub use ::vulkanalia::vk::MAX_DEVICE_GROUP_SIZE as VULKAN_MAX_DEVICE_GROUP_SIZE;
 pub use ::vulkanalia::vk::MAX_DRIVER_INFO_SIZE as VULKAN_MAX_DRIVER_INFO_SIZE;
 pub use ::vulkanalia::vk::MAX_DRIVER_NAME_SIZE as VULKAN_MAX_DRIVER_NAME_SIZE;
 pub use ::vulkanalia::vk::MAX_EXTENSION_NAME_SIZE as VULKAN_MAX_EXTENSION_NAME_SIZE;
-//pub use ::vulkanalia::vk::MAX_GLOBAL_PRIORITY_SIZE_EXT as VULKAN_MAX_GLOBAL_PRIORITY_SIZE_EXT;
+pub use ::vulkanalia::vk::MAX_GLOBAL_PRIORITY_SIZE_KHR as VULKAN_MAX_GLOBAL_PRIORITY_SIZE_KHR;
 pub use ::vulkanalia::vk::MAX_MEMORY_HEAPS as VULKAN_MAX_MEMORY_HEAPS;
 pub use ::vulkanalia::vk::MAX_MEMORY_TYPES as VULKAN_MAX_MEMORY_TYPES;
 pub use ::vulkanalia::vk::MAX_PHYSICAL_DEVICE_NAME_SIZE as VULKAN_MAX_PHYSICAL_DEVICE_NAME_SIZE;
@@ -277,6 +287,6 @@ pub use ::vulkanalia::vk::WHOLE_SIZE as VULKAN_WHOLE_SIZE;
 pub use ::vulkanalia::vk::KHR_SWAPCHAIN_EXTENSION as VULKAN_SWAPCHAIN_EXTENSION_KHR;
 
 pub use ::vulkanalia::vk::make_version;
-
-pub const VULKAN_EXTENSION_NAME_VALIDATION: VulkanExtensionName =
-    VulkanExtensionName::from_bytes(b"VK_LAYER_KHRONOS_validation");
+pub use ::vulkanalia::vk::version_major;
+pub use ::vulkanalia::vk::version_minor;
+pub use ::vulkanalia::vk::version_patch;
