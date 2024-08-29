@@ -1,4 +1,4 @@
-mod main;
+mod self_;
 pub mod prelude;
 
-pub use main::*;
+pub use self_::*;
