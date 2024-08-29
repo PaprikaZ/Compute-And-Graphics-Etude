@@ -1,4 +1,4 @@
-mod main;
+mod self_;
 pub mod error;
 pub mod queue;
 pub mod memory;
@@ -7,7 +7,7 @@ pub mod mipmap;
 pub mod application;
 pub mod prelude;
 
-pub use main::*;
+pub use self_::*;
 //TODO: remove
 pub use error::VulkanErrorCode;
 pub use queue::VulkanQueueFamilyIndexGraphic;
