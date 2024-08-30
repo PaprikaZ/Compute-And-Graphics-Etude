@@ -1,5 +1,7 @@
 #[derive(Debug)]
 pub enum ErrorFoundationVulkanCookedOwn {
+    VulkanRequirementVersionApiLeastInstanceNotFulfilled,
+    VulkanRequirementVersionApiLeastDevicePhysicalNotFulfilled,
 }
 
 
