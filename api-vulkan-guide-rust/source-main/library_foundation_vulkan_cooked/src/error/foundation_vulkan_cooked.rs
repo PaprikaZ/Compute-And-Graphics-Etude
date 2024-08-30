@@ -2,6 +2,8 @@
 pub enum ErrorFoundationVulkanCookedOwn {
     VulkanRequirementVersionApiLeastInstanceNotFulfilled,
     VulkanRequirementVersionApiLeastDevicePhysicalNotFulfilled,
+    VulkanInstanceLayerPropertySEnumerateFail,
+    VulkanRequirementInstanceLayerSNotFulfilled,
 }
 
 
