@@ -3,8 +3,15 @@ use ::library_foundation_reintroduction::vulkan::VulkanInstanceVersion1_0;
 use ::library_foundation_reintroduction::vulkan::VulkanInstanceVersion1_1;
 use ::library_foundation_reintroduction::vulkan::VulkanInstance;
 use ::library_foundation_reintroduction::vulkan::VulkanDevicePhysical;
+use ::library_foundation_reintroduction::vulkan::VulkanQueueFamilyPropertyS;
+use ::library_foundation_reintroduction::vulkan::VulkanSurfaceKhr;
+use ::library_foundation_reintroduction::vulkan::VulkanQueueFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanVersionVanilla;
 use ::library_foundation_reintroduction::vulkan::version::VulkanVersionApi;
+use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexGraphic;
+use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexPresent;
+use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexCompute;
+use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexTransfer;
 
 use crate::error::foundation_vulkan_cooked::ErrorFoundationVulkanCooked;
 use crate::vulkan_requirement::version::VulkanRequirementVersionApiLeast;
@@ -23,5 +30,51 @@ impl VulkanRequirementDevicePhysical {
         let api_version = VulkanVersionApi::from(VulkanVersionVanilla::from(property_s.api_version));
         least_vulkan_api_version_requirement.fulfill_device_physical(&api_version)?;
         Ok(())
+    }
+
+    //
+    fn find_queue_family_index_graphic(vulkan_queue_family_property_s: &[VulkanQueueFamilyPropertyS])
+    -> Option<VulkanQueueFamilyIndexGraphic>
+    {
+        vulkan_queue_family_property_s
+        .iter()
+        .position(|p| p.queue_flags.contains(VulkanQueueFlagS::GRAPHICS))
+        .map(|i| VulkanQueueFamilyIndexGraphic::new(i as u32))
+    }
+
+    fn find_queue_family_index_present(
+        vulkan_instance: &VulkanInstance,
+        vulkan_physical_device: VulkanDevicePhysical,
+        vulkan_surface: VulkanSurfaceKhr,
+        vulkan_queue_family_property_s: &[VulkanQueueFamilyPropertyS])
+    -> Option<VulkanQueueFamilyIndexPresent>
+    {
+        vulkan_queue_family_property_s
+        .iter()
+        .enumerate()
+        .find(|(index, _property_s)| { unsafe {
+            vulkan_instance.get_physical_device_surface_support_khr(
+                vulkan_physical_device, *index as u32, vulkan_surface)
+            .unwrap_or(false)
+        }})
+        .map(|(index, _property_s)| VulkanQueueFamilyIndexPresent::new(index as u32))
+    }
+
+    fn _find_queue_family_index_compute(vulkan_queue_family_property_s: &[VulkanQueueFamilyPropertyS])
+    -> Option<VulkanQueueFamilyIndexCompute>
+    {
+        vulkan_queue_family_property_s
+        .iter()
+        .position(|p| p.queue_flags.contains(VulkanQueueFlagS::COMPUTE))
+        .map(|i| VulkanQueueFamilyIndexCompute::new(i as u32))
+    }
+
+    fn _find_queue_family_index_transfer(vulkan_queue_family_property_s: &[VulkanQueueFamilyPropertyS])
+    -> Option<VulkanQueueFamilyIndexTransfer>
+    {
+        vulkan_queue_family_property_s
+        .iter()
+        .position(|p| p.queue_flags.contains(VulkanQueueFlagS::TRANSFER))
+        .map(|i| VulkanQueueFamilyIndexTransfer::new(i as u32))
     }
 }
