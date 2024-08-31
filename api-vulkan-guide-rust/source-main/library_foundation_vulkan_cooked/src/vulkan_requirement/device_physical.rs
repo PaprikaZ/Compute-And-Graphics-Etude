@@ -6,9 +6,13 @@ use ::library_foundation_reintroduction::vulkan::VulkanInstanceVersion1_1;
 use ::library_foundation_reintroduction::vulkan::VulkanInstance;
 use ::library_foundation_reintroduction::vulkan::VulkanDevicePhysical;
 use ::library_foundation_reintroduction::vulkan::VulkanQueueFamilyPropertyS;
+use ::library_foundation_reintroduction::vulkan::VulkanSurfaceExtensionKhr;
 use ::library_foundation_reintroduction::vulkan::VulkanSurfaceKhr;
 use ::library_foundation_reintroduction::vulkan::VulkanQueueFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanExtensionName;
+use ::library_foundation_reintroduction::vulkan::VulkanSurfaceCapabilitySKhr;
+use ::library_foundation_reintroduction::vulkan::VulkanSurfaceFormatKhr;
+use ::library_foundation_reintroduction::vulkan::VulkanPresentModeKhr;
 use ::library_foundation_reintroduction::vulkan::VulkanVersionVanilla;
 use ::library_foundation_reintroduction::vulkan::version::VulkanVersionApi;
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexGraphic;
@@ -207,5 +211,43 @@ impl VulkanRequirementDevicePhysical {
             .collect::<Vec<_>>();
         //
         Ok((matched_vulkan_extension_name_s, matched_optional_vulkan_extension_number))
+    }
+
+    pub fn fulfill_surface(
+        vulkan_instance: &VulkanInstance,
+        vulkan_physical_device: VulkanDevicePhysical,
+        vulkan_surface: VulkanSurfaceKhr)
+    -> Result<(VulkanSurfaceCapabilitySKhr, Vec<VulkanSurfaceFormatKhr>, Vec<VulkanPresentModeKhr>),
+              ErrorFoundationVulkanCooked>
+    {
+        let vulkan_surface_capability_s =
+            match unsafe { vulkan_instance.get_physical_device_surface_capabilities_khr(
+                vulkan_physical_device, vulkan_surface) }
+            {
+                Err(_e) => Err(ErrorFoundationVulkanCookedOwn::VulkanDevicePhysicalSurfaceCapabilitySGetFail)?,
+                Ok(scs) => scs,
+            };
+        let vulkan_surface_format_s =
+            match unsafe { vulkan_instance. get_physical_device_surface_formats_khr(
+                vulkan_physical_device, vulkan_surface) }
+            {
+                Err(_e) => Err(ErrorFoundationVulkanCookedOwn::VulkanDevicePhysicalSurfaceFormatSGetFail)?,
+                Ok(sf_s) => sf_s,
+            };
+        let vulkan_present_mode_s =
+            match unsafe { vulkan_instance.get_physical_device_surface_present_modes_khr(
+                vulkan_physical_device, vulkan_surface) }
+            {
+                Err(_e) => Err(ErrorFoundationVulkanCookedOwn::VulkanDevicePhysicalSurfacePresentModeSGetFail)?,
+                Ok(spm_s) => spm_s,
+            };
+        match (vulkan_surface_format_s.is_empty(), vulkan_present_mode_s.is_empty()) {
+            (true, _) =>
+                Err(ErrorFoundationVulkanCookedOwn::VulkanRequirementDevicePhysicalSurfaceFormatNoneFulfilled)?,
+            (_, true) =>
+                Err(ErrorFoundationVulkanCookedOwn::VulkanRequirementDevicePhysicalSurfacePresentModeNoneFulfilled)?,
+            (false, false) =>
+                Ok((vulkan_surface_capability_s, vulkan_surface_format_s, vulkan_present_mode_s))
+        }
     }
 }
