@@ -1,0 +1,95 @@
+use crate::vulkan::make_version;
+use crate::vulkan::version_major;
+use crate::vulkan::version_minor;
+use crate::vulkan::version_patch;
+use crate::vulkan::VulkanVersionVanilla;
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct VulkanVersionApplication(u32);
+
+impl VulkanVersionApplication {
+    pub fn new(major_version: u32, minor_version: u32, patch_version: u32) -> Self {
+        Self(make_version(major_version, minor_version, patch_version))
+    }
+
+    pub fn unwrap(self) -> u32 {
+        self.0
+    }
+
+    pub fn get_major(&self) -> u32 {
+        version_major(self.0)
+    }
+
+    pub fn get_minor(&self) -> u32 {
+        version_minor(self.0)
+    }
+
+    pub fn get_patch(&self) -> u32 {
+        version_patch(self.0)
+    }
+}
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct VulkanVersionEngine(u32);
+
+impl VulkanVersionEngine {
+    pub fn new(major_version: u32, minor_version: u32, patch_version: u32) -> Self {
+        Self(make_version(major_version, minor_version, patch_version))
+    }
+
+    pub fn unwrap(self) -> u32 {
+        self.0
+    }
+
+    pub fn get_major(&self) -> u32 {
+        version_major(self.0)
+    }
+
+    pub fn get_minor(&self) -> u32 {
+        version_minor(self.0)
+    }
+
+    pub fn get_patch(&self) -> u32 {
+        version_patch(self.0)
+    }
+}
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct VulkanVersionApi(u32);
+
+impl VulkanVersionApi {
+    pub fn new(major_version: u32, minor_version: u32, patch_version: u32) -> Self {
+        Self(make_version(major_version, minor_version, patch_version))
+    }
+
+    pub fn unwrap(self) -> u32 {
+        self.0
+    }
+
+    pub fn get_major(&self) -> u32 {
+        version_major(self.0)
+    }
+
+    pub fn get_minor(&self) -> u32 {
+        version_minor(self.0)
+    }
+
+    pub fn get_patch(&self) -> u32 {
+        version_patch(self.0)
+    }
+}
+
+impl From<VulkanVersionVanilla> for VulkanVersionApi {
+    fn from(version: VulkanVersionVanilla) -> Self {
+        Self::new(version.major, version.minor, version.patch)
+    }
+}
+
+impl From<VulkanVersionApi> for VulkanVersionVanilla {
+    fn from(version: VulkanVersionApi) -> Self {
+        Self::new(version.get_major(), version.get_minor(), version.get_patch())
+    }
+}
