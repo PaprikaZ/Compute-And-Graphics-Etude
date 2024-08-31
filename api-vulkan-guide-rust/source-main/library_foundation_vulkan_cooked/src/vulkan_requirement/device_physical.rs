@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 use ::library_foundation_reintroduction::vulkan::VulkanBuilderHas;
+use ::library_foundation_reintroduction::vulkan::VULKAN_TRUE;
 use ::library_foundation_reintroduction::vulkan::VulkanInstanceVersion1_0;
 use ::library_foundation_reintroduction::vulkan::VulkanInstanceVersion1_1;
 use ::library_foundation_reintroduction::vulkan::VulkanInstance;
@@ -22,6 +23,8 @@ use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexTr
 
 use crate::error::foundation_vulkan_cooked::ErrorFoundationVulkanCooked;
 use crate::error::foundation_vulkan_cooked::ErrorFoundationVulkanCookedOwn;
+use crate::vulkan_device_physical::feature::VulkanDevicePhysicalFeatureStandardName;
+use crate::vulkan_device_physical::feature::VulkanDevicePhysicalFeatureTableLookupEnable;
 use crate::vulkan_requirement::version::VulkanRequirementVersionApiLeast;
 
 
@@ -249,5 +252,35 @@ impl VulkanRequirementDevicePhysical {
             (false, false) =>
                 Ok((vulkan_surface_capability_s, vulkan_surface_format_s, vulkan_present_mode_s))
         }
+    }
+
+    pub fn fulfill_feature_s<'t>(
+        vulkan_instance: &VulkanInstance,
+        vulkan_physical_device: VulkanDevicePhysical,
+        required_vulkan_feature_name_s: &'t HashSet<VulkanDevicePhysicalFeatureStandardName>,
+        optional_vulkan_feature_name_s: &'t HashSet<VulkanDevicePhysicalFeatureStandardName>)
+    -> Result<(Vec<&'t VulkanDevicePhysicalFeatureStandardName>, u32), ErrorFoundationVulkanCooked>
+    {
+        let vulkan_physical_device_feature_s = unsafe { vulkan_instance.get_physical_device_features(vulkan_physical_device) };
+        let be_required_vulkan_feature_name_s_fulfilled =
+            required_vulkan_feature_name_s
+            .iter()
+            .all(|n| n.lookup(&vulkan_physical_device_feature_s) == VULKAN_TRUE);
+        if be_required_vulkan_feature_name_s_fulfilled {
+            return Err(ErrorFoundationVulkanCookedOwn::VulkanRequirementDevicePhysicalFeatureSNotFulfilled)?
+        }
+        //
+        let matched_optional_vulkan_feature_name_s =
+            optional_vulkan_feature_name_s
+            .iter()
+            .filter(|n| n.lookup(&vulkan_physical_device_feature_s) == VULKAN_TRUE);
+        let matched_optional_vulkan_feature_number = matched_optional_vulkan_feature_name_s.clone().count() as u32;
+        let matched_vulkan_feature_name_s =
+            required_vulkan_feature_name_s
+            .iter()
+            .chain(matched_optional_vulkan_feature_name_s)
+            .collect::<Vec<_>>();
+        //
+        Ok((matched_vulkan_feature_name_s, matched_optional_vulkan_feature_number))
     }
 }
