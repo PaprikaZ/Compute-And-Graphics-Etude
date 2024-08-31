@@ -97,4 +97,72 @@ impl VulkanRequirementDevicePhysical {
             .map(|pi| (gi, pi)))
         .ok_or(ErrorFoundationVulkanCookedOwn::VulkanRequirementDevicePhysicalQueueFamilySNotFulfilled.into())
     }
+
+    pub fn fulfill_queue_family_graphic_present_transfer(
+        _vulkan_instance: &VulkanInstance,
+        _vulkan_physical_device: VulkanDevicePhysical,
+        _vulkan_surface: VulkanSurfaceKhr)
+    -> Result<(VulkanQueueFamilyIndexGraphic, VulkanQueueFamilyIndexPresent, VulkanQueueFamilyIndexTransfer),
+              ErrorFoundationVulkanCooked>
+    {
+        todo!()
+    }
+
+    pub fn fulfill_queue_family_compute(
+        _vulkan_instance: &VulkanInstance,
+        _vulkan_physical_device: VulkanDevicePhysical)
+    -> Result<VulkanQueueFamilyIndexCompute, ErrorFoundationVulkanCooked>
+    {
+        todo!()
+    }
+
+    pub fn fulfill_queue_family_compute_transfer(
+        _vulkan_instance: &VulkanInstance,
+        _vulkan_physical_device: VulkanDevicePhysical)
+    -> Result<(VulkanQueueFamilyIndexCompute, VulkanQueueFamilyIndexTransfer),
+              ErrorFoundationVulkanCooked>
+    {
+        todo!()
+    }
+
+    pub fn fulfill_queue_family_compute_present(
+        _vulkan_instance: &VulkanInstance,
+        _vulkan_physical_device: VulkanDevicePhysical,
+        _vulkan_surface: VulkanSurfaceKhr)
+    -> Result<(VulkanQueueFamilyIndexCompute, VulkanQueueFamilyIndexPresent),
+              ErrorFoundationVulkanCooked>
+    {
+        todo!()
+    }
+
+    pub fn fulfill_queue_family_compute_present_transfer(
+        _vulkan_instance: &VulkanInstance,
+        _vulkan_physical_device: VulkanDevicePhysical,
+        _vulkan_surface: VulkanSurfaceKhr)
+    -> Result<(VulkanQueueFamilyIndexCompute, VulkanQueueFamilyIndexPresent, VulkanQueueFamilyIndexTransfer),
+              ErrorFoundationVulkanCooked>
+    {
+        todo!()
+    }
+
+    pub fn fulfill_queue_family_graphic_compute_present(
+        _vulkan_instance: &VulkanInstance,
+        _vulkan_physical_device: VulkanDevicePhysical,
+        _vulkan_surface: VulkanSurfaceKhr)
+    -> Result<(VulkanQueueFamilyIndexGraphic, VulkanQueueFamilyIndexCompute, VulkanQueueFamilyIndexPresent),
+              ErrorFoundationVulkanCooked>
+    {
+        todo!()
+    }
+
+    pub fn fulfill_queue_family_graphic_compute_present_transfer(
+        _vulkan_instance: &VulkanInstance,
+        _vulkan_physical_device: VulkanDevicePhysical,
+        _vulkan_surface: VulkanSurfaceKhr)
+    -> Result<(VulkanQueueFamilyIndexGraphic, VulkanQueueFamilyIndexCompute,
+               VulkanQueueFamilyIndexPresent, VulkanQueueFamilyIndexTransfer),
+              ErrorFoundationVulkanCooked>
+    {
+        todo!()
+    }
 }
