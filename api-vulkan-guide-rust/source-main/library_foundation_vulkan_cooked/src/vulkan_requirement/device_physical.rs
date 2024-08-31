@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use ::library_foundation_reintroduction::vulkan::VulkanBuilderHas;
 use ::library_foundation_reintroduction::vulkan::VulkanInstanceVersion1_0;
 use ::library_foundation_reintroduction::vulkan::VulkanInstanceVersion1_1;
@@ -6,6 +8,7 @@ use ::library_foundation_reintroduction::vulkan::VulkanDevicePhysical;
 use ::library_foundation_reintroduction::vulkan::VulkanQueueFamilyPropertyS;
 use ::library_foundation_reintroduction::vulkan::VulkanSurfaceKhr;
 use ::library_foundation_reintroduction::vulkan::VulkanQueueFlagS;
+use ::library_foundation_reintroduction::vulkan::VulkanExtensionName;
 use ::library_foundation_reintroduction::vulkan::VulkanVersionVanilla;
 use ::library_foundation_reintroduction::vulkan::version::VulkanVersionApi;
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexGraphic;
@@ -164,5 +167,45 @@ impl VulkanRequirementDevicePhysical {
               ErrorFoundationVulkanCooked>
     {
         todo!()
+    }
+
+    //
+    pub fn fulfill_extension_name_s<'t>(
+        vulkan_instance: &VulkanInstance,
+        vulkan_physical_device: VulkanDevicePhysical,
+        required_vulkan_extension_name_s: &'t HashSet<VulkanExtensionName>,
+        optional_vulkan_extension_name_s: &'t HashSet<VulkanExtensionName>)
+    -> Result<(Vec<&'t VulkanExtensionName>, u32), ErrorFoundationVulkanCooked>
+    {
+        //TODO available physical device extensions should be queried by layer list
+        let available_vulkan_extension_property_s_s =
+            match unsafe { vulkan_instance.enumerate_device_extension_properties(vulkan_physical_device, None) } {
+                Err(_e) => Err(ErrorFoundationVulkanCookedOwn::VulkanDevicePhysicalExtensionPropertySEnumerateFail)?,
+                Ok(ps) => ps,
+            };
+        let available_vulkan_extension_name_s =
+            available_vulkan_extension_property_s_s
+            .iter()
+            .map(|p| p.extension_name)
+            .collect::<HashSet<_>>();
+        //
+        let be_required_vulkan_extension_s_fulfilled =
+            required_vulkan_extension_name_s.is_subset(&available_vulkan_extension_name_s);
+        if be_required_vulkan_extension_s_fulfilled {
+            return Err(ErrorFoundationVulkanCookedOwn::VulkanRequirementDevicePhysicalExtensionSNotFulfilled)?
+        }
+        //
+        let matched_optional_vulkan_extension_name_s =
+            optional_vulkan_extension_name_s
+            .iter()
+            .filter(|n| available_vulkan_extension_name_s.contains(n));
+        let matched_optional_vulkan_extension_number = matched_optional_vulkan_extension_name_s.clone().count() as u32;
+        let matched_vulkan_extension_name_s =
+            required_vulkan_extension_name_s
+            .iter()
+            .chain(matched_optional_vulkan_extension_name_s)
+            .collect::<Vec<_>>();
+        //
+        Ok((matched_vulkan_extension_name_s, matched_optional_vulkan_extension_number))
     }
 }
