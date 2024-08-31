@@ -14,6 +14,7 @@ use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexCo
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexTransfer;
 
 use crate::error::foundation_vulkan_cooked::ErrorFoundationVulkanCooked;
+use crate::error::foundation_vulkan_cooked::ErrorFoundationVulkanCookedOwn;
 use crate::vulkan_requirement::version::VulkanRequirementVersionApiLeast;
 
 
@@ -76,5 +77,24 @@ impl VulkanRequirementDevicePhysical {
         .iter()
         .position(|p| p.queue_flags.contains(VulkanQueueFlagS::TRANSFER))
         .map(|i| VulkanQueueFamilyIndexTransfer::new(i as u32))
+    }
+
+    pub fn fulfill_queue_family_graphic_present(
+        vulkan_instance: &VulkanInstance,
+        vulkan_physical_device: VulkanDevicePhysical,
+        vulkan_surface: VulkanSurfaceKhr)
+    -> Result<(VulkanQueueFamilyIndexGraphic, VulkanQueueFamilyIndexPresent),
+              ErrorFoundationVulkanCooked>
+    {
+        let vulkan_queue_family_property_s =
+            unsafe { vulkan_instance.get_physical_device_queue_family_properties(vulkan_physical_device) };
+        None
+        .and_then(|_: ()|
+            Self::find_queue_family_index_graphic(vulkan_queue_family_property_s.as_slice()))
+        .and_then(|gi|
+            Self::find_queue_family_index_present(
+                vulkan_instance, vulkan_physical_device, vulkan_surface, vulkan_queue_family_property_s.as_slice())
+            .map(|pi| (gi, pi)))
+        .ok_or(ErrorFoundationVulkanCookedOwn::VulkanRequirementDevicePhysicalQueueFamilySNotFulfilled.into())
     }
 }

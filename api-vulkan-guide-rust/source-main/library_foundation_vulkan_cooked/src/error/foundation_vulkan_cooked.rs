@@ -6,6 +6,7 @@ pub enum ErrorFoundationVulkanCookedOwn {
     VulkanInstanceExtensionPropertySEnumerateFail,
     VulkanRequirementInstanceLayerSNotFulfilled,
     VulkanRequirementInstanceExtensionSNotFulfilled,
+    VulkanRequirementDevicePhysicalQueueFamilySNotFulfilled,
 }
 
 
