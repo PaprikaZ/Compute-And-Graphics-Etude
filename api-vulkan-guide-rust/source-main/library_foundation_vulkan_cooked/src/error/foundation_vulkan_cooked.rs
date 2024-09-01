@@ -1,5 +1,15 @@
 #[derive(Debug)]
 pub enum ErrorFoundationVulkanCookedOwn {
+    WindowUniformCreateFail,
+    WindowUniformEventLoopCreateFail,
+    VulkanNegotiationRankWeightFactorExponentialInvalid,
+    VulkanRequirementVersionApiLeastInstanceNotFulfilled,
+    VulkanRequirementVersionApiLeastDevicePhysicalNotFulfilled,
+    VulkanInstanceLayerPropertySEnumerateFail,
+    VulkanInstanceExtensionPropertySEnumerateFail,
+    VulkanRequirementInstanceLayerSNotFulfilled,
+    VulkanRequirementInstanceExtensionSNotFulfilled,
+    VulkanRequirementDevicePhysicalQueueFamilySNotFulfilled,
 }
 
 
