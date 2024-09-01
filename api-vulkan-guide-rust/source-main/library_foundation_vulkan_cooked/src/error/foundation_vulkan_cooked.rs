@@ -1,5 +1,6 @@
 #[derive(Debug)]
 pub enum ErrorFoundationVulkanCookedOwn {
+    VulkanNegotiationRankWeightFactorExponentialInvalid,
     VulkanRequirementVersionApiLeastInstanceNotFulfilled,
     VulkanRequirementVersionApiLeastDevicePhysicalNotFulfilled,
     VulkanInstanceLayerPropertySEnumerateFail,
