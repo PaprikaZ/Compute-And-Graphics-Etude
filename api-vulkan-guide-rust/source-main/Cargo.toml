@@ -1,3 +1,7 @@
 [workspace]
 resolver = "2"
-members = ["library_foundation_reintroduction"]
+members = [
+    "library_foundation_reintroduction",
+    "library_foundation_vulkan_cooked",
+    "library_foundation_application_guide",
+]
