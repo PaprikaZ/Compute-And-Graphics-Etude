@@ -6,6 +6,7 @@ use ::library_foundation_vulkan_cooked::error::foundation_vulkan_cooked::ErrorFo
 
 #[derive(Debug)]
 pub enum ErrorFoundationApplicationGuideOwn {
+    WindowEventLoopRunAbort,
     VulkanInstanceVersionApiQueryFail,
 
     VulkanInstanceCreateFail,
