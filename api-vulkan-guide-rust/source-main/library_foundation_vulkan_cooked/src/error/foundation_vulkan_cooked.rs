@@ -15,6 +15,7 @@ pub enum ErrorFoundationVulkanCookedOwn {
     VulkanDeviceLogicalCreateFail,
     VulkanSwapchainCreateFail,
     VulkanSwapchainImageSGetFail,
+    VulkanSwapchainImageViewSCreateFail,
 }
 
 

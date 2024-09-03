@@ -95,4 +95,67 @@ impl InitializationVulkanSwapchain {
             .or(Err(ErrorFoundationVulkanCookedOwn::VulkanSwapchainImageSGetFail))?;
         Ok((vulkan_swapchain, vulkan_swapchain_image_s))
     }
+
+    fn create_image_view_default(
+        vulkan_logical_device: &VulkanDeviceLogical, vulkan_format: VulkanFormat, vulkan_image: VulkanImage)
+    -> Result<VulkanImageView, ErrorFoundationVulkanCooked>
+    {
+        let vulkan_component_mapping_s =
+            VulkanComponentMapping::builder()
+            .r(VulkanComponentSwizzle::IDENTITY)
+            .g(VulkanComponentSwizzle::IDENTITY)
+            .b(VulkanComponentSwizzle::IDENTITY)
+            .a(VulkanComponentSwizzle::IDENTITY);
+        let vulkan_image_sub_resource_range =
+            VulkanImageSubResourceRange::builder()
+            .aspect_mask(VulkanImageAspectFlagS::COLOR)
+            .base_mip_level(0)
+            .level_count(1)
+            .base_array_layer(0)
+            .layer_count(1);
+        let vulkan_image_view_create_information =
+            VulkanImageViewCreateInformation::builder()
+            .image(vulkan_image)
+            .view_type(VulkanImageViewType::_2D)
+            .format(vulkan_format)
+            .components(vulkan_component_mapping_s)
+            .subresource_range(vulkan_image_sub_resource_range);
+        unsafe { vulkan_logical_device.create_image_view(&vulkan_image_view_create_information, None) }
+        .or(Err(ErrorFoundationVulkanCookedOwn::VulkanSwapchainImageViewSCreateFail.into()))
+    }
+
+    fn create_image_view_s_default(
+        vulkan_logical_device: &VulkanDeviceLogical, vulkan_format: VulkanFormat, vulkan_image_s: &[VulkanImage])
+    -> Result<Vec<VulkanImageView>, ErrorFoundationVulkanCooked>
+    {
+        vulkan_image_s
+        .iter()
+        .try_fold(Vec::new(), |mut result_image_view_s, image|
+            Self::create_image_view_default(vulkan_logical_device, vulkan_format, *image)
+            .map(|new_image_view| { result_image_view_s.push(new_image_view); result_image_view_s }))
+    }
+
+    pub fn initialize_with_image_and_view_s(
+        vulkan_surface: VulkanSurfaceKhr,
+        vulkan_logical_device: &VulkanDeviceLogical,
+        vulkan_surface_capability_s: VulkanSurfaceCapabilitySKhr,
+        vulkan_sharing_mode: VulkanSharingMode,
+        vulkan_queue_family_index_s: &Vec<VulkanQueueFamilyIndex>,
+        vulkan_swapchain_image_number: VulkanSwapchainImageNumber,
+        vulkan_2d_extent: VulkanExtentD2,
+        vulkan_surface_format: VulkanSurfaceFormatKhr,
+        vulkan_present_mode: VulkanPresentModeKhr,
+        old_vulkan_swapchain_o: Option<VulkanSwapchainKhr>)
+    -> Result<(VulkanSwapchainKhr, Vec<VulkanImage>, Vec<VulkanImageView>), ErrorFoundationVulkanCooked>
+    {
+        let (vulkan_swapchain, vulkan_swapchain_image_s) =
+            Self::initialize_with_image_s(
+                vulkan_surface, vulkan_logical_device, vulkan_surface_capability_s,
+                vulkan_sharing_mode, vulkan_queue_family_index_s, vulkan_swapchain_image_number,
+                vulkan_2d_extent, vulkan_surface_format, vulkan_present_mode, old_vulkan_swapchain_o)?;
+        let vulkan_swapchain_image_view_s =
+            Self::create_image_view_s_default(
+                vulkan_logical_device, vulkan_surface_format.format, vulkan_swapchain_image_s.as_slice())?;
+        Ok((vulkan_swapchain, vulkan_swapchain_image_s, vulkan_swapchain_image_view_s))
+    }
 }
