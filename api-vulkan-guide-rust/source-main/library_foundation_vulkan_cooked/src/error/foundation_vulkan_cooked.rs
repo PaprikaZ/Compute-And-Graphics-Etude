@@ -5,6 +5,7 @@ pub enum ErrorFoundationVulkanCookedOwn {
     VulkanNegotiationRankWeightFactorExponentialInvalid,
     VulkanRequirementVersionApiLeastInstanceNotFulfilled,
     VulkanRequirementVersionApiLeastDevicePhysicalNotFulfilled,
+    VulkanLibraryLoaderInitializeFail,
     VulkanInstanceLayerPropertySEnumerateFail,
     VulkanInstanceExtensionPropertySEnumerateFail,
     VulkanRequirementInstanceLayerSNotFulfilled,
