@@ -6,4 +6,5 @@ pub mod vulkan_rank;
 
 pub mod config_vulkan;
 
+pub mod negotiation;
 pub mod initialization;
