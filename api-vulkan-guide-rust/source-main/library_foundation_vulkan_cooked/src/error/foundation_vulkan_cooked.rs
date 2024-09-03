@@ -12,6 +12,7 @@ pub enum ErrorFoundationVulkanCookedOwn {
     VulkanRequirementInstanceLayerSNotFulfilled,
     VulkanRequirementInstanceExtensionSNotFulfilled,
     VulkanRequirementDevicePhysicalQueueFamilySNotFulfilled,
+    VulkanDeviceLogicalCreateFail,
 }
 
 
