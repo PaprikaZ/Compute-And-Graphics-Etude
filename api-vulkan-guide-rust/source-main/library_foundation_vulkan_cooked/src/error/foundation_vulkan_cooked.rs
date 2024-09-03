@@ -13,6 +13,8 @@ pub enum ErrorFoundationVulkanCookedOwn {
     VulkanRequirementInstanceExtensionSNotFulfilled,
     VulkanRequirementDevicePhysicalQueueFamilySNotFulfilled,
     VulkanDeviceLogicalCreateFail,
+    VulkanSwapchainCreateFail,
+    VulkanSwapchainImageSGetFail,
 }
 
 
