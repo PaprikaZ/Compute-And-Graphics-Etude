@@ -357,15 +357,16 @@ impl<'t> ApplicationPartMain<'t> {
 
 
 #[derive(Debug)]
-pub struct Application(ApplicationPartWindow, ApplicationPartMain);
+pub struct Application<'t>(ApplicationPartWindow, ApplicationPartMain<'t>);
 
-impl Application {
-    pub fn as_raw(self) -> (ApplicationPartWindow, ApplicationPartMain) {
-        (self.0, self.1)
+impl<'t> Application<'t> {
+    pub fn new(wp_application: ApplicationPartWindow, mp_application: ApplicationPartMain<'t>)
+    -> Self
+    {
+        Self(wp_application, mp_application)
     }
 
-    pub fn terminate(self)
-    {
-        todo!()
+    pub fn as_raw(self) -> (ApplicationPartWindow, ApplicationPartMain<'t>) {
+        (self.0, self.1)
     }
 }
