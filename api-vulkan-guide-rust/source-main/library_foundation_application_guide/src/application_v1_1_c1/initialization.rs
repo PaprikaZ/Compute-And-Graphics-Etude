@@ -12,9 +12,9 @@ use ::library_foundation_vulkan_cooked::initialization::window::InitializationWi
 
 use crate::error::foundation_application_guide::ErrorFoundationApplicationGuideOwn;
 use crate::error::foundation_application_guide::ErrorFoundationApplicationGuide;
-use crate::application_v1_1_c0::config::ApplicationConfig;
-use crate::application_v1_1_c0::vulkan_debug::ApplicationVulkanDebug;
-use crate::application_v1_1_c0::Application;
+use crate::application_v1_1_c1::config::ApplicationConfig;
+use crate::application_v1_1_c1::vulkan_debug::ApplicationVulkanDebug;
+use crate::application_v1_1_c1::self_::Application;
 
 
 pub struct ApplicationInitialization {}

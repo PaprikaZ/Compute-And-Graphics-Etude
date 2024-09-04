@@ -3,7 +3,8 @@ use ::library_foundation_reintroduction::window_uniform::WindowUniformEventWindo
 
 use crate::error::foundation_application_guide::ErrorFoundationApplicationGuideOwn;
 use crate::error::foundation_application_guide::ErrorFoundationApplicationGuide;
-use crate::application_v1_1_c0::self_::Application;
+use crate::application_v1_1_c1::self_::ApplicationPartMain;
+use crate::application_v1_1_c1::self_::Application;
 
 
 pub struct ApplicationContinuation {}
