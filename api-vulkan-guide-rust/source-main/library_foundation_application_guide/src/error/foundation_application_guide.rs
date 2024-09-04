@@ -13,6 +13,22 @@ pub enum ErrorFoundationApplicationGuideOwn {
     VulkanSurfaceCreateFail,
     VulkanDevicePhysicalEnumerateFail,
     VulkanDevicePhysicalRequirementNoneFulfilled,
+    VulkanRenderPassCreateFail,
+    VulkanFrameBufferCreateFail,
+    VulkanCommandPoolCreateFail,
+    VulkanCommandBufferAllocateFail,
+    VulkanFenceCreateFail,
+    VulkanSemaphoreCreateFail,
+
+    VulkanDeviceLogicalWaitIdleFail,
+    VulkanDeviceLogicalFenceWaitFail,
+    VulkanDeviceLogicalFenceResetFail,
+    VulkanDeviceLogicalCommandBufferResetFail,
+    VulkanDeviceLogicalSwapchainImageIndexNextAcquireFail,
+    VulkanDeviceLogicalCommandBufferBeginFail,
+    VulkanDeviceLogicalCommandBufferEndFail,
+    VulkanDeviceLogicalQueueSubmitFail,
+    VulkanDeviceLogicalQueuePresentFail,
 }
 
 

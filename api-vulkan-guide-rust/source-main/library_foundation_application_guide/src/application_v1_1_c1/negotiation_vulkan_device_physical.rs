@@ -19,7 +19,7 @@ use ::library_foundation_vulkan_cooked::vulkan_rank::VulkanRank;
 
 use crate::error::foundation_application_guide::ErrorFoundationApplicationGuideOwn;
 use crate::error::foundation_application_guide::ErrorFoundationApplicationGuide;
-use crate::application_v1_1_c0::config::ApplicationConfig;
+use crate::application_v1_1_c1::config::ApplicationConfig;
 
 
 #[derive(Debug)]
