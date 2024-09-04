@@ -34,6 +34,11 @@ use ::library_foundation_reintroduction::vulkan::VulkanCommandPoolCreateFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanCommandBufferAllocateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanCommandBufferLevel;
 use ::library_foundation_reintroduction::vulkan::VulkanCommandBuffer;
+use ::library_foundation_reintroduction::vulkan::VulkanFence;
+use ::library_foundation_reintroduction::vulkan::VulkanFenceCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanFenceCreateFlagS;
+use ::library_foundation_reintroduction::vulkan::VulkanSemaphore;
+use ::library_foundation_reintroduction::vulkan::VulkanSemaphoreCreateInformation;
 use ::library_foundation_reintroduction::vulkan::version::VulkanVersionApi;
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexGraphic;
 use ::library_foundation_vulkan_cooked::vulkan_requirement::instance::VulkanRequirementInstance;
@@ -198,6 +203,25 @@ impl ApplicationInitialization {
         let main_vulkan_command_buffer = vulkan_command_buffer_s[0];
         Ok((main_vulkan_command_pool, main_vulkan_command_buffer))
     }
+
+    fn initialize_synchronization_primitive_set(vulkan_logical_device: &VulkanDeviceLogical)
+    -> Result<(VulkanFence, VulkanSemaphore, VulkanSemaphore), ErrorFoundationApplicationGuide>
+    {
+        let vulkan_fence_create_information =
+            VulkanFenceCreateInformation::builder().flags(VulkanFenceCreateFlagS::SIGNALED).build();
+        let frame_rendering_finished_vulkan_fence =
+            unsafe { vulkan_logical_device.create_fence(&vulkan_fence_create_information, None) }
+            .or(Err(ErrorFoundationApplicationGuideOwn::VulkanFenceCreateFail))?;
+        let vulkan_semaphore_create_information = VulkanSemaphoreCreateInformation::builder().build();
+        let image_available_vulkan_semaphore =
+            unsafe { vulkan_logical_device.create_semaphore(&vulkan_semaphore_create_information, None) }
+            .or(Err(ErrorFoundationApplicationGuideOwn::VulkanSemaphoreCreateFail))?;
+        let render_finished_vulkan_semaphore =
+            unsafe { vulkan_logical_device.create_semaphore(&vulkan_semaphore_create_information, None) }
+            .or(Err(ErrorFoundationApplicationGuideOwn::VulkanSemaphoreCreateFail))?;
+        Ok((frame_rendering_finished_vulkan_fence, image_available_vulkan_semaphore, render_finished_vulkan_semaphore))
+    }
+
     //
     pub fn initialize<'t>(config: ApplicationConfig<'t>)
     -> Result<Application<'t>, ErrorFoundationApplicationGuide>

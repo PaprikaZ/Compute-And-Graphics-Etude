@@ -17,6 +17,8 @@ pub enum ErrorFoundationApplicationGuideOwn {
     VulkanFrameBufferCreateFail,
     VulkanCommandPoolCreateFail,
     VulkanCommandBufferAllocateFail,
+    VulkanFenceCreateFail,
+    VulkanSemaphoreCreateFail,
 }
 
 
