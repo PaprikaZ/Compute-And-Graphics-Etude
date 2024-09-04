@@ -1,4 +1,6 @@
 use ::library_foundation_reintroduction::window_uniform::WindowUniformWindow;
+use ::library_foundation_reintroduction::vulkan::VulkanDeviceLogicalCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanDeviceVersion1_0;
 use ::library_foundation_reintroduction::vulkan::VulkanBuilderHas;
 use ::library_foundation_reintroduction::vulkan::VulkanEntry;
 use ::library_foundation_reintroduction::vulkan::VulkanInstance;
@@ -21,6 +23,10 @@ use ::library_foundation_reintroduction::vulkan::VulkanPipelineBindPoint;
 use ::library_foundation_reintroduction::vulkan::VulkanAccessFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanPipelineStageFlagS;
 use ::library_foundation_reintroduction::vulkan::VULKAN_SUBPASS_EXTERNAL;
+use ::library_foundation_reintroduction::vulkan::VulkanImageView;
+use ::library_foundation_reintroduction::vulkan::VulkanExtentD2;
+use ::library_foundation_reintroduction::vulkan::VulkanFrameBuffer;
+use ::library_foundation_reintroduction::vulkan::VulkanFrameBufferCreateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanRenderPassCreateInformation;
 use ::library_foundation_reintroduction::vulkan::version::VulkanVersionApi;
 use ::library_foundation_vulkan_cooked::vulkan_requirement::instance::VulkanRequirementInstance;
@@ -135,6 +141,29 @@ impl ApplicationInitialization {
         .or(Err(ErrorFoundationApplicationGuideOwn::VulkanRenderPassCreateFail.into()))
     }
 
+    fn initialize_frame_buffer_s(
+        vulkan_logical_device: &VulkanDeviceLogical,
+        vulkan_image_view_s: &[VulkanImageView],
+        vulkan_render_pass: VulkanRenderPass,
+        vulkan_extent: VulkanExtentD2)
+    -> Result<Vec<VulkanFrameBuffer>, ErrorFoundationApplicationGuide>
+    {
+        vulkan_image_view_s
+        .iter()
+        .try_fold(Vec::new(), |mut result_frame_buffer_s, iv| {
+            let vulkan_frame_buffer_create_information =
+                VulkanFrameBufferCreateInformation::builder()
+                .render_pass(vulkan_render_pass)
+                .attachments(&[*iv])
+                .width(vulkan_extent.width)
+                .height(vulkan_extent.height)
+                .layers(1)
+                .build();
+            unsafe { vulkan_logical_device.create_framebuffer(&vulkan_frame_buffer_create_information, None) }
+            .map(|fb| { result_frame_buffer_s.push(fb); result_frame_buffer_s })
+        })
+        .or(Err(ErrorFoundationApplicationGuideOwn::VulkanFrameBufferCreateFail.into()))
+    }
     //
     pub fn initialize<'t>(config: ApplicationConfig<'t>)
     -> Result<Application<'t>, ErrorFoundationApplicationGuide>

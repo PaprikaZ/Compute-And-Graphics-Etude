@@ -14,6 +14,7 @@ pub enum ErrorFoundationApplicationGuideOwn {
     VulkanDevicePhysicalEnumerateFail,
     VulkanDevicePhysicalRequirementNoneFulfilled,
     VulkanRenderPassCreateFail,
+    VulkanFrameBufferCreateFail,
 }
 
 
