@@ -28,7 +28,14 @@ use ::library_foundation_reintroduction::vulkan::VulkanExtentD2;
 use ::library_foundation_reintroduction::vulkan::VulkanFrameBuffer;
 use ::library_foundation_reintroduction::vulkan::VulkanFrameBufferCreateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanRenderPassCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanCommandPool;
+use ::library_foundation_reintroduction::vulkan::VulkanCommandPoolCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanCommandPoolCreateFlagS;
+use ::library_foundation_reintroduction::vulkan::VulkanCommandBufferAllocateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanCommandBufferLevel;
+use ::library_foundation_reintroduction::vulkan::VulkanCommandBuffer;
 use ::library_foundation_reintroduction::vulkan::version::VulkanVersionApi;
+use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexGraphic;
 use ::library_foundation_vulkan_cooked::vulkan_requirement::instance::VulkanRequirementInstance;
 use ::library_foundation_vulkan_cooked::initialization::window::InitializationWindowUniform;
 
@@ -163,6 +170,33 @@ impl ApplicationInitialization {
             .map(|fb| { result_frame_buffer_s.push(fb); result_frame_buffer_s })
         })
         .or(Err(ErrorFoundationApplicationGuideOwn::VulkanFrameBufferCreateFail.into()))
+    }
+
+    fn initialize_command_pool_and_buffer_main(
+        vulkan_logical_device: &VulkanDeviceLogical,
+        vulkan_graphic_queue_family_index: VulkanQueueFamilyIndexGraphic)
+    -> Result<(VulkanCommandPool, VulkanCommandBuffer), ErrorFoundationApplicationGuide>
+    {
+        let vulkan_command_pool_create_information =
+            VulkanCommandPoolCreateInformation::builder()
+            .flags(VulkanCommandPoolCreateFlagS::RESET_COMMAND_BUFFER)
+            .queue_family_index(vulkan_graphic_queue_family_index.as_raw())
+            .build();
+        let main_vulkan_command_pool =
+            unsafe { vulkan_logical_device.create_command_pool(&vulkan_command_pool_create_information, None) }
+            .or(Err(ErrorFoundationApplicationGuideOwn::VulkanCommandPoolCreateFail))?;
+        let vulkan_command_buffer_allocate_information =
+            VulkanCommandBufferAllocateInformation::builder()
+            .command_pool(main_vulkan_command_pool)
+            .level(VulkanCommandBufferLevel::PRIMARY)
+            .command_buffer_count(1)
+            .build();
+        let vulkan_command_buffer_s =
+            unsafe { vulkan_logical_device.allocate_command_buffers(&vulkan_command_buffer_allocate_information) }
+            .or(Err(ErrorFoundationApplicationGuideOwn::VulkanCommandBufferAllocateFail))?;
+        assert!(vulkan_command_buffer_s.len() == 1);
+        let main_vulkan_command_buffer = vulkan_command_buffer_s[0];
+        Ok((main_vulkan_command_pool, main_vulkan_command_buffer))
     }
     //
     pub fn initialize<'t>(config: ApplicationConfig<'t>)
