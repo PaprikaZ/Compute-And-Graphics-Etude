@@ -43,11 +43,20 @@ use ::library_foundation_reintroduction::vulkan::version::VulkanVersionApi;
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexGraphic;
 use ::library_foundation_vulkan_cooked::vulkan_requirement::instance::VulkanRequirementInstance;
 use ::library_foundation_vulkan_cooked::initialization::window::InitializationWindowUniform;
+use ::library_foundation_vulkan_cooked::initialization::vulkan_library_loader::InitializationVulkanLibraryLoader;
+use ::library_foundation_vulkan_cooked::initialization::vulkan_entry::InitializationVulkanEntry;
+use ::library_foundation_vulkan_cooked::initialization::vulkan_device_logical::InitializationVulkanDeviceLogical;
+use ::library_foundation_vulkan_cooked::initialization::vulkan_swapchain::InitializationVulkanSwapchain;
+use ::library_foundation_vulkan_cooked::negotiation::vulkan_swapchain::NegotiationVulkanSwapchain;
 
 use crate::error::foundation_application_guide::ErrorFoundationApplicationGuideOwn;
 use crate::error::foundation_application_guide::ErrorFoundationApplicationGuide;
 use crate::application_v1_1_c1::config::ApplicationConfig;
 use crate::application_v1_1_c1::vulkan_debug::ApplicationVulkanDebug;
+use crate::application_v1_1_c1::negotiation_vulkan_device_physical::ApplicationNegotiationVulkanDevicePhysical;
+use crate::application_v1_1_c1::negotiation_vulkan_swapchain::ApplicationNegotiationVulkanSwapchain;
+use crate::application_v1_1_c1::self_::ApplicationPartWindow;
+use crate::application_v1_1_c1::self_::ApplicationPartMain;
 use crate::application_v1_1_c1::self_::Application;
 
 
@@ -226,6 +235,79 @@ impl ApplicationInitialization {
     pub fn initialize<'t>(config: ApplicationConfig<'t>)
     -> Result<Application<'t>, ErrorFoundationApplicationGuide>
     {
-        todo!()
+        let (window, window_event_loop) =
+            InitializationWindowUniform::initialize_window_and_event_loop(config.window_title, config.window_inner_size)?;
+        let vulkan_library_loader = InitializationVulkanLibraryLoader::initialize()?;
+        let vulkan_entry = InitializationVulkanEntry::initialize(vulkan_library_loader)?;
+        let vulkan_instance = Self::initialize_vulkan_instance(&config, &vulkan_entry)?;
+        let vulkan_surface = Self::initialize_vulkan_surface(&vulkan_instance, &window)?;
+        let (vulkan_physical_device,
+             vulkan_graphic_queue_family_index, vulkan_present_queue_family_index,
+             matched_vulkan_extension_name_s, matched_vulkan_physical_device_feature_name_s,
+             vulkan_surface_capability_s, available_vulkan_surface_format_s, available_vulkan_present_mode_s) =
+            ApplicationNegotiationVulkanDevicePhysical::try_pick_queue_family_index_s_graphic_rank(
+                &config, &vulkan_instance, vulkan_surface)?;
+        let matched_vulkan_extension_name_s =
+            matched_vulkan_extension_name_s.into_iter() .map(|n| n.clone()).collect::<Vec<_>>();
+        let matched_vulkan_physical_device_feature_name_s =
+            matched_vulkan_physical_device_feature_name_s.into_iter().map(|n| n.clone()).collect::<Vec<_>>();
+        let vulkan_logical_device =
+            InitializationVulkanDeviceLogical::initialize(
+                &vulkan_instance, vulkan_physical_device,
+                &matched_vulkan_extension_name_s, &matched_vulkan_physical_device_feature_name_s,
+                vulkan_graphic_queue_family_index, vulkan_present_queue_family_index,
+                VulkanDeviceLogicalCreateInformation::builder())?;
+        let vulkan_graphic_queue =
+            unsafe { vulkan_logical_device.get_device_queue(vulkan_graphic_queue_family_index.as_raw(), 0) };
+        let vulkan_present_queue =
+            unsafe { vulkan_logical_device.get_device_queue(vulkan_present_queue_family_index.as_raw(), 0) };
+        //
+        let vulkan_surface_format =
+            ApplicationNegotiationVulkanSwapchain::negotiate_surface_format(
+                config.vulkan_swapchain.format_prioritized,
+                config.vulkan_swapchain.color_space_prioritized,
+                &available_vulkan_surface_format_s);
+        let vulkan_present_mode =
+            NegotiationVulkanSwapchain::negotiate_present_mode(
+                config.vulkan_swapchain.present_mode_prioritized,
+                config.vulkan_swapchain.present_mode_fallback,
+                &available_vulkan_present_mode_s);
+        let vulkan_2d_extent =
+            NegotiationVulkanSwapchain::negotiate_extent(&window, &vulkan_surface_capability_s);
+        let vulkan_swapchain_image_number =
+            NegotiationVulkanSwapchain::negotiate_image_number(&vulkan_surface_capability_s);
+        let (vulkan_swapchain_sharing_mode, vulkan_swapchain_queue_family_index_s) =
+            NegotiationVulkanSwapchain::negotiate_sharing_mode_and_queue_family_index_s_graphic_present(
+                vulkan_graphic_queue_family_index, vulkan_present_queue_family_index);
+        let (vulkan_swapchain, vulkan_swapchain_image_s, vulkan_swapchain_image_view_s) =
+            InitializationVulkanSwapchain::initialize_with_image_and_view_s(
+                vulkan_surface, &vulkan_logical_device, vulkan_surface_capability_s,
+                vulkan_swapchain_sharing_mode, &vulkan_swapchain_queue_family_index_s,
+                vulkan_swapchain_image_number, vulkan_2d_extent, vulkan_surface_format, vulkan_present_mode, None)?;
+        let vulkan_render_pass =
+            Self::initialize_render_pass(&vulkan_logical_device, vulkan_surface_format.format)?;
+        let vulkan_swapchain_frame_buffer_s =
+            Self::initialize_frame_buffer_s(&vulkan_logical_device, &vulkan_swapchain_image_view_s, vulkan_render_pass, vulkan_2d_extent)?;
+        let (main_vulkan_command_pool, main_vulkan_command_buffer) =
+            Self::initialize_command_pool_and_buffer_main(&vulkan_logical_device, vulkan_graphic_queue_family_index)?;
+        let (render_finished_vulkan_fence, render_finished_vulkan_semaphore, image_available_vulkan_semaphore) =
+            Self::initialize_synchronization_primitive_set(&vulkan_logical_device)?;
+        let wp_application = ApplicationPartWindow::new(window, window_event_loop);
+        let mp_application =
+            ApplicationPartMain::new(
+                config, vulkan_entry, vulkan_instance, vulkan_surface,
+                vulkan_physical_device, vulkan_graphic_queue_family_index, vulkan_present_queue_family_index,
+                matched_vulkan_extension_name_s, matched_vulkan_physical_device_feature_name_s,
+                vulkan_surface_capability_s, available_vulkan_surface_format_s, available_vulkan_present_mode_s,
+                vulkan_logical_device, vulkan_graphic_queue, vulkan_present_queue,
+                vulkan_surface_format, vulkan_present_mode, vulkan_2d_extent,
+                vulkan_swapchain_image_number, vulkan_swapchain_sharing_mode,
+                vulkan_swapchain, vulkan_swapchain_image_s, vulkan_swapchain_image_view_s,
+                vulkan_render_pass, vulkan_swapchain_frame_buffer_s,
+                main_vulkan_command_pool, main_vulkan_command_buffer,
+                render_finished_vulkan_fence, render_finished_vulkan_semaphore, image_available_vulkan_semaphore,
+                None,
+            );
+        Ok(Application::<'t>::new(wp_application, mp_application))
     }
 }
