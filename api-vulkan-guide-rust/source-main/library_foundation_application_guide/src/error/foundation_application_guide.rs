@@ -13,6 +13,7 @@ pub enum ErrorFoundationApplicationGuideOwn {
     VulkanSurfaceCreateFail,
     VulkanDevicePhysicalEnumerateFail,
     VulkanDevicePhysicalRequirementNoneFulfilled,
+    VulkanRenderPassCreateFail,
 }
 
 
