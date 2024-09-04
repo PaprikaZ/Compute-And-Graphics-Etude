@@ -5,5 +5,6 @@ pub mod negotiation_vulkan_swapchain;
 pub mod self_;
 pub mod initialization;
 pub mod continuation;
+pub mod termination;
 
 pub use self_::*;
