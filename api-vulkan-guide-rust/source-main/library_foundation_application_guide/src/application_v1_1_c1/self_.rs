@@ -349,6 +349,31 @@ impl<'t> ApplicationPartMain<'t> {
         self.flag_signal_window_resized = window_resized_signal_flag;
     }
 
+    //
+    pub fn destroy(self) -> Result<(), ErrorFoundationApplicationGuide> {
+        unsafe { self.vulkan_device_logical.device_wait_idle() }
+        .or(Err(ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalWaitIdleFail))?;
+        unsafe { self.vulkan_device_logical.destroy_command_pool(self.vulkan_command_pool_main, None) };
+        unsafe { self.vulkan_device_logical.destroy_fence(self.vulkan_fence_render_finished, None) };
+        unsafe { self.vulkan_device_logical.destroy_semaphore(self.vulkan_semaphore_image_available, None) };
+        unsafe { self.vulkan_device_logical.destroy_semaphore(self.vulkan_semaphore_render_finished, None) };
+        unsafe { self.vulkan_device_logical.destroy_swapchain_khr(self.vulkan_swapchain, None) };
+        unsafe { self.vulkan_device_logical.destroy_render_pass(self.vulkan_render_pass, None) };
+        self.vulkan_swapchain_frame_buffer_s.into_iter().for_each(|frame_buffer| unsafe {
+            self.vulkan_device_logical.destroy_framebuffer(frame_buffer, None);
+        });
+        self.vulkan_swapchain_image_view_s.into_iter().for_each(|image_view| unsafe {
+            self.vulkan_device_logical.destroy_image_view(image_view, None);
+        });
+        unsafe { self.vulkan_instance.destroy_surface_khr(self.vulkan_surface, None) };
+        unsafe { self.vulkan_device_logical.destroy_device(None) };
+        self.vulkan_debug_messenger_o.map(|debug_messenger| unsafe {
+            self.vulkan_instance.destroy_debug_utils_messenger_ext(debug_messenger, None);
+        });
+        unsafe { self.vulkan_instance.destroy_instance(None) };
+        Ok(())
+    }
+
     pub fn recreate_swapchain(&mut self, _window: &WindowUniformWindow) -> Result<(), ErrorFoundationApplicationGuide>
     {
         todo!()

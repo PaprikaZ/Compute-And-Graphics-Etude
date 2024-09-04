@@ -19,6 +19,8 @@ pub enum ErrorFoundationApplicationGuideOwn {
     VulkanCommandBufferAllocateFail,
     VulkanFenceCreateFail,
     VulkanSemaphoreCreateFail,
+
+    VulkanDeviceLogicalWaitIdleFail,
 }
 
 
