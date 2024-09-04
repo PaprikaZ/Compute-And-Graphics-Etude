@@ -21,6 +21,14 @@ pub enum ErrorFoundationApplicationGuideOwn {
     VulkanSemaphoreCreateFail,
 
     VulkanDeviceLogicalWaitIdleFail,
+    VulkanDeviceLogicalFenceWaitFail,
+    VulkanDeviceLogicalFenceResetFail,
+    VulkanDeviceLogicalCommandBufferResetFail,
+    VulkanDeviceLogicalSwapchainImageIndexNextAcquireFail,
+    VulkanDeviceLogicalCommandBufferBeginFail,
+    VulkanDeviceLogicalCommandBufferEndFail,
+    VulkanDeviceLogicalQueueSubmitFail,
+    VulkanDeviceLogicalQueuePresentFail,
 }
 
 

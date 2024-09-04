@@ -374,6 +374,94 @@ impl<'t> ApplicationPartMain<'t> {
         Ok(())
     }
 
+    //
+    pub fn render(&mut self, _window: &WindowUniformWindow) -> Result<(), ErrorFoundationApplicationGuide> {
+        if self.be_window_minimized { return Ok(()) }
+        //
+        unsafe { self.vulkan_device_logical.wait_for_fences(&[self.vulkan_fence_render_finished], true, 1000_000_000) }
+        .or(Err(ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalFenceWaitFail))?;
+        unsafe { self.vulkan_device_logical.reset_fences(&[self.vulkan_fence_render_finished]) }
+        .or(Err(ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalFenceResetFail))?;
+        //
+        unsafe { self.vulkan_device_logical.reset_command_buffer(
+            self.vulkan_command_buffer_main, VulkanCommandBufferResetFlagS::RELEASE_RESOURCES) }
+        .or(Err(ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalCommandBufferResetFail))?;
+        //
+        let next_available_vulkan_swapchain_image_index =
+            unsafe { self.vulkan_device_logical.acquire_next_image_khr(
+                self.vulkan_swapchain, 1000_000_000, self.vulkan_semaphore_image_available, VulkanFence::null()) }
+            .map(|(image_index, _succcess_code)| VulkanSwapchainImageIndex::new(image_index))
+            .or(Err(ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalSwapchainImageIndexNextAcquireFail))?;
+        let vulkan_command_buffer_begin_information =
+            VulkanCommandBufferBeginInformation::builder()
+            .flags(VulkanCommandBufferUsageFlagS::ONE_TIME_SUBMIT)
+            .build();
+        unsafe { self.vulkan_device_logical.begin_command_buffer(
+            self.vulkan_command_buffer_main, &vulkan_command_buffer_begin_information) }
+        .or(Err(ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalCommandBufferBeginFail))?;
+        //
+        let vulkan_render_area =
+            VulkanRectangleD2::builder()
+            .offset(VulkanOffsetD2::default())
+            .extent(self.vulkan_extent_d2)
+            .build();
+        let vulkan_clear_color_value_blue = ((self.number_frame_rendered as f32) / 120.0f32).sin().abs();
+        let vulkan_clear_value =
+            VulkanClearValue {
+                color: VulkanClearColorValue { float32: [0.0, 0.0, vulkan_clear_color_value_blue, 1.0] } };
+        let vulkan_render_pass_begin_information =
+            VulkanRenderPassBeginInformation::builder()
+            .render_pass(self.vulkan_render_pass)
+            .framebuffer(self.vulkan_swapchain_frame_buffer_s[next_available_vulkan_swapchain_image_index.as_raw() as usize])
+            .render_area(vulkan_render_area)
+            .clear_values(&[vulkan_clear_value])
+            .build();
+        unsafe { self.vulkan_device_logical.cmd_begin_render_pass(
+            self.vulkan_command_buffer_main, &vulkan_render_pass_begin_information, VulkanSubpassContents::INLINE) };
+        unsafe { self.vulkan_device_logical.cmd_end_render_pass(self.vulkan_command_buffer_main) };
+        unsafe { self.vulkan_device_logical.end_command_buffer(self.vulkan_command_buffer_main) }
+        .or(Err(ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalCommandBufferEndFail))?;
+        //
+        let submit_wait_vulkan_semaphore_s = &[self.vulkan_semaphore_image_available];
+        let submit_signal_vulkan_semaphore_s = &[self.vulkan_semaphore_render_finished];
+        let submit_wait_vulkan_pipeline_stage_flag_s = &[VulkanPipelineStageFlagS::COLOR_ATTACHMENT_OUTPUT];
+        let submit_vulkan_command_buffer_s = &[self.vulkan_command_buffer_main];
+        let vulkan_submit_information =
+            VulkanSubmitInformation::builder()
+            .wait_semaphores(submit_wait_vulkan_semaphore_s)
+            .signal_semaphores(submit_signal_vulkan_semaphore_s)
+            .wait_dst_stage_mask(submit_wait_vulkan_pipeline_stage_flag_s)
+            .command_buffers(submit_vulkan_command_buffer_s)
+            .build();
+        unsafe { self.vulkan_device_logical.queue_submit(self.vulkan_queue_graphic, &[vulkan_submit_information], self.vulkan_fence_render_finished) }
+        .or(Err(ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalQueueSubmitFail))?;
+        //
+        let present_wait_vulkan_semaphore_s = submit_signal_vulkan_semaphore_s;
+        let present_swapchain_s = &[self.vulkan_swapchain];
+        let present_vulkan_swapchain_image_index_s = &[next_available_vulkan_swapchain_image_index.as_raw()];
+        let vulkan_present_information =
+            VulkanPresentInformationKhr::builder()
+            .wait_semaphores(present_wait_vulkan_semaphore_s)
+            .swapchains(present_swapchain_s)
+            .image_indices(present_vulkan_swapchain_image_index_s)
+            .build();
+        let be_present_result_swapchain_recreate_needed =
+            match unsafe { self.vulkan_device_logical.queue_present_khr(
+                self.vulkan_queue_present, &vulkan_present_information) }
+            {
+                Err(VulkanErrorCode_::OUT_OF_DATE_KHR) => true,
+                Ok(VulkanSuccessCode_::SUBOPTIMAL_KHR) => true,
+                Err(_error) => Err(ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalQueuePresentFail)?,
+                Ok(_) => false,
+            };
+        if self.flag_signal_window_resized && be_present_result_swapchain_recreate_needed {
+            self.flag_signal_window_resized = false;
+            self.recreate_swapchain(_window)?;
+        }
+        self.number_frame_rendered += 1;
+        Ok(())
+    }
+
     pub fn recreate_swapchain(&mut self, _window: &WindowUniformWindow) -> Result<(), ErrorFoundationApplicationGuide>
     {
         todo!()
