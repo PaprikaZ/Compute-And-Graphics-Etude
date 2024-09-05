@@ -1,0 +1,140 @@
+use ::library_foundation_reintroduction::error::foundation_reintroduction::ErrorFoundationReintroductionOwn;
+use ::library_foundation_vulkan_cooked::error::foundation_vulkan_cooked::ErrorFoundationVulkanCookedOwn;
+use ::library_foundation_application_guide::error::foundation_application_guide::ErrorFoundationApplicationGuideOwn;
+
+use crate::error::entry_guide::ErrorEntryGuideOwn;
+use crate::error::entry_guide::ErrorEntryGuide;
+
+
+pub struct ErrorEntryGuideHandler {}
+
+impl ErrorEntryGuideHandler {
+    fn handle_reintroduction_own(error: ErrorFoundationReintroductionOwn)
+    -> Option<ErrorFoundationReintroductionOwn>
+    {
+        let (error_message, be_bypass) =
+            match &error {
+                ErrorFoundationReintroductionOwn::VulkanApplicationNameInvalid =>
+                    ("vulkan application name invalid", true),
+                ErrorFoundationReintroductionOwn::VulkanEngineNameInvalid =>
+                    ("vulkan engine name invalid", true),
+            };
+        println!("{error_message}");
+        if be_bypass { Some(error) } else { None }
+    }
+
+    fn handle_vulkan_cooked_own(error: ErrorFoundationVulkanCookedOwn)
+    -> Option<ErrorFoundationVulkanCookedOwn>
+    {
+        let (error_message, be_bypass) =
+            match &error {
+                ErrorFoundationVulkanCookedOwn::WindowUniformCreateFail =>
+                    ("window uniform create fail", true),
+                ErrorFoundationVulkanCookedOwn::WindowUniformEventLoopCreateFail =>
+                    ("window uniform event loop create fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanNegotiationRankWeightFactorExponentialInvalid =>
+                    ("vulkan negotiation rank weight factor exponential invalid", true),
+                ErrorFoundationVulkanCookedOwn::VulkanRequirementVersionApiLeastInstanceNotFulfilled =>
+                    ("vulkan requirement version api least instance not fulfilled", true),
+                ErrorFoundationVulkanCookedOwn::VulkanRequirementVersionApiLeastDevicePhysicalNotFulfilled =>
+                    ("vulkan requirement version api least device physical not fulfilled", true),
+                ErrorFoundationVulkanCookedOwn::VulkanLibraryLoaderInitializeFail =>
+                    ("vulkan library loader initialize fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanEntryInitializeFail =>
+                    ("vulkan entry initialize fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanInstanceLayerPropertySEnumerateFail =>
+                    ("vulkan instance layer property s enumerate fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanInstanceExtensionPropertySEnumerateFail =>
+                    ("vulkan instance extension property s enumerate fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanRequirementDevicePhysicalQueueFamilySNotFulfilled =>
+                    ("vulkan requirement device physical queue family s not fulfilled", true),
+                ErrorFoundationVulkanCookedOwn::VulkanDeviceLogicalCreateFail =>
+                    ("vulkan device logical create fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanSwapchainCreateFail =>
+                    ("vulkan swapchain create fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanSwapchainImageSGetFail =>
+                    ("vulkan swapchain image s get fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanSwapchainImageViewSCreateFail =>
+                    ("vulkan swapchain image view s create fail", true),
+            };
+        println!("{error_message}");
+        if be_bypass { Some(error) } else { None }
+    }
+
+    fn handle_application_guide_own(error: ErrorFoundationApplicationGuideOwn)
+    -> Option<ErrorFoundationApplicationGuideOwn>
+    {
+        let (error_message, be_bypass) =
+            match &error {
+                ErrorFoundationApplicationGuideOwn::WindowEventLoopRunAbort =>
+                    ("window event loop run abort", true),
+                ErrorFoundationApplicationGuideOwn::VulkanInstanceVersionApiQueryFail =>
+                    ("vulkan instance version api query fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanInstanceCreateFail =>
+                    ("vulkan instance create fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanSurfaceCreateFail =>
+                    ("vulkan surface create fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanDevicePhysicalEnumerateFail =>
+                    ("vulkan device physical enumerate fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanDevicePhysicalRequirementNoneFulfilled =>
+                    ("vulkan device physical requirement none fulfilled", true),
+                ErrorFoundationApplicationGuideOwn::VulkanRenderPassCreateFail =>
+                    ("vulkan render pass create fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanFrameBufferCreateFail =>
+                    ("vulkan frame buffer create fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanCommandPoolCreateFail =>
+                    ("vulkan command pool create fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanCommandBufferAllocateFail =>
+                    ("vulkan command buffer allocate fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanFenceCreateFail =>
+                    ("vulkan fence create fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanSemaphoreCreateFail =>
+                    ("vulkan semaphore create fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalWaitIdleFail =>
+                    ("vulkan device logical wait idle fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalFenceWaitFail =>
+                    ("vulkan device logical fence wait fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalFenceResetFail =>
+                    ("vulkan device logical fence reset fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalCommandBufferResetFail =>
+                    ("vulkan device logical command buffer reset fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalSwapchainImageIndexNextAcquireFail =>
+                    ("vulkan device logical swapchain image index next acquire fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalCommandBufferBeginFail =>
+                    ("vulkan device logical command buffer begin fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalCommandBufferEndFail =>
+                    ("vulkan device logical command buffer end fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalQueueSubmitFail =>
+                    ("vulkan device logical queue submit fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalQueuePresentFail =>
+                    ("vulkan device logical queue present fail", true),
+            };
+        println!("{error_message}");
+        if be_bypass { Some(error) } else { None }
+    }
+
+    fn handle_entry_guide_own(error: ErrorEntryGuideOwn)
+    -> Option<ErrorEntryGuideOwn>
+    {
+        let (error_message, be_bypass) =
+            match &error {
+                ErrorEntryGuideOwn::EntryArgumentParseFail(message) =>
+                    (message.as_str(), false),
+            };
+        println!("{error_message}");
+        if be_bypass { Some(error) } else { None }
+    }
+
+    pub fn handle(error: ErrorEntryGuide) -> Option<ErrorEntryGuide> {
+        match error {
+            ErrorEntryGuide::Own(err) =>
+                Self::handle_entry_guide_own(err).map(|e| e.into()),
+            ErrorEntryGuide::ScopeApplicationGuide(err) =>
+                Self::handle_application_guide_own(err).map(|e| e.into()),
+            ErrorEntryGuide::ScopeVulkanCooked(err) =>
+                Self::handle_vulkan_cooked_own(err).map(|e| e.into()),
+            ErrorEntryGuide::ScopeReintroduction(err) =>
+                Self::handle_reintroduction_own(err).map(|e| e.into()),
+        }
+    }
+}
