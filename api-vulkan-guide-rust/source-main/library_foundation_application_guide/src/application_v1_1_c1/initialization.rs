@@ -6,6 +6,7 @@ use ::library_foundation_reintroduction::vulkan::VulkanEntry;
 use ::library_foundation_reintroduction::vulkan::VulkanInstance;
 use ::library_foundation_reintroduction::vulkan::VulkanExtensionDebugUtilityMessengerCreateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanInstanceCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanInstanceCreateFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanWindow;
 use ::library_foundation_reintroduction::vulkan::VulkanSurfaceKhr;
 use ::library_foundation_reintroduction::vulkan::VulkanFormat;
@@ -39,8 +40,12 @@ use ::library_foundation_reintroduction::vulkan::VulkanFenceCreateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanFenceCreateFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanSemaphore;
 use ::library_foundation_reintroduction::vulkan::VulkanSemaphoreCreateInformation;
-use ::library_foundation_reintroduction::vulkan::version::VulkanVersionApi;
+use ::library_foundation_reintroduction::vulkan::VULKAN_EXTENSION_GET_PHYSICAL_DEVICE_PROPERTIES2_KHR;
+use ::library_foundation_reintroduction::vulkan::VULKAN_EXTENSION_PORTABILITY_ENUMERATION_KHR;
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexGraphic;
+use ::library_foundation_reintroduction::vulkan::version::VulkanVersionEntry;
+use ::library_foundation_reintroduction::vulkan::version::VulkanVersionApi;
+use ::library_foundation_reintroduction::vulkan::portability::VULKAN_PORTABILITY_VERSION_ENTRY_MACOS_MIN;
 use ::library_foundation_vulkan_cooked::vulkan_requirement::instance::VulkanRequirementInstance;
 use ::library_foundation_vulkan_cooked::initialization::window::InitializationWindowUniform;
 use ::library_foundation_vulkan_cooked::initialization::vulkan_library_loader::InitializationVulkanLibraryLoader;
@@ -63,6 +68,27 @@ use crate::application_v1_1_c1::self_::Application;
 pub struct ApplicationInitialization {}
 
 impl ApplicationInitialization {
+    fn patch_config_window_extension(config: &mut ApplicationConfig, window: &WindowUniformWindow)
+    {
+        VulkanWindow::get_required_instance_extensions(window)
+        .iter()
+        .for_each(|n| { let _ = config.vulkan.instance_extension_name_s_required.insert(**n); })
+    }
+
+    fn patch_config_portability_macos(config: &mut ApplicationConfig, vulkan_entry: &VulkanEntry)
+    -> Result<(), ErrorFoundationApplicationGuide>
+    {
+        let vulkan_entry_version: VulkanVersionEntry =
+            vulkan_entry.version()
+            .or(Err(ErrorFoundationApplicationGuideOwn::VulkanEntryVersionGetFail))?.into();
+        if cfg!(target_os = "macos") && VULKAN_PORTABILITY_VERSION_ENTRY_MACOS_MIN <= vulkan_entry_version {
+            config.vulkan.instance_extension_name_s_required.insert(VULKAN_EXTENSION_GET_PHYSICAL_DEVICE_PROPERTIES2_KHR.name);
+            config.vulkan.instance_extension_name_s_required.insert(VULKAN_EXTENSION_PORTABILITY_ENUMERATION_KHR.name);
+            config.vulkan.instance_create_flag_s = VulkanInstanceCreateFlagS::ENUMERATE_PORTABILITY_KHR;
+        }
+        Ok(())
+    }
+
     fn initialize_vulkan_instance(config: &ApplicationConfig, vulkan_entry: &VulkanEntry)
     -> Result<VulkanInstance, ErrorFoundationApplicationGuide>
     {
@@ -239,6 +265,12 @@ impl ApplicationInitialization {
             InitializationWindowUniform::initialize_window_and_event_loop(config.window_title, config.window_inner_size)?;
         let vulkan_library_loader = InitializationVulkanLibraryLoader::initialize()?;
         let vulkan_entry = InitializationVulkanEntry::initialize(vulkan_library_loader)?;
+        let config = {
+            let mut config = config;
+            Self::patch_config_window_extension(&mut config, &window);
+            Self::patch_config_portability_macos(&mut config, &vulkan_entry)?;
+            config
+        };
         let vulkan_instance = Self::initialize_vulkan_instance(&config, &vulkan_entry)?;
         let vulkan_surface = Self::initialize_vulkan_surface(&vulkan_instance, &window)?;
         let (vulkan_physical_device,
