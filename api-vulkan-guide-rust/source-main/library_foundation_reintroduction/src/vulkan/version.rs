@@ -51,7 +51,7 @@ impl From<VulkanVersionEntry> for VulkanVersionVanilla {
 }
 
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct VulkanVersionApplication(u32);
 
 impl VulkanVersionApplication {
@@ -76,8 +76,26 @@ impl VulkanVersionApplication {
     }
 }
 
+impl PartialOrd<Self> for VulkanVersionApplication {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.0.partial_cmp(&other.0)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+impl From<VulkanVersionVanilla> for VulkanVersionApplication {
+    fn from(version: VulkanVersionVanilla) -> Self {
+        Self::new(version.major, version.minor, version.patch)
+    }
+}
+
+impl From<VulkanVersionApplication> for VulkanVersionVanilla {
+    fn from(version: VulkanVersionApplication) -> Self {
+        Self::new(version.get_major(), version.get_minor(), version.get_patch())
+    }
+}
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct VulkanVersionEngine(u32);
 
 impl VulkanVersionEngine {
@@ -102,8 +120,26 @@ impl VulkanVersionEngine {
     }
 }
 
+impl PartialOrd<Self> for VulkanVersionEngine {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.0.partial_cmp(&other.0)
+    }
+}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+impl From<VulkanVersionVanilla> for VulkanVersionEngine {
+    fn from(version: VulkanVersionVanilla) -> Self {
+        Self::new(version.major, version.minor, version.patch)
+    }
+}
+
+impl From<VulkanVersionEngine> for VulkanVersionVanilla {
+    fn from(version: VulkanVersionEngine) -> Self {
+        Self::new(version.get_major(), version.get_minor(), version.get_patch())
+    }
+}
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct VulkanVersionApi(u32);
 
 impl VulkanVersionApi {
@@ -125,6 +161,12 @@ impl VulkanVersionApi {
 
     pub fn get_patch(&self) -> u32 {
         version_patch(self.0)
+    }
+}
+
+impl PartialOrd<Self> for VulkanVersionApi {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.0.partial_cmp(&other.0)
     }
 }
 
