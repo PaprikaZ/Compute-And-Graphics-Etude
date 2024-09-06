@@ -86,7 +86,6 @@ pub use ::vulkanalia::vk::DeviceV1_1 as VulkanDeviceVersion1_1;
 pub use ::vulkanalia::vk::DeviceV1_2 as VulkanDeviceVersion1_2;
 pub use ::vulkanalia::vk::DeviceV1_3 as VulkanDeviceVersion1_3;
 pub use ::vulkanalia::vk::DynamicState as VulkanDynamicState;
-pub use ::vulkanalia::vk::EXT_DEBUG_UTILS_EXTENSION as VULKAN_EXTENSION_DEBUG_UTILITY;
 pub use ::vulkanalia::vk::EntryV1_0 as VulkanEntryVersion1_0;
 pub use ::vulkanalia::vk::EntryV1_1 as VulkanEntryVersion1_1;
 pub use ::vulkanalia::vk::EntryV1_2 as VulkanEntryVersion1_2;
@@ -284,7 +283,14 @@ pub use ::vulkanalia::vk::SUBPASS_EXTERNAL as VULKAN_SUBPASS_EXTERNAL;
 pub use ::vulkanalia::vk::TRUE as VULKAN_TRUE;
 pub use ::vulkanalia::vk::UUID_SIZE as VULKAN_UUID_SIZE;
 pub use ::vulkanalia::vk::WHOLE_SIZE as VULKAN_WHOLE_SIZE;
-pub use ::vulkanalia::vk::KHR_SWAPCHAIN_EXTENSION as VULKAN_SWAPCHAIN_EXTENSION_KHR;
+
+pub const VULKAN_LAYER_VALIDATION_NAME: VulkanLayerName = VulkanLayerName::from_bytes(b"VK_LAYER_KHRONOS_validation");
+pub use ::vulkanalia::vk::EXT_DEBUG_UTILS_EXTENSION as VULKAN_EXTENSION_DEBUG_UTILITY;
+pub use ::vulkanalia::vk::KHR_SWAPCHAIN_EXTENSION as VULKAN_EXTENSION_SWAPCHAIN_KHR;
+pub use ::vulkanalia::vk::KHR_GET_PHYSICAL_DEVICE_PROPERTIES2_EXTENSION as VULKAN_EXTENSION_GET_PHYSICAL_DEVICE_PROPERTIES2_KHR;
+pub use ::vulkanalia::vk::KHR_PORTABILITY_ENUMERATION_EXTENSION as VULKAN_EXTENSION_PORTABILITY_ENUMERATION_KHR;
+pub use ::vulkanalia::vk::KHR_SURFACE_EXTENSION as VULKAN_EXTENSION_SURFACE_KHR;
+pub use ::vulkanalia::vk::KHR_WIN32_SURFACE_EXTENSION as VULKAN_EXTENSION_SURFACE_WIN32_KHR;
 
 pub use ::vulkanalia::vk::make_version;
 pub use ::vulkanalia::vk::version_major;
