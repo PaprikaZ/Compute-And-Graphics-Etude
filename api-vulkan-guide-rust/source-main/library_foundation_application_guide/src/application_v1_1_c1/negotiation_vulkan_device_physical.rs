@@ -87,7 +87,7 @@ impl ApplicationNegotiationVulkanDevicePhysical {
                 vulkan_instance, vulkan_physical_device, vulkan_surface)
             .map_err(map_err)?;
         let (matched_extension_name_s, matched_optional_extension_number) =
-            VulkanRequirementDevicePhysical::fulfill_extension_name_s(
+            VulkanRequirementDevicePhysical::fulfill_extension_s(
                 vulkan_instance, vulkan_physical_device,
                 &config.vulkan.device_physical_extension_name_s_required,
                 &config.vulkan.device_physical_extension_name_s_optional)

@@ -177,7 +177,7 @@ impl VulkanRequirementDevicePhysical {
     }
 
     //
-    pub fn fulfill_extension_name_s<'t>(
+    pub fn fulfill_extension_s<'t>(
         vulkan_instance: &VulkanInstance,
         vulkan_physical_device: VulkanDevicePhysical,
         required_vulkan_extension_name_s: &'t HashSet<VulkanExtensionName>,
