@@ -6,6 +6,7 @@ use ::library_foundation_reintroduction::vulkan::VulkanLayerName;
 use ::library_foundation_reintroduction::vulkan::VulkanExtensionName;
 use ::library_foundation_reintroduction::vulkan::VulkanExtensionDebugUtilityMessageTypeFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanExtensionDebugUtilityMessageSeverityFlagS;
+use ::library_foundation_reintroduction::vulkan::VulkanInstanceCreateFlagS;
 use ::library_foundation_reintroduction::vulkan::VULKAN_EXTENSION_DEBUG_UTILITY;
 use ::library_foundation_reintroduction::vulkan::VULKAN_LAYER_VALIDATION_NAME;
 use ::library_foundation_reintroduction::vulkan::version::VulkanVersionApi;
@@ -48,7 +49,7 @@ pub struct ConfigVulkanBase<'t> {
     pub engine_version: VulkanVersionEngine,
     pub application_name: VulkanApplicationName<'t>,
     pub application_version: VulkanVersionApplication,
-    pub instance_layer_validation_enable: bool,
+    pub instance_create_flag_s: VulkanInstanceCreateFlagS,
     pub instance_layer_name_s_required: HashSet<VulkanLayerName>,
     pub instance_layer_name_s_optional: HashSet<VulkanLayerName>,
     pub instance_extension_window_name_s: HashSet<VulkanLayerName>,
@@ -62,6 +63,8 @@ pub struct ConfigVulkanBase<'t> {
     pub device_physical_feature_name_s_optional: HashSet<VulkanDevicePhysicalFeatureStandardName>,
     pub extension_debug_utility_message_type_flag_s: VulkanExtensionDebugUtilityMessageTypeFlagS,
     pub extension_debug_utility_message_severity_flag_s: VulkanExtensionDebugUtilityMessageSeverityFlagS,
+    //NOTE be to enable effect required by mixin, record this field for debug/diagnostic purpose
+    pub be_to_enable_validation: VulkanValidationBeToEnable,
 }
 
 impl<'t> ConfigVulkanBase<'t> {
