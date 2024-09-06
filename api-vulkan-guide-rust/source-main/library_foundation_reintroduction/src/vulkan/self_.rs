@@ -131,6 +131,7 @@ pub use ::vulkanalia::vk::ImageView as VulkanImageView;
 pub use ::vulkanalia::vk::ImageViewCreateInfo as VulkanImageViewCreateInformation;
 pub use ::vulkanalia::vk::ImageViewType as VulkanImageViewType;
 pub use ::vulkanalia::vk::IndexType as VulkanIndexType;
+pub use ::vulkanalia::vk::InstanceCreateFlags as VulkanInstanceCreateFlagS;
 pub use ::vulkanalia::vk::InstanceCreateInfo as VulkanInstanceCreateInformation;
 pub use ::vulkanalia::vk::InstanceCreateInfoBuilder as VulkanInstanceCreateInformationBuilder;
 pub use ::vulkanalia::vk::InstanceV1_0 as VulkanInstanceVersion1_0;
