@@ -8,7 +8,7 @@ use crate::error::foundation_reintroduction::ErrorFoundationReintroduction;
 pub struct VulkanEngineName<'t>(&'t CStr);
 
 impl<'t> VulkanEngineName<'t> {
-    pub fn new(name_data: &'t [u8]) -> Result<Self, ErrorFoundationReintroduction> {
+    pub fn try_new(name_data: &'t [u8]) -> Result<Self, ErrorFoundationReintroduction> {
         let c_str_r = CStr::from_bytes_with_nul(name_data);
         match c_str_r {
             Ok(c_str) => Ok(Self(c_str)),

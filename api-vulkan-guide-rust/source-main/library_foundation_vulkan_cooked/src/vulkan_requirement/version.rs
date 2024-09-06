@@ -33,12 +33,12 @@ impl VulkanRequirementVersionApiLeast {
     }
 
     pub fn is_fulfilled_instance(&self, instance_api_version: &VulkanVersionApi) -> bool {
-        let raw_instance_api_version = instance_api_version.unwrap();
+        let raw_instance_api_version = instance_api_version.as_raw();
         self.0 <= raw_instance_api_version
     }
 
     pub fn is_fulfilled_device_physical(&self, physical_device_api_version: &VulkanVersionApi) -> bool {
-        let raw_physical_device_api_version = physical_device_api_version.unwrap();
+        let raw_physical_device_api_version = physical_device_api_version.as_raw();
         self.0 <= raw_physical_device_api_version
     }
 
