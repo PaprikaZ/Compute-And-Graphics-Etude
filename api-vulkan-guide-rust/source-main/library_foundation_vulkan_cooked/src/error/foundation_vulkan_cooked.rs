@@ -5,11 +5,17 @@ pub enum ErrorFoundationVulkanCookedOwn {
     VulkanNegotiationRankWeightFactorExponentialInvalid,
     VulkanRequirementVersionApiLeastInstanceNotFulfilled,
     VulkanRequirementVersionApiLeastDevicePhysicalNotFulfilled,
+    VulkanLibraryLoaderInitializeFail,
+    VulkanEntryInitializeFail,
     VulkanInstanceLayerPropertySEnumerateFail,
     VulkanInstanceExtensionPropertySEnumerateFail,
     VulkanRequirementInstanceLayerSNotFulfilled,
     VulkanRequirementInstanceExtensionSNotFulfilled,
     VulkanRequirementDevicePhysicalQueueFamilySNotFulfilled,
+    VulkanDeviceLogicalCreateFail,
+    VulkanSwapchainCreateFail,
+    VulkanSwapchainImageSGetFail,
+    VulkanSwapchainImageViewSCreateFail,
 }
 
 

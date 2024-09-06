@@ -98,8 +98,8 @@ impl VulkanRequirementDevicePhysical {
     {
         let vulkan_queue_family_property_s =
             unsafe { vulkan_instance.get_physical_device_queue_family_properties(vulkan_physical_device) };
-        None
-        .and_then(|_: ()|
+        Some(())
+        .and_then(|_|
             Self::find_queue_family_index_graphic(vulkan_queue_family_property_s.as_slice()))
         .and_then(|gi|
             Self::find_queue_family_index_present(
@@ -177,7 +177,7 @@ impl VulkanRequirementDevicePhysical {
     }
 
     //
-    pub fn fulfill_extension_name_s<'t>(
+    pub fn fulfill_extension_s<'t>(
         vulkan_instance: &VulkanInstance,
         vulkan_physical_device: VulkanDevicePhysical,
         required_vulkan_extension_name_s: &'t HashSet<VulkanExtensionName>,
@@ -198,7 +198,7 @@ impl VulkanRequirementDevicePhysical {
         //
         let be_required_vulkan_extension_s_fulfilled =
             required_vulkan_extension_name_s.is_subset(&available_vulkan_extension_name_s);
-        if be_required_vulkan_extension_s_fulfilled {
+        if !be_required_vulkan_extension_s_fulfilled {
             return Err(ErrorFoundationVulkanCookedOwn::VulkanRequirementDevicePhysicalExtensionSNotFulfilled)?
         }
         //
@@ -266,7 +266,7 @@ impl VulkanRequirementDevicePhysical {
             required_vulkan_feature_name_s
             .iter()
             .all(|n| n.lookup(&vulkan_physical_device_feature_s) == VULKAN_TRUE);
-        if be_required_vulkan_feature_name_s_fulfilled {
+        if !be_required_vulkan_feature_name_s_fulfilled {
             return Err(ErrorFoundationVulkanCookedOwn::VulkanRequirementDevicePhysicalFeatureSNotFulfilled)?
         }
         //
