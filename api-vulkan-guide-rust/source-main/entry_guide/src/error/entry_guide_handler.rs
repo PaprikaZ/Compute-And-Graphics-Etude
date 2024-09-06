@@ -46,6 +46,28 @@ impl ErrorEntryGuideHandler {
                     ("vulkan instance layer property s enumerate fail", true),
                 ErrorFoundationVulkanCookedOwn::VulkanInstanceExtensionPropertySEnumerateFail =>
                     ("vulkan instance extension property s enumerate fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanRequirementInstanceLayerSNotFulfilled =>
+                    ("vulkan requirement instance layer s not fulfilled", true),
+                ErrorFoundationVulkanCookedOwn::VulkanRequirementInstanceExtensionSNotFulfilled =>
+                    ("vulkan requirement instance extension s not fulfilled", true),
+                ErrorFoundationVulkanCookedOwn::VulkanDevicePhysicalExtensionPropertySEnumerateFail =>
+                    ("vulkan device physical extension property s enumerate fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanRequirementDevicePhysicalExtensionSNotFulfilled =>
+                    ("vulkan requirement device physical extension s not fulfilled", true),
+                ErrorFoundationVulkanCookedOwn::VulkanDevicePhysicalSurfaceCapabilitySGetFail =>
+                    ("vulkan device physical surface capability s get fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanDevicePhysicalSurfaceFormatSGetFail =>
+                    ("vulkan device physical surface format s get fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanDevicePhysicalSurfacePresentModeSGetFail =>
+                    ("vulkan device physical surface present mode s get fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanRequirementDevicePhysicalSurfaceFormatNoneFulfilled =>
+                    ("vulkan requirement device physical surface format none fulfilled", true),
+                ErrorFoundationVulkanCookedOwn::VulkanRequirementDevicePhysicalSurfacePresentModeNoneFulfilled =>
+                    ("vulkan requirement device physical surface present mode none fulfilled", true),
+                ErrorFoundationVulkanCookedOwn::VulkanRequirementDevicePhysicalFeatureNotFulfilled =>
+                    ("vulkan requirement device physical feature not fulfilled", true),
+                ErrorFoundationVulkanCookedOwn::VulkanRequirementDevicePhysicalFeatureSNotFulfilled =>
+                    ("vulkan requirement device physical feature s not fulfilled", true),
                 ErrorFoundationVulkanCookedOwn::VulkanRequirementDevicePhysicalQueueFamilySNotFulfilled =>
                     ("vulkan requirement device physical queue family s not fulfilled", true),
                 ErrorFoundationVulkanCookedOwn::VulkanDeviceLogicalCreateFail =>
