@@ -31,7 +31,7 @@ impl VulkanRequirementInstance {
         //
         let be_required_layer_s_fulfilled =
             required_vulkan_layer_name_s.is_subset(&available_layer_name_s);
-        if be_required_layer_s_fulfilled {
+        if !be_required_layer_s_fulfilled {
             return Err(ErrorFoundationVulkanCookedOwn::VulkanRequirementInstanceLayerSNotFulfilled)?
         }
         //
@@ -70,7 +70,7 @@ impl VulkanRequirementInstance {
         let be_required_extension_s_fulfilled =
             window_vulkan_extension_name_s.is_subset(&available_extension_name_s) &&
             required_vulkan_extension_name_s.is_subset(&available_extension_name_s);
-        if be_required_extension_s_fulfilled {
+        if !be_required_extension_s_fulfilled {
             return Err(ErrorFoundationVulkanCookedOwn::VulkanRequirementInstanceExtensionSNotFulfilled)?
         }
         //
