@@ -59,7 +59,7 @@ impl VulkanVersionApplication {
         Self(make_version(major_version, minor_version, patch_version))
     }
 
-    pub fn unwrap(self) -> u32 {
+    pub fn as_raw(self) -> u32 {
         self.0
     }
 
@@ -103,7 +103,7 @@ impl VulkanVersionEngine {
         Self(make_version(major_version, minor_version, patch_version))
     }
 
-    pub fn unwrap(self) -> u32 {
+    pub fn as_raw(self) -> u32 {
         self.0
     }
 
@@ -147,7 +147,7 @@ impl VulkanVersionApi {
         Self(make_version(major_version, minor_version, patch_version))
     }
 
-    pub fn unwrap(self) -> u32 {
+    pub fn as_raw(self) -> u32 {
         self.0
     }
 

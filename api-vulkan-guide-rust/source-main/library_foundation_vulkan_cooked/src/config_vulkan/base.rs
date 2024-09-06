@@ -46,10 +46,10 @@ impl<'t> ConfigVulkanBase<'t> {
     {
         VulkanApplicationInformation::builder()
         .application_name(self.application_name.as_ref_byte_s_with_nul())
-        .application_version(self.application_version.unwrap())
+        .application_version(self.application_version.as_raw())
         .engine_name(self.engine_name.as_ref_byte_s_with_nul())
-        .engine_version(self.engine_version.unwrap())
-        .api_version(negotiated_api_version.unwrap())
+        .engine_version(self.engine_version.as_raw())
+        .api_version(negotiated_api_version.as_raw())
         .build()
     }
 }
