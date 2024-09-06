@@ -20,9 +20,7 @@ impl ApplicationContinuation {
         let (window, window_event_loop) = wp_application.as_raw();
         window_event_loop.run(|event, window_target| {
             match event {
-                WE::AboutToWait => {
-                    todo!()
-                },
+                WE::AboutToWait => window.request_redraw(),
                 WE::WindowEvent { event: WEW::RedrawRequested, .. }
                 if !window_target.exiting() && !mp_application.is_window_minimized() =>
                 {
