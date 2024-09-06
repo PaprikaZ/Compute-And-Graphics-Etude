@@ -143,30 +143,30 @@ impl ApplicationNegotiationVulkanDevicePhysical {
         let vulkan_physical_device_queue_family_index_s_rank_score_o : TState<'t> =
             vulkan_physical_device_s
             .into_iter()
-            .fold(Ok(None), |result, physical_device| {
-                if result.is_err() { return result }
+            .fold(Ok(None), |result_o_r, physical_device| {
+                if result_o_r.is_err() { return result_o_r }
                 match Self::try_pick_queue_family_index_s_graphic_rank_one(
                     config, vulkan_instance, vulkan_surface, physical_device, &vulkan_rank)
                 {
                     Err(RPE::RequirementNotMatch(RNM::VersionApiNotFulfilled)) => //TODO logging
-                        result,
+                        result_o_r,
                     Err(RPE::RequirementNotMatch(RNM::QueueFamilyNotFulfilled)) => //TODO logging
-                        result,
+                        result_o_r,
                     Err(RPE::RequirementNotMatch(RNM::ExtensionNotFulfilled)) => //TODO logging
-                        result,
+                        result_o_r,
                     Err(RPE::RequirementNotMatch(RNM::SwapchainFormatNoneFulfilled)) => //TODO logging
-                        result,
+                        result_o_r,
                     Err(RPE::RequirementNotMatch(RNM::SwapchainPresentModeNoneFulfilled)) => //TODO logging
-                        result,
+                        result_o_r,
                     Err(RPE::RequirementNotMatch(RNM::FeatureNotFulfilled)) => //TODO logging
-                        result,
+                        result_o_r,
                     Err(RPE::Error(e)) =>
                         Err(e),
                     Ok((graphic_queue_family_index, surface_queue_family_index,
                         extension_name_s, feature_name_s,
                         surface_capability_s, surface_format_s, present_mode_s,
                         rank_score)) =>
-                        match result.unwrap() {
+                        match result_o_r.unwrap() {
                             None =>
                                 Ok(Some((physical_device,
                                          graphic_queue_family_index, surface_queue_family_index,
