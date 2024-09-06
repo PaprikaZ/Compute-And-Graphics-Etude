@@ -12,6 +12,28 @@ pub struct ConfigVulkanRank {
 }
 
 impl ConfigVulkanRank {
+    pub fn new(
+        discrete_gpu_type_physical_device_factor_weight: VulkanRankWeightFactorExponential,
+        integrated_gpu_type_physical_device_factor_weight: VulkanRankWeightFactorExponential,
+        least_api_version_minor_exceeding_point_physical_device_factor_weight: VulkanRankWeightFactorExponential,
+        one_extension_physical_device_factor_weight: VulkanRankWeightFactorExponential,
+        one_feature_physical_device_factor_weight: VulkanRankWeightFactorExponential)
+    -> Self
+    {
+        Self {
+            weight_factor_device_physical_type_gpu_discrete:
+                discrete_gpu_type_physical_device_factor_weight,
+            weight_factor_device_physical_type_gpu_integrated:
+                integrated_gpu_type_physical_device_factor_weight,
+            weight_factor_device_physical_version_api_least_minor_exceeding_point:
+                least_api_version_minor_exceeding_point_physical_device_factor_weight,
+            weight_factor_device_physical_extension_one:
+                one_extension_physical_device_factor_weight,
+            weight_factor_device_physical_feature_one:
+                one_feature_physical_device_factor_weight,
+        }
+    }
+
     pub fn create_vulkan_rank(&self) -> VulkanRank {
         VulkanRank::new(
             self.weight_factor_device_physical_type_gpu_discrete,
