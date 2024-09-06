@@ -11,6 +11,7 @@ pub enum ErrorFoundationApplicationGuideOwn {
 
     VulkanEntryVersionGetFail,
     VulkanInstanceCreateFail,
+    VulkanDebugUtilityMessengerCreateFail,
     VulkanSurfaceCreateFail,
     VulkanDevicePhysicalEnumerateFail,
     VulkanDevicePhysicalRequirementNoneFulfilled,

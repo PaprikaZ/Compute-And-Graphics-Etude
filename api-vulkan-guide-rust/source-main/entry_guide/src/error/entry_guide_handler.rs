@@ -74,6 +74,8 @@ impl ErrorEntryGuideHandler {
                     ("vulkan entry version get fail", true),
                 ErrorFoundationApplicationGuideOwn::VulkanInstanceCreateFail =>
                     ("vulkan instance create fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanDebugUtilityMessengerCreateFail =>
+                    ("vulkan debug utility messenger create fail", true),
                 ErrorFoundationApplicationGuideOwn::VulkanSurfaceCreateFail =>
                     ("vulkan surface create fail", true),
                 ErrorFoundationApplicationGuideOwn::VulkanDevicePhysicalEnumerateFail =>

@@ -4,6 +4,7 @@ use ::library_foundation_reintroduction::vulkan::VulkanDeviceVersion1_0;
 use ::library_foundation_reintroduction::vulkan::VulkanBuilderHas;
 use ::library_foundation_reintroduction::vulkan::VulkanEntry;
 use ::library_foundation_reintroduction::vulkan::VulkanInstance;
+use ::library_foundation_reintroduction::vulkan::VulkanExtensionDebugUtility;
 use ::library_foundation_reintroduction::vulkan::VulkanExtensionDebugUtilityMessengerCreateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanInstanceCreateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanInstanceCreateFlagS;
@@ -40,11 +41,13 @@ use ::library_foundation_reintroduction::vulkan::VulkanFenceCreateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanFenceCreateFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanSemaphore;
 use ::library_foundation_reintroduction::vulkan::VulkanSemaphoreCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanExtensionDebugUtilityMessenger;
 use ::library_foundation_reintroduction::vulkan::VULKAN_EXTENSION_GET_PHYSICAL_DEVICE_PROPERTIES2_KHR;
 use ::library_foundation_reintroduction::vulkan::VULKAN_EXTENSION_PORTABILITY_ENUMERATION_KHR;
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexGraphic;
 use ::library_foundation_reintroduction::vulkan::version::VulkanVersionEntry;
 use ::library_foundation_reintroduction::vulkan::version::VulkanVersionApi;
+use ::library_foundation_reintroduction::vulkan::validation::VulkanValidationBeToEnable;
 use ::library_foundation_reintroduction::vulkan::portability::VULKAN_PORTABILITY_VERSION_ENTRY_MACOS_MIN;
 use ::library_foundation_vulkan_cooked::vulkan_requirement::instance::VulkanRequirementInstance;
 use ::library_foundation_vulkan_cooked::initialization::window::InitializationWindowUniform;
@@ -90,50 +93,63 @@ impl ApplicationInitialization {
     }
 
     fn initialize_vulkan_instance(config: &ApplicationConfig, vulkan_entry: &VulkanEntry)
-    -> Result<VulkanInstance, ErrorFoundationApplicationGuide>
+    -> Result<(VulkanInstance, Option<VulkanExtensionDebugUtilityMessenger>), ErrorFoundationApplicationGuide>
     {
-        let api_version: VulkanVersionApi =
+        let vulkan_api_version: VulkanVersionApi =
             vulkan_entry
             .version()
             .map_err(|_| ErrorFoundationApplicationGuideOwn::VulkanInstanceVersionApiQueryFail)?.into();
-        config.vulkan.version_api_least_requirement.fulfill_instance(&api_version)?;
+        config.vulkan.version_api_least_requirement.fulfill_instance(&vulkan_api_version)?;
         let vulkan_application_information =
-            config.vulkan.create_vulkan_application_information(&api_version);
+            config.vulkan.create_vulkan_application_information(&vulkan_api_version);
         let vulkan_instance_layer_name_s =
-            VulkanRequirementInstance::fulfill_layer_name_s(
+            VulkanRequirementInstance::fulfill_layer_s(
                 vulkan_entry,
                 &config.vulkan.instance_layer_name_s_required,
                 &config.vulkan.instance_layer_name_s_optional)?;
         let vulkan_instance_extension_name_s =
-            VulkanRequirementInstance::fulfill_extension_name_s(
+            VulkanRequirementInstance::fulfill_extension_s(
                 vulkan_entry,
                 &config.vulkan.instance_extension_window_name_s,
                 &config.vulkan.instance_extension_name_s_required,
                 &config.vulkan.instance_extension_name_s_optional)?;
-        let mut vulkan_debug_messager_create_information =
+        let mut vulkan_debug_utility_messenger_create_information =
             VulkanExtensionDebugUtilityMessengerCreateInformation::builder()
             .message_severity(config.vulkan.extension_debug_utility_message_severity_flag_s)
             .message_type(config.vulkan.extension_debug_utility_message_type_flag_s)
             .user_callback(Some(ApplicationVulkanDebug::callback))
             .build();
         //
+        let vulkan_instance_layer_name_ptr_s =
+            vulkan_instance_layer_name_s.iter().map(|n| n.as_ptr()).collect::<Vec<_>>();
+        let vulkan_instance_extension_name_ptr_s =
+            vulkan_instance_extension_name_s.iter().map(|n| n.as_ptr()).collect::<Vec<_>>();
         let vulkan_instance_create_information =
             VulkanInstanceCreateInformation::builder()
             .application_info(&vulkan_application_information)
-            .enabled_layer_names(vulkan_instance_layer_name_s.iter().map(|n| n.as_ptr()).collect::<Vec<_>>().as_ref())
-            .enabled_extension_names(vulkan_instance_extension_name_s.iter().map(|n| n.as_ptr()).collect::<Vec<_>>().as_ref())
-            .push_next(&mut vulkan_debug_messager_create_information)
+            .enabled_layer_names(&vulkan_instance_layer_name_ptr_s)
+            .enabled_extension_names(&vulkan_instance_extension_name_ptr_s)
+            .flags(config.vulkan.instance_create_flag_s)
+            .push_next(&mut vulkan_debug_utility_messenger_create_information)
             .build();
-        match unsafe { vulkan_entry.create_instance(&vulkan_instance_create_information, None) } {
-            Err(_e) => Err(ErrorFoundationApplicationGuideOwn::VulkanInstanceCreateFail)?,
-            Ok(i) => Ok(i),
-        }
+        let vulkan_instance =
+            unsafe { vulkan_entry.create_instance(&vulkan_instance_create_information, None) }
+            .or(Err(ErrorFoundationApplicationGuideOwn::VulkanInstanceCreateFail))?;
+        let vulkan_debug_utility_messenger_o =
+            if let VulkanValidationBeToEnable::Y = config.vulkan.be_to_enable_validation {
+                Some(
+                unsafe { vulkan_instance.create_debug_utils_messenger_ext(&vulkan_debug_utility_messenger_create_information, None) }
+                .or(Err(ErrorFoundationApplicationGuideOwn::VulkanDebugUtilityMessengerCreateFail))?)
+            } else {
+                None
+            };
+        Ok((vulkan_instance, vulkan_debug_utility_messenger_o))
     }
 
     fn initialize_vulkan_surface(vulkan_instance: &VulkanInstance, window: &WindowUniformWindow)
     -> Result<VulkanSurfaceKhr, ErrorFoundationApplicationGuide>
     {
-        match unsafe { VulkanWindow::create_surface(&vulkan_instance, window, window) } {
+        match unsafe { VulkanWindow::create_surface(vulkan_instance, window, window) } {
             Err(_e) => Err(ErrorFoundationApplicationGuideOwn::VulkanSurfaceCreateFail)?,
             Ok(s) => Ok(s),
         }
@@ -271,7 +287,8 @@ impl ApplicationInitialization {
             Self::patch_config_portability_macos(&mut config, &vulkan_entry)?;
             config
         };
-        let vulkan_instance = Self::initialize_vulkan_instance(&config, &vulkan_entry)?;
+        let (vulkan_instance, vulkan_debug_utility_messenger_o) =
+            Self::initialize_vulkan_instance(&config, &vulkan_entry)?;
         let vulkan_surface = Self::initialize_vulkan_surface(&vulkan_instance, &window)?;
         let (vulkan_physical_device,
              vulkan_graphic_queue_family_index, vulkan_present_queue_family_index,
@@ -338,7 +355,7 @@ impl ApplicationInitialization {
                 vulkan_render_pass, vulkan_swapchain_frame_buffer_s,
                 main_vulkan_command_pool, main_vulkan_command_buffer,
                 render_finished_vulkan_fence, render_finished_vulkan_semaphore, image_available_vulkan_semaphore,
-                None,
+                vulkan_debug_utility_messenger_o,
             );
         Ok(Application::<'t>::new(wp_application, mp_application))
     }
