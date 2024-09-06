@@ -6,14 +6,39 @@ use ::library_foundation_reintroduction::vulkan::VulkanLayerName;
 use ::library_foundation_reintroduction::vulkan::VulkanExtensionName;
 use ::library_foundation_reintroduction::vulkan::VulkanExtensionDebugUtilityMessageTypeFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanExtensionDebugUtilityMessageSeverityFlagS;
+use ::library_foundation_reintroduction::vulkan::VULKAN_EXTENSION_DEBUG_UTILITY;
+use ::library_foundation_reintroduction::vulkan::VULKAN_LAYER_VALIDATION_NAME;
 use ::library_foundation_reintroduction::vulkan::version::VulkanVersionApi;
 use ::library_foundation_reintroduction::vulkan::version::VulkanVersionEngine;
 use ::library_foundation_reintroduction::vulkan::version::VulkanVersionApplication;
 use ::library_foundation_reintroduction::vulkan::engine::VulkanEngineName;
 use ::library_foundation_reintroduction::vulkan::application::VulkanApplicationName;
+use ::library_foundation_reintroduction::vulkan::validation::VulkanValidationBeToEnable;
 
 use crate::vulkan_device_physical::feature::VulkanDevicePhysicalFeatureStandardName;
 use crate::vulkan_requirement::version::VulkanRequirementVersionApiLeast;
+
+
+#[derive(Debug, Clone)]
+pub struct ConfigVulkanBaseMixinInstanceLayerExtension {
+    pub instance_layer_name_s: HashSet<VulkanLayerName>,
+    pub instance_extension_name_s: HashSet<VulkanExtensionName>,
+}
+
+impl ConfigVulkanBaseMixinInstanceLayerExtension {
+    pub fn create(be_to_enable_validation: VulkanValidationBeToEnable) -> Self {
+        let mut instance_layer_name_s = HashSet::<VulkanLayerName>::new();
+        let mut instance_extension_name_s = HashSet::<VulkanExtensionName>::new();
+        if let VulkanValidationBeToEnable::Y = be_to_enable_validation {
+            instance_layer_name_s.insert(VULKAN_LAYER_VALIDATION_NAME);
+            instance_extension_name_s.insert(VULKAN_EXTENSION_DEBUG_UTILITY.name);
+        }
+        Self {
+            instance_layer_name_s: instance_layer_name_s,
+            instance_extension_name_s: instance_extension_name_s,
+        }
+    }
+}
 
 
 #[derive(Debug, Clone)]
