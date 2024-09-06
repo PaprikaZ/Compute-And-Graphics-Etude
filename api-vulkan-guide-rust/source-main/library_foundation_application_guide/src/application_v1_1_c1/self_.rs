@@ -116,7 +116,7 @@ pub struct ApplicationPartMain<'t> {
     vulkan_fence_render_finished: VulkanFence,
     vulkan_semaphore_render_finished: VulkanSemaphore,
     vulkan_semaphore_image_available: VulkanSemaphore,
-    vulkan_debug_messenger_o: Option<VulkanExtensionDebugUtilityMessenger>,
+    vulkan_debug_utility_messenger_o: Option<VulkanExtensionDebugUtilityMessenger>,
     //
     number_frame_rendered: u32,
     //
@@ -157,7 +157,7 @@ impl<'t> ApplicationPartMain<'t> {
         render_finished_vulkan_fence: VulkanFence,
         render_finished_vulkan_semaphore: VulkanSemaphore,
         image_available_vulkan_semaphore: VulkanSemaphore,
-        vulkan_debug_messenger_o: Option<VulkanExtensionDebugUtilityMessenger>)
+        vulkan_debug_utility_messenger_o: Option<VulkanExtensionDebugUtilityMessenger>)
     -> Self
     {
         Self {
@@ -191,7 +191,7 @@ impl<'t> ApplicationPartMain<'t> {
             vulkan_fence_render_finished: render_finished_vulkan_fence,
             vulkan_semaphore_render_finished: render_finished_vulkan_semaphore,
             vulkan_semaphore_image_available: image_available_vulkan_semaphore,
-            vulkan_debug_messenger_o: vulkan_debug_messenger_o,
+            vulkan_debug_utility_messenger_o: vulkan_debug_utility_messenger_o,
             //
             number_frame_rendered: 0,
             //
@@ -321,8 +321,8 @@ impl<'t> ApplicationPartMain<'t> {
         &self.vulkan_semaphore_image_available
     }
 
-    pub fn get_vulkan_debug_messenger_o(&self) -> &Option<VulkanExtensionDebugUtilityMessenger> {
-        &self.vulkan_debug_messenger_o
+    pub fn get_vulkan_debug_utility_messenger_o(&self) -> &Option<VulkanExtensionDebugUtilityMessenger> {
+        &self.vulkan_debug_utility_messenger_o
     }
 
     pub fn is_destroying(&self) -> bool {
@@ -367,9 +367,12 @@ impl<'t> ApplicationPartMain<'t> {
         });
         unsafe { self.vulkan_instance.destroy_surface_khr(self.vulkan_surface, None) };
         unsafe { self.vulkan_device_logical.destroy_device(None) };
-        self.vulkan_debug_messenger_o.map(|debug_messenger| unsafe {
+        self.vulkan_debug_utility_messenger_o.map(|debug_messenger| unsafe {
             self.vulkan_instance.destroy_debug_utils_messenger_ext(debug_messenger, None);
         });
+        if let Some(vulkan_debug_utility_messenger) = self.vulkan_debug_utility_messenger_o {
+            unsafe { self.vulkan_instance.destroy_debug_utils_messenger_ext(vulkan_debug_utility_messenger, None) }
+        }
         unsafe { self.vulkan_instance.destroy_instance(None) };
         Ok(())
     }

@@ -70,8 +70,12 @@ impl ErrorEntryGuideHandler {
                     ("window event loop run abort", true),
                 ErrorFoundationApplicationGuideOwn::VulkanInstanceVersionApiQueryFail =>
                     ("vulkan instance version api query fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanEntryVersionGetFail =>
+                    ("vulkan entry version get fail", true),
                 ErrorFoundationApplicationGuideOwn::VulkanInstanceCreateFail =>
                     ("vulkan instance create fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanDebugUtilityMessengerCreateFail =>
+                    ("vulkan debug utility messenger create fail", true),
                 ErrorFoundationApplicationGuideOwn::VulkanSurfaceCreateFail =>
                     ("vulkan surface create fail", true),
                 ErrorFoundationApplicationGuideOwn::VulkanDevicePhysicalEnumerateFail =>

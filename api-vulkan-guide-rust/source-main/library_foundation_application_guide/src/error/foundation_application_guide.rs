@@ -9,7 +9,9 @@ pub enum ErrorFoundationApplicationGuideOwn {
     WindowEventLoopRunAbort,
     VulkanInstanceVersionApiQueryFail,
 
+    VulkanEntryVersionGetFail,
     VulkanInstanceCreateFail,
+    VulkanDebugUtilityMessengerCreateFail,
     VulkanSurfaceCreateFail,
     VulkanDevicePhysicalEnumerateFail,
     VulkanDevicePhysicalRequirementNoneFulfilled,
