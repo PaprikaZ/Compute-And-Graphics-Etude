@@ -12,7 +12,7 @@ use crate::error::foundation_vulkan_cooked::ErrorFoundationVulkanCooked;
 pub struct VulkanRequirementInstance {}
 
 impl VulkanRequirementInstance {
-    pub fn fulfill_layer_name_s<'t>(
+    pub fn fulfill_layer_s<'t>(
         vulkan_entry: &VulkanEntry,
         required_vulkan_layer_name_s: &'t HashSet<VulkanLayerName>,
         optional_vulkan_layer_name_s: &'t HashSet<VulkanLayerName>)
@@ -48,7 +48,7 @@ impl VulkanRequirementInstance {
         Ok(matched_layer_name_s)
     }
 
-    pub fn fulfill_extension_name_s<'t>(
+    pub fn fulfill_extension_s<'t>(
         vulkan_entry: &VulkanEntry,
         window_vulkan_extension_name_s: &'t HashSet<VulkanExtensionName>,
         required_vulkan_extension_name_s: &'t HashSet<VulkanExtensionName>,
