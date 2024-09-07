@@ -31,12 +31,12 @@ impl ApplicationInitialization {
         let vulkan_application_information =
             config.vulkan.create_vulkan_application_information(&api_version);
         let vulkan_instance_layer_name_s =
-            VulkanRequirementInstance::fulfill_layer_name_s(
+            VulkanRequirementInstance::fulfill_layer_s(
                 vulkan_entry,
                 &config.vulkan.instance_layer_name_s_required,
                 &config.vulkan.instance_layer_name_s_optional)?;
         let vulkan_instance_extension_name_s =
-            VulkanRequirementInstance::fulfill_extension_name_s(
+            VulkanRequirementInstance::fulfill_extension_s(
                 vulkan_entry,
                 &config.vulkan.instance_extension_window_name_s,
                 &config.vulkan.instance_extension_name_s_required,
