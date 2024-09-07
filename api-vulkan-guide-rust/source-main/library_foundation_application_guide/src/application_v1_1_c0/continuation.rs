@@ -14,8 +14,8 @@ impl ApplicationContinuation {
     {
         type WE = WindowUniformEvent<()>;
         type WEW = WindowUniformEventWindow;
-        let (wp_application, mut mp_application) = application.unwrap();
-        wp_application.window_event_loop.run(move |event, window_target| {
+        let (wp_application, mut mp_application) = application.as_raw();
+        wp_application.window_event_loop.run(move |event: WindowUniformEvent<()>, window_target| {
             match event {
                 WE::AboutToWait => {
                     todo!()
