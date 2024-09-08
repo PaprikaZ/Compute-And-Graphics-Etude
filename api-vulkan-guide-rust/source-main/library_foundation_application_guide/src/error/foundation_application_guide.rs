@@ -34,6 +34,8 @@ pub enum ErrorFoundationApplicationGuideOwn {
     VulkanShaderBytecodeFileReadFail,
     VulkanShaderBytecodeDataAlignmentCorrupted,
     VulkanShaderModuleCreateFail,
+    VulkanPipelineLayoutCreateFail,
+    VulkanPipelineCreateFail,
 }
 
 

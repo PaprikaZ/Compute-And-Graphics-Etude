@@ -140,6 +140,10 @@ impl ErrorEntryGuideHandler {
                     ("vulkan shader bytecode data alignment corrupted", true),
                 ErrorFoundationApplicationGuideOwn::VulkanShaderModuleCreateFail =>
                     ("vulkan shader module create fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanPipelineLayoutCreateFail =>
+                    ("vulkan pipeline layout create fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanPipelineCreateFail =>
+                    ("vulkan pipeline create fail", true),
             };
         println!("{error_message}");
         if be_bypass { Some(error) } else { None }
