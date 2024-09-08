@@ -1,6 +1,7 @@
 use ::library_foundation_reintroduction::window_uniform::WindowUniformEventLoop;
 use ::library_foundation_reintroduction::window_uniform::WindowUniformWindow;
 use ::library_foundation_reintroduction::vulkan::VulkanHandler;
+use ::library_foundation_reintroduction::vulkan::VulkanPipelineBindPoint;
 use ::library_foundation_reintroduction::vulkan::VulkanBuilderHas;
 use ::library_foundation_reintroduction::vulkan::VulkanInstanceVersion1_0;
 use ::library_foundation_reintroduction::vulkan::VulkanDeviceVersion1_0;
@@ -503,6 +504,15 @@ impl<'t> ApplicationPartMain<'t> {
             .build();
         unsafe { self.vulkan_device_logical.cmd_begin_render_pass(
             self.vulkan_command_buffer_main, &vulkan_render_pass_begin_information, VulkanSubpassContents::INLINE) };
+        //
+        unsafe {
+            self.vulkan_device_logical.cmd_bind_pipeline(
+                self.vulkan_command_buffer_main,
+                VulkanPipelineBindPoint::GRAPHICS,
+                self.get_vulkan_pipeline_scene_current())
+        }
+        unsafe { self.vulkan_device_logical.cmd_draw(self.vulkan_command_buffer_main, 3, 1, 0, 0); }
+        //
         unsafe { self.vulkan_device_logical.cmd_end_render_pass(self.vulkan_command_buffer_main) };
         unsafe { self.vulkan_device_logical.end_command_buffer(self.vulkan_command_buffer_main) }
         .or(Err(ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalCommandBufferEndFail))?;
