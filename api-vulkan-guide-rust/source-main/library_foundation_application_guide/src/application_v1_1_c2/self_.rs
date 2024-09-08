@@ -43,6 +43,9 @@ use ::library_foundation_reintroduction::vulkan::VulkanSubmitInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanPresentInformationKhr;
 use ::library_foundation_reintroduction::vulkan::VulkanErrorCode_;
 use ::library_foundation_reintroduction::vulkan::VulkanSuccessCode_;
+use ::library_foundation_reintroduction::vulkan::VulkanPipelineLayout;
+use ::library_foundation_reintroduction::vulkan::VulkanPipeline;
+
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexGraphic;
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexPresent;
 use ::library_foundation_reintroduction::vulkan::swapchain::VulkanSwapchainImageNumber;
@@ -52,6 +55,8 @@ use ::library_foundation_vulkan_cooked::vulkan_device_physical::feature::VulkanD
 use crate::error::foundation_application_guide::ErrorFoundationApplicationGuideOwn;
 use crate::error::foundation_application_guide::ErrorFoundationApplicationGuide;
 use crate::application_v1_1_c2::config::ApplicationConfig;
+use crate::application_v1_1_c2::graphic_resource::ApplicationGraphicResourceDestroyStack;
+use crate::application_v1_1_c2::scene::ApplicationSceneName;
 
 
 #[derive(Debug)]
@@ -84,11 +89,11 @@ impl ApplicationPartWindow {
 }
 
 
-#[derive(Debug)]
 pub struct ApplicationPartMain<'t> {
     config: ApplicationConfig<'t>,
     vulkan_entry: VulkanEntry,
     vulkan_instance: VulkanInstance,
+    vulkan_debug_utility_messenger_o: Option<VulkanExtensionDebugUtilityMessenger>,
     vulkan_surface: VulkanSurfaceKhr,
     vulkan_device_physical: VulkanDevicePhysical,
     vulkan_queue_family_index_graphic: VulkanQueueFamilyIndexGraphic,
@@ -116,7 +121,13 @@ pub struct ApplicationPartMain<'t> {
     vulkan_fence_render_finished: VulkanFence,
     vulkan_semaphore_render_finished: VulkanSemaphore,
     vulkan_semaphore_image_available: VulkanSemaphore,
-    vulkan_debug_utility_messenger_o: Option<VulkanExtensionDebugUtilityMessenger>,
+    vulkan_pipeline_layout: VulkanPipelineLayout,
+    vulkan_pipeline_triangle_red: VulkanPipeline,
+    vulkan_pipeline_triangle_colored: VulkanPipeline,
+    //
+    graphic_resource_destroy_stack: ApplicationGraphicResourceDestroyStack,
+    //
+    scene_name_current: ApplicationSceneName,
     //
     number_frame_rendered: u32,
     //
@@ -126,10 +137,11 @@ pub struct ApplicationPartMain<'t> {
 }
 
 impl<'t> ApplicationPartMain<'t> {
-    pub fn new(
+    pub(super) fn new(
         config: ApplicationConfig<'t>,
         vulkan_entry: VulkanEntry,
         vulkan_instance: VulkanInstance,
+        vulkan_debug_utility_messenger_o: Option<VulkanExtensionDebugUtilityMessenger>,
         vulkan_surface: VulkanSurfaceKhr,
         vulkan_physical_device: VulkanDevicePhysical,
         vulkan_graphic_queue_family_index: VulkanQueueFamilyIndexGraphic,
@@ -157,13 +169,17 @@ impl<'t> ApplicationPartMain<'t> {
         render_finished_vulkan_fence: VulkanFence,
         render_finished_vulkan_semaphore: VulkanSemaphore,
         image_available_vulkan_semaphore: VulkanSemaphore,
-        vulkan_debug_utility_messenger_o: Option<VulkanExtensionDebugUtilityMessenger>)
+        vulkan_pipeline_layout: VulkanPipelineLayout,
+        red_triangle_vulkan_pipeline: VulkanPipeline,
+        colored_triangle_vulkan_pipeline: VulkanPipeline,
+        graphic_resource_destroy_stack: ApplicationGraphicResourceDestroyStack)
     -> Self
     {
         Self {
             config: config,
             vulkan_entry: vulkan_entry,
             vulkan_instance: vulkan_instance,
+            vulkan_debug_utility_messenger_o: vulkan_debug_utility_messenger_o,
             vulkan_surface: vulkan_surface,
             vulkan_device_physical: vulkan_physical_device,
             vulkan_queue_family_index_graphic: vulkan_graphic_queue_family_index,
@@ -191,7 +207,13 @@ impl<'t> ApplicationPartMain<'t> {
             vulkan_fence_render_finished: render_finished_vulkan_fence,
             vulkan_semaphore_render_finished: render_finished_vulkan_semaphore,
             vulkan_semaphore_image_available: image_available_vulkan_semaphore,
-            vulkan_debug_utility_messenger_o: vulkan_debug_utility_messenger_o,
+            vulkan_pipeline_layout: vulkan_pipeline_layout,
+            vulkan_pipeline_triangle_red: red_triangle_vulkan_pipeline,
+            vulkan_pipeline_triangle_colored: colored_triangle_vulkan_pipeline,
+            //
+            graphic_resource_destroy_stack: graphic_resource_destroy_stack,
+            //
+            scene_name_current: ApplicationSceneName::TriangleColored,
             //
             number_frame_rendered: 0,
             //
@@ -211,6 +233,10 @@ impl<'t> ApplicationPartMain<'t> {
 
     pub fn get_vulkan_instance(&self) -> &VulkanInstance {
         &self.vulkan_instance
+    }
+
+    pub fn get_vulkan_debug_utility_messenger_o(&self) -> &Option<VulkanExtensionDebugUtilityMessenger> {
+        &self.vulkan_debug_utility_messenger_o
     }
 
     pub fn get_vulkan_surface(&self) -> &VulkanSurfaceKhr {
@@ -321,8 +347,27 @@ impl<'t> ApplicationPartMain<'t> {
         &self.vulkan_semaphore_image_available
     }
 
-    pub fn get_vulkan_debug_utility_messenger_o(&self) -> &Option<VulkanExtensionDebugUtilityMessenger> {
-        &self.vulkan_debug_utility_messenger_o
+    pub fn get_vulkan_pipeline_layout(&self) -> &VulkanPipelineLayout {
+        &self.vulkan_pipeline_layout
+    }
+
+    pub fn get_vulkan_pipeline_triangle_red(&self) -> &VulkanPipeline {
+        &self.vulkan_pipeline_triangle_red
+    }
+
+    pub fn get_vulkan_pipeline_triangle_colored(&self) -> &VulkanPipeline {
+        &self.vulkan_pipeline_triangle_colored
+    }
+
+    pub fn get_scene_name_current(&self) -> ApplicationSceneName {
+        self.scene_name_current
+    }
+
+    pub fn get_vulkan_pipeline_scene_current(&self) -> VulkanPipeline {
+        match self.scene_name_current {
+            ApplicationSceneName::TriangleRed => self.vulkan_pipeline_triangle_red,
+            ApplicationSceneName::TriangleColored => self.vulkan_pipeline_triangle_colored,
+        }
     }
 
     pub fn is_destroying(&self) -> bool {
@@ -472,7 +517,6 @@ impl<'t> ApplicationPartMain<'t> {
 }
 
 
-#[derive(Debug)]
 pub struct Application<'t>(ApplicationPartWindow, ApplicationPartMain<'t>);
 
 impl<'t> Application<'t> {
