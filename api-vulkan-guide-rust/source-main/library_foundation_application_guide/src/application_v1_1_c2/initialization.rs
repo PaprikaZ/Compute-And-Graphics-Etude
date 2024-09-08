@@ -1,47 +1,57 @@
+use std::path::Path;
+
 use ::library_foundation_reintroduction::window_uniform::WindowUniformWindow;
-use ::library_foundation_reintroduction::vulkan::VulkanDeviceLogicalCreateInformation;
-use ::library_foundation_reintroduction::vulkan::VulkanDeviceVersion1_0;
-use ::library_foundation_reintroduction::vulkan::VulkanBuilderHas;
-use ::library_foundation_reintroduction::vulkan::VulkanEntry;
-use ::library_foundation_reintroduction::vulkan::VulkanInstance;
-use ::library_foundation_reintroduction::vulkan::VulkanExtensionDebugUtility;
-use ::library_foundation_reintroduction::vulkan::VulkanExtensionDebugUtilityMessengerCreateInformation;
-use ::library_foundation_reintroduction::vulkan::VulkanInstanceCreateInformation;
-use ::library_foundation_reintroduction::vulkan::VulkanInstanceCreateFlagS;
-use ::library_foundation_reintroduction::vulkan::VulkanWindow;
-use ::library_foundation_reintroduction::vulkan::VulkanSurfaceKhr;
-use ::library_foundation_reintroduction::vulkan::VulkanFormat;
-use ::library_foundation_reintroduction::vulkan::VulkanDeviceLogical;
-use ::library_foundation_reintroduction::vulkan::VulkanRenderPass;
-use ::library_foundation_reintroduction::vulkan::VulkanAttachmentDescription;
-use ::library_foundation_reintroduction::vulkan::VulkanAttachmentReference;
-use ::library_foundation_reintroduction::vulkan::VulkanAttachmentLoadOperation;
-use ::library_foundation_reintroduction::vulkan::VulkanAttachmentStoreOperation;
-use ::library_foundation_reintroduction::vulkan::VulkanImageLayout;
-use ::library_foundation_reintroduction::vulkan::VulkanSampleCountFlagS;
-use ::library_foundation_reintroduction::vulkan::VulkanSubpassDescription;
-use ::library_foundation_reintroduction::vulkan::VulkanSubpassDependency;
-use ::library_foundation_reintroduction::vulkan::VulkanPipelineBindPoint;
 use ::library_foundation_reintroduction::vulkan::VulkanAccessFlagS;
-use ::library_foundation_reintroduction::vulkan::VulkanPipelineStageFlagS;
-use ::library_foundation_reintroduction::vulkan::VULKAN_SUBPASS_EXTERNAL;
-use ::library_foundation_reintroduction::vulkan::VulkanImageView;
-use ::library_foundation_reintroduction::vulkan::VulkanExtentD2;
-use ::library_foundation_reintroduction::vulkan::VulkanFrameBuffer;
-use ::library_foundation_reintroduction::vulkan::VulkanFrameBufferCreateInformation;
-use ::library_foundation_reintroduction::vulkan::VulkanRenderPassCreateInformation;
-use ::library_foundation_reintroduction::vulkan::VulkanCommandPool;
-use ::library_foundation_reintroduction::vulkan::VulkanCommandPoolCreateInformation;
-use ::library_foundation_reintroduction::vulkan::VulkanCommandPoolCreateFlagS;
+use ::library_foundation_reintroduction::vulkan::VulkanAttachmentDescription;
+use ::library_foundation_reintroduction::vulkan::VulkanAttachmentLoadOperation;
+use ::library_foundation_reintroduction::vulkan::VulkanAttachmentReference;
+use ::library_foundation_reintroduction::vulkan::VulkanAttachmentStoreOperation;
+use ::library_foundation_reintroduction::vulkan::VulkanBuilderHas;
+use ::library_foundation_reintroduction::vulkan::VulkanCommandBuffer;
 use ::library_foundation_reintroduction::vulkan::VulkanCommandBufferAllocateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanCommandBufferLevel;
-use ::library_foundation_reintroduction::vulkan::VulkanCommandBuffer;
+use ::library_foundation_reintroduction::vulkan::VulkanCommandPool;
+use ::library_foundation_reintroduction::vulkan::VulkanCommandPoolCreateFlagS;
+use ::library_foundation_reintroduction::vulkan::VulkanCommandPoolCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanDeviceLogical;
+use ::library_foundation_reintroduction::vulkan::VulkanDeviceLogicalCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanDeviceVersion1_0;
+use ::library_foundation_reintroduction::vulkan::VulkanEntry;
+use ::library_foundation_reintroduction::vulkan::VulkanExtensionDebugUtility;
+use ::library_foundation_reintroduction::vulkan::VulkanExtensionDebugUtilityMessenger;
+use ::library_foundation_reintroduction::vulkan::VulkanExtensionDebugUtilityMessengerCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanExtentD2;
 use ::library_foundation_reintroduction::vulkan::VulkanFence;
-use ::library_foundation_reintroduction::vulkan::VulkanFenceCreateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanFenceCreateFlagS;
+use ::library_foundation_reintroduction::vulkan::VulkanFenceCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanFormat;
+use ::library_foundation_reintroduction::vulkan::VulkanFrameBuffer;
+use ::library_foundation_reintroduction::vulkan::VulkanFrameBufferCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanHandler;
+use ::library_foundation_reintroduction::vulkan::VulkanImageLayout;
+use ::library_foundation_reintroduction::vulkan::VulkanImageView;
+use ::library_foundation_reintroduction::vulkan::VulkanInstance;
+use ::library_foundation_reintroduction::vulkan::VulkanInstanceCreateFlagS;
+use ::library_foundation_reintroduction::vulkan::VulkanInstanceCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanPipelineBindPoint;
+use ::library_foundation_reintroduction::vulkan::VulkanPipelineStageFlagS;
+use ::library_foundation_reintroduction::vulkan::VulkanPipelineVertexInputStateCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanPipelineViewportStateCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanPolygonMode;
+use ::library_foundation_reintroduction::vulkan::VulkanPresentModeKhr;
+use ::library_foundation_reintroduction::vulkan::VulkanPrimitiveTopology;
+use ::library_foundation_reintroduction::vulkan::VulkanPushConstantRange;
+use ::library_foundation_reintroduction::vulkan::VulkanRectangleD2;
+use ::library_foundation_reintroduction::vulkan::VulkanRenderPass;
+use ::library_foundation_reintroduction::vulkan::VulkanRenderPassCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanSampleCountFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanSemaphore;
 use ::library_foundation_reintroduction::vulkan::VulkanSemaphoreCreateInformation;
-use ::library_foundation_reintroduction::vulkan::VulkanExtensionDebugUtilityMessenger;
+use ::library_foundation_reintroduction::vulkan::VulkanSubpassDependency;
+use ::library_foundation_reintroduction::vulkan::VulkanSubpassDescription;
+use ::library_foundation_reintroduction::vulkan::VULKAN_SUBPASS_EXTERNAL;
+use ::library_foundation_reintroduction::vulkan::VulkanSurfaceKhr;
+use ::library_foundation_reintroduction::vulkan::VulkanWindow;
 use ::library_foundation_reintroduction::vulkan::VULKAN_EXTENSION_GET_PHYSICAL_DEVICE_PROPERTIES2_KHR;
 use ::library_foundation_reintroduction::vulkan::VULKAN_EXTENSION_PORTABILITY_ENUMERATION_KHR;
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexGraphic;
@@ -63,6 +73,8 @@ use crate::application_v1_1_c2::config::ApplicationConfig;
 use crate::application_v1_1_c2::vulkan_debug::ApplicationVulkanDebug;
 use crate::application_v1_1_c2::negotiation_vulkan_device_physical::ApplicationNegotiationVulkanDevicePhysical;
 use crate::application_v1_1_c2::negotiation_vulkan_swapchain::ApplicationNegotiationVulkanSwapchain;
+use crate::application_v1_1_c2::graphic_resource::ApplicationGraphicResourceDestroyDirective;
+use crate::application_v1_1_c2::graphic_resource::ApplicationGraphicResourceDestroyStack;
 use crate::application_v1_1_c2::self_::ApplicationPartWindow;
 use crate::application_v1_1_c2::self_::ApplicationPartMain;
 use crate::application_v1_1_c2::self_::Application;
@@ -155,9 +167,13 @@ impl ApplicationInitialization {
         }
     }
 
-    fn initialize_render_pass(vulkan_logical_device: &VulkanDeviceLogical, vulkan_swapchain_format: VulkanFormat)
+    fn initialize_render_pass(
+        vulkan_logical_device: &VulkanDeviceLogical,
+        vulkan_swapchain_format: VulkanFormat,
+        graphic_resource_destroy_stack: &mut ApplicationGraphicResourceDestroyStack)
     -> Result<VulkanRenderPass, ErrorFoundationApplicationGuide>
     {
+        type DD = ApplicationGraphicResourceDestroyDirective;
         let vulkan_color_attachment =
             VulkanAttachmentDescription::builder()
             .format(vulkan_swapchain_format)
@@ -200,39 +216,49 @@ impl ApplicationInitialization {
             .subpasses(vulkan_subpass_description_s)
             .dependencies(vulkan_subpass_dependency_s)
             .build();
-        unsafe { vulkan_logical_device.create_render_pass(&vulkan_render_pass_create_information, None) }
-        .or(Err(ErrorFoundationApplicationGuideOwn::VulkanRenderPassCreateFail.into()))
+        let main_vulkan_render_pass =
+            unsafe { vulkan_logical_device.create_render_pass(&vulkan_render_pass_create_information, None) }
+            .or(Err(ErrorFoundationApplicationGuideOwn::VulkanRenderPassCreateFail))?;
+        graphic_resource_destroy_stack.push(DD::DestroyVulkanRenderPassMain);
+        Ok(main_vulkan_render_pass)
     }
 
     fn initialize_frame_buffer_s(
         vulkan_logical_device: &VulkanDeviceLogical,
         vulkan_image_view_s: &[VulkanImageView],
         vulkan_render_pass: VulkanRenderPass,
-        vulkan_extent: VulkanExtentD2)
+        vulkan_extent: VulkanExtentD2,
+        graphic_resource_destroy_stack: &mut ApplicationGraphicResourceDestroyStack)
     -> Result<Vec<VulkanFrameBuffer>, ErrorFoundationApplicationGuide>
     {
-        vulkan_image_view_s
-        .iter()
-        .try_fold(Vec::new(), |mut result_frame_buffer_s, iv| {
-            let vulkan_frame_buffer_create_information =
-                VulkanFrameBufferCreateInformation::builder()
-                .render_pass(vulkan_render_pass)
-                .attachments(&[*iv])
-                .width(vulkan_extent.width)
-                .height(vulkan_extent.height)
-                .layers(1)
-                .build();
-            unsafe { vulkan_logical_device.create_framebuffer(&vulkan_frame_buffer_create_information, None) }
-            .map(|fb| { result_frame_buffer_s.push(fb); result_frame_buffer_s })
-        })
-        .or(Err(ErrorFoundationApplicationGuideOwn::VulkanFrameBufferCreateFail.into()))
+        type DD = ApplicationGraphicResourceDestroyDirective;
+        let vulkan_frame_buffer_s =
+            vulkan_image_view_s
+            .iter()
+            .try_fold(Vec::new(), |mut result_frame_buffer_s, iv| {
+                let vulkan_frame_buffer_create_information =
+                    VulkanFrameBufferCreateInformation::builder()
+                    .render_pass(vulkan_render_pass)
+                    .attachments(&[*iv])
+                    .width(vulkan_extent.width)
+                    .height(vulkan_extent.height)
+                    .layers(1)
+                    .build();
+                unsafe { vulkan_logical_device.create_framebuffer(&vulkan_frame_buffer_create_information, None) }
+                .map(|fb| { result_frame_buffer_s.push(fb); result_frame_buffer_s })
+            })
+            .or(Err(ErrorFoundationApplicationGuideOwn::VulkanFrameBufferCreateFail))?;
+        graphic_resource_destroy_stack.push(DD::DestroyVulkanSwapchainFrameBufferS);
+        Ok(vulkan_frame_buffer_s)
     }
 
     fn initialize_command_pool_and_buffer_main(
         vulkan_logical_device: &VulkanDeviceLogical,
-        vulkan_graphic_queue_family_index: VulkanQueueFamilyIndexGraphic)
+        vulkan_graphic_queue_family_index: VulkanQueueFamilyIndexGraphic,
+        graphic_resource_destroy_stack: &mut ApplicationGraphicResourceDestroyStack)
     -> Result<(VulkanCommandPool, VulkanCommandBuffer), ErrorFoundationApplicationGuide>
     {
+        type DD = ApplicationGraphicResourceDestroyDirective;
         let vulkan_command_pool_create_information =
             VulkanCommandPoolCreateInformation::builder()
             .flags(VulkanCommandPoolCreateFlagS::RESET_COMMAND_BUFFER)
@@ -241,6 +267,7 @@ impl ApplicationInitialization {
         let main_vulkan_command_pool =
             unsafe { vulkan_logical_device.create_command_pool(&vulkan_command_pool_create_information, None) }
             .or(Err(ErrorFoundationApplicationGuideOwn::VulkanCommandPoolCreateFail))?;
+        graphic_resource_destroy_stack.push(DD::DestroyVulkanCommandPoolMain);
         let vulkan_command_buffer_allocate_information =
             VulkanCommandBufferAllocateInformation::builder()
             .command_pool(main_vulkan_command_pool)
@@ -255,21 +282,27 @@ impl ApplicationInitialization {
         Ok((main_vulkan_command_pool, main_vulkan_command_buffer))
     }
 
-    fn initialize_synchronization_primitive_set(vulkan_logical_device: &VulkanDeviceLogical)
+    fn initialize_synchronization_primitive_set(
+        vulkan_logical_device: &VulkanDeviceLogical,
+        graphic_resource_destroy_stack: &mut ApplicationGraphicResourceDestroyStack)
     -> Result<(VulkanFence, VulkanSemaphore, VulkanSemaphore), ErrorFoundationApplicationGuide>
     {
+        type DD = ApplicationGraphicResourceDestroyDirective;
         let vulkan_fence_create_information =
             VulkanFenceCreateInformation::builder().flags(VulkanFenceCreateFlagS::SIGNALED).build();
         let frame_rendering_finished_vulkan_fence =
             unsafe { vulkan_logical_device.create_fence(&vulkan_fence_create_information, None) }
             .or(Err(ErrorFoundationApplicationGuideOwn::VulkanFenceCreateFail))?;
+        graphic_resource_destroy_stack.push(DD::DestroyVulkanFenceRenderFinished);
         let vulkan_semaphore_create_information = VulkanSemaphoreCreateInformation::builder().build();
         let image_available_vulkan_semaphore =
             unsafe { vulkan_logical_device.create_semaphore(&vulkan_semaphore_create_information, None) }
             .or(Err(ErrorFoundationApplicationGuideOwn::VulkanSemaphoreCreateFail))?;
+        graphic_resource_destroy_stack.push(DD::DestroyVulkanSemaphoreImageAvailable);
         let render_finished_vulkan_semaphore =
             unsafe { vulkan_logical_device.create_semaphore(&vulkan_semaphore_create_information, None) }
             .or(Err(ErrorFoundationApplicationGuideOwn::VulkanSemaphoreCreateFail))?;
+        graphic_resource_destroy_stack.push(DD::DestroyVulkanSemaphoreRenderFinished);
         Ok((frame_rendering_finished_vulkan_fence, image_available_vulkan_semaphore, render_finished_vulkan_semaphore))
     }
 
@@ -277,6 +310,8 @@ impl ApplicationInitialization {
     pub fn initialize<'t>(config: ApplicationConfig<'t>)
     -> Result<Application<'t>, ErrorFoundationApplicationGuide>
     {
+        let mut graphic_resource_destroy_stack = ApplicationGraphicResourceDestroyStack::new_empty();
+        //
         let (window, window_event_loop) =
             InitializationWindowUniform::initialize_window_and_event_loop(config.window_title, config.window_inner_size)?;
         let vulkan_library_loader = InitializationVulkanLibraryLoader::initialize()?;
@@ -329,22 +364,31 @@ impl ApplicationInitialization {
             NegotiationVulkanSwapchain::negotiate_sharing_mode_and_queue_family_index_s_graphic_present(
                 vulkan_graphic_queue_family_index, vulkan_present_queue_family_index);
         let (vulkan_swapchain, vulkan_swapchain_image_s, vulkan_swapchain_image_view_s) =
-            InitializationVulkanSwapchain::initialize_with_image_and_view_s(
+            Self::initialize_vulkan_swapchain_with_image_and_view_s(
                 vulkan_surface, &vulkan_logical_device, vulkan_surface_capability_s,
                 vulkan_swapchain_sharing_mode, &vulkan_swapchain_queue_family_index_s,
-                vulkan_swapchain_image_number, vulkan_2d_extent, vulkan_surface_format, vulkan_present_mode, None)?;
+                vulkan_swapchain_image_number, vulkan_2d_extent, vulkan_surface_format, vulkan_present_mode, None,
+                &mut graphic_resource_destroy_stack)?;
         let vulkan_render_pass =
-            Self::initialize_render_pass(&vulkan_logical_device, vulkan_surface_format.format)?;
+            Self::initialize_render_pass(
+                &vulkan_logical_device, vulkan_surface_format.format,
+                &mut graphic_resource_destroy_stack)?;
         let vulkan_swapchain_frame_buffer_s =
-            Self::initialize_frame_buffer_s(&vulkan_logical_device, &vulkan_swapchain_image_view_s, vulkan_render_pass, vulkan_2d_extent)?;
+            Self::initialize_frame_buffer_s(
+                &vulkan_logical_device,
+                &vulkan_swapchain_image_view_s, vulkan_render_pass, vulkan_2d_extent,
+                &mut graphic_resource_destroy_stack)?;
         let (main_vulkan_command_pool, main_vulkan_command_buffer) =
-            Self::initialize_command_pool_and_buffer_main(&vulkan_logical_device, vulkan_graphic_queue_family_index)?;
+            Self::initialize_command_pool_and_buffer_main(
+                &vulkan_logical_device, vulkan_graphic_queue_family_index,
+                &mut graphic_resource_destroy_stack)?;
         let (render_finished_vulkan_fence, render_finished_vulkan_semaphore, image_available_vulkan_semaphore) =
-            Self::initialize_synchronization_primitive_set(&vulkan_logical_device)?;
+            Self::initialize_synchronization_primitive_set(
+                &vulkan_logical_device, &mut graphic_resource_destroy_stack)?;
         let wp_application = ApplicationPartWindow::new(window, window_event_loop);
         let mp_application =
             ApplicationPartMain::new(
-                config, vulkan_entry, vulkan_instance, vulkan_surface,
+                config, vulkan_entry, vulkan_instance, vulkan_debug_utility_messenger_o, vulkan_surface,
                 vulkan_physical_device, vulkan_graphic_queue_family_index, vulkan_present_queue_family_index,
                 matched_vulkan_extension_name_s, matched_vulkan_physical_device_feature_name_s,
                 vulkan_surface_capability_s, available_vulkan_surface_format_s, available_vulkan_present_mode_s,
@@ -355,7 +399,8 @@ impl ApplicationInitialization {
                 vulkan_render_pass, vulkan_swapchain_frame_buffer_s,
                 main_vulkan_command_pool, main_vulkan_command_buffer,
                 render_finished_vulkan_fence, render_finished_vulkan_semaphore, image_available_vulkan_semaphore,
-                vulkan_debug_utility_messenger_o,
+                vulkan_pipeline_layout, red_triangle_vulkan_pipeline, colored_triangle_vulkan_pipeline,
+                graphic_resource_destroy_stack
             );
         Ok(Application::<'t>::new(wp_application, mp_application))
     }
