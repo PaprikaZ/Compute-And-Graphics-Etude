@@ -31,6 +31,9 @@ pub enum ErrorFoundationApplicationGuideOwn {
     VulkanDeviceLogicalCommandBufferEndFail,
     VulkanDeviceLogicalQueueSubmitFail,
     VulkanDeviceLogicalQueuePresentFail,
+    VulkanShaderBytecodeFileReadFail,
+    VulkanShaderBytecodeDataAlignmentCorrupted,
+    VulkanShaderModuleCreateFail,
 }
 
 

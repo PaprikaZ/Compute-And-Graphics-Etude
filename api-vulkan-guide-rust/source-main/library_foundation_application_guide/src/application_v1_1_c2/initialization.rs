@@ -35,6 +35,7 @@ use ::library_foundation_reintroduction::vulkan::VulkanInstance;
 use ::library_foundation_reintroduction::vulkan::VulkanInstanceCreateFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanInstanceCreateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanPipelineBindPoint;
+use ::library_foundation_reintroduction::vulkan::VulkanPipelineShaderStageCreateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanPipelineStageFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanPipelineVertexInputStateCreateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanPipelineViewportStateCreateInformation;
@@ -48,6 +49,9 @@ use ::library_foundation_reintroduction::vulkan::VulkanRenderPassCreateInformati
 use ::library_foundation_reintroduction::vulkan::VulkanSampleCountFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanSemaphore;
 use ::library_foundation_reintroduction::vulkan::VulkanSemaphoreCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanShaderModule;
+use ::library_foundation_reintroduction::vulkan::VulkanShaderModuleCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanShaderStageFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanSharingMode;
 use ::library_foundation_reintroduction::vulkan::VulkanSubpassDependency;
 use ::library_foundation_reintroduction::vulkan::VulkanSubpassDescription;
@@ -338,6 +342,85 @@ impl ApplicationInitialization {
         Ok((frame_rendering_finished_vulkan_fence, image_available_vulkan_semaphore, render_finished_vulkan_semaphore))
     }
 
+    fn create_shader_module_from_file_path(vulkan_logical_device: &VulkanDeviceLogical, shader_bytecode_file_path: &Path)
+    -> Result<VulkanShaderModule, ErrorFoundationApplicationGuide>
+    {
+        let file_bytecode_byte_s =
+            std::fs::read(shader_bytecode_file_path)
+            .or(Err(ErrorFoundationApplicationGuideOwn::VulkanShaderBytecodeFileReadFail))?;
+        let (align_prefix, bytecode_byte_s, align_suffix) = unsafe { file_bytecode_byte_s.align_to::<u32>() };
+        if !align_prefix.is_empty() || !align_suffix.is_empty() {
+            return Err(ErrorFoundationApplicationGuideOwn::VulkanShaderBytecodeDataAlignmentCorrupted)?
+        }
+        let vulkan_shader_module_create_information =
+            VulkanShaderModuleCreateInformation::builder()
+            .code_size(file_bytecode_byte_s.len())
+            .code(bytecode_byte_s)
+            .build();
+        unsafe { vulkan_logical_device.create_shader_module(&vulkan_shader_module_create_information, None) }
+        .or(Err(ErrorFoundationApplicationGuideOwn::VulkanShaderModuleCreateFail.into()))
+    }
+
+    fn create_shader_module_s<'tc, 'tl>(vulkan_logical_device: &'tl VulkanDeviceLogical, config: &ApplicationConfig<'tc>)
+    -> Result<(VulkanPipelineShaderStageCreateInformation,
+               VulkanPipelineShaderStageCreateInformation,
+               VulkanPipelineShaderStageCreateInformation,
+               VulkanPipelineShaderStageCreateInformation,
+               Box<dyn FnOnce() -> () + 'tl>),
+              ErrorFoundationApplicationGuide>
+    {
+        let red_triangle_vertex_shader_file_path =
+            config.path_directory_shader.join(config.file_name_shader_triangle_red_vertex.clone());
+        let red_triangle_fragment_shader_file_path =
+            config.path_directory_shader.join(config.file_name_shader_triangle_red_fragment.clone());
+        let colored_triangle_vertex_shader_file_path =
+            config.path_directory_shader.join(config.file_name_shader_triangle_colored_vertex.clone());
+        let colored_triangle_fragment_shader_file_path =
+            config.path_directory_shader.join(config.file_name_shader_triangle_colored_fragment.clone());
+        let red_triangle_vertex_shader_module =
+            Self::create_shader_module_from_file_path(vulkan_logical_device, &red_triangle_vertex_shader_file_path)?;
+        let red_triangle_fragment_shader_module =
+            Self::create_shader_module_from_file_path(vulkan_logical_device, &red_triangle_fragment_shader_file_path)?;
+        let colored_triangle_vertex_shader_module =
+            Self::create_shader_module_from_file_path(vulkan_logical_device, &colored_triangle_vertex_shader_file_path)?;
+        let colored_triangle_fragment_shader_module =
+            Self::create_shader_module_from_file_path(vulkan_logical_device, &colored_triangle_fragment_shader_file_path)?;
+        let red_triangle_vertex_shader_stage_create_information =
+            VulkanPipelineShaderStageCreateInformation::builder()
+            .stage(VulkanShaderStageFlagS::VERTEX)
+            .module(red_triangle_vertex_shader_module)
+            .name(b"main\0")
+            .build();
+        let red_triangle_fragment_shader_stage_create_information =
+            VulkanPipelineShaderStageCreateInformation::builder()
+            .stage(VulkanShaderStageFlagS::FRAGMENT)
+            .module(red_triangle_fragment_shader_module)
+            .name(b"main\0")
+            .build();
+        let colored_triangle_vertex_shader_stage_create_information =
+            VulkanPipelineShaderStageCreateInformation::builder()
+            .stage(VulkanShaderStageFlagS::VERTEX)
+            .module(colored_triangle_vertex_shader_module)
+            .name(b"main\0")
+            .build();
+        let colored_triangle_fragment_shader_stage_create_information =
+            VulkanPipelineShaderStageCreateInformation::builder()
+            .stage(VulkanShaderStageFlagS::FRAGMENT)
+            .module(colored_triangle_fragment_shader_module)
+            .name(b"main\0")
+            .build();
+        let destroy_shader_module_s = move || unsafe {
+            vulkan_logical_device.destroy_shader_module(red_triangle_vertex_shader_module, None);
+            vulkan_logical_device.destroy_shader_module(red_triangle_fragment_shader_module, None);
+            vulkan_logical_device.destroy_shader_module(colored_triangle_vertex_shader_module, None);
+            vulkan_logical_device.destroy_shader_module(colored_triangle_fragment_shader_module, None);
+        };
+        Ok((red_triangle_vertex_shader_stage_create_information,
+            red_triangle_fragment_shader_stage_create_information,
+            colored_triangle_vertex_shader_stage_create_information,
+            colored_triangle_fragment_shader_stage_create_information,
+            Box::new(destroy_shader_module_s)))
+    }
     //
     pub fn initialize<'t>(config: ApplicationConfig<'t>)
     -> Result<Application<'t>, ErrorFoundationApplicationGuide>
