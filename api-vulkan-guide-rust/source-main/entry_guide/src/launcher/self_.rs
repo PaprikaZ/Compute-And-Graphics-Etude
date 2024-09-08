@@ -5,6 +5,14 @@ use ::library_foundation_application_guide::application_v1_1_c1::continuation::A
 use ::library_foundation_application_guide::application_v1_1_c1::termination::ApplicationTermination
     as ApplicationV1_1Chapter1Termination;
 use ::library_foundation_application_guide::predefine_config::application_v1_1_c1::PredefineConfigApplicationV1_1Chapter1;
+//
+use ::library_foundation_application_guide::application_v1_1_c2::initialization::ApplicationInitialization
+    as ApplicationV1_1Chapter2Initialization;
+use ::library_foundation_application_guide::application_v1_1_c2::continuation::ApplicationContinuation
+    as ApplicationV1_1Chapter2Continuation;
+use ::library_foundation_application_guide::application_v1_1_c2::termination::ApplicationTermination
+    as ApplicationV1_1Chapter2Termination;
+use ::library_foundation_application_guide::predefine_config::application_v1_1_c2::PredefineConfigApplicationV1_1Chapter2;
 
 use crate::error::entry_guide::ErrorEntryGuide;
 use crate::application_name::self_::ApplicationName;
@@ -29,6 +37,15 @@ impl Launcher {
                     ApplicationV1_1Chapter1Continuation::continue_loop_window_event(application))
                 .and_then(|(uniform_window, mp_application)|
                     ApplicationV1_1Chapter1Termination::terminate(uniform_window, mp_application))
+                .map_err(|e| e.into())
+            },
+            EntryArgument::RunApplication(ApplicationName::VulkanV1_1Chapter2) => {
+                let application_config = PredefineConfigApplicationV1_1Chapter2::get();
+                ApplicationV1_1Chapter2Initialization::initialize(application_config)
+                .and_then(|application|
+                    ApplicationV1_1Chapter2Continuation::continue_loop_window_event(application))
+                .and_then(|(uniform_window, mp_application)|
+                    ApplicationV1_1Chapter2Termination::terminate(uniform_window, mp_application))
                 .map_err(|e| e.into())
             },
         }
