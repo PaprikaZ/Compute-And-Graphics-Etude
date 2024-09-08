@@ -55,6 +55,7 @@ use ::library_foundation_vulkan_cooked::vulkan_device_physical::feature::VulkanD
 use crate::error::foundation_application_guide::ErrorFoundationApplicationGuideOwn;
 use crate::error::foundation_application_guide::ErrorFoundationApplicationGuide;
 use crate::application_v1_1_c2::config::ApplicationConfig;
+use crate::application_v1_1_c2::graphic_resource::ApplicationGraphicResourceDestroyDirective;
 use crate::application_v1_1_c2::graphic_resource::ApplicationGraphicResourceDestroyStack;
 use crate::application_v1_1_c2::scene::ApplicationSceneName;
 
@@ -392,6 +393,50 @@ impl<'t> ApplicationPartMain<'t> {
 
     pub fn set_flag_signal_window_resized(&mut self, window_resized_signal_flag: bool) {
         self.flag_signal_window_resized = window_resized_signal_flag;
+    }
+
+    pub(super) fn destroy_by_directive(&self, directive: ApplicationGraphicResourceDestroyDirective)
+    -> Result<(), ErrorFoundationApplicationGuide>
+    {
+        type DD = ApplicationGraphicResourceDestroyDirective;
+        match directive {
+            DD::DestroyVulkanCommandPoolMain => unsafe {
+                self.vulkan_device_logical.destroy_command_pool(self.vulkan_command_pool_main, None);
+            },
+            DD::DestroyVulkanFenceRenderFinished => unsafe {
+                self.vulkan_device_logical.destroy_fence(self.vulkan_fence_render_finished, None);
+            },
+            DD::DestroyVulkanSemaphoreImageAvailable => unsafe {
+                self.vulkan_device_logical.destroy_semaphore(self.vulkan_semaphore_image_available, None);
+            },
+            DD::DestroyVulkanSemaphoreRenderFinished => unsafe {
+                self.vulkan_device_logical.destroy_semaphore(self.vulkan_semaphore_render_finished, None);
+            },
+            DD::DestroyVulkanSwapchain => unsafe {
+                self.vulkan_device_logical.destroy_swapchain_khr(self.vulkan_swapchain, None);
+            },
+            DD::DestroyVulkanRenderPassMain => unsafe {
+                self.vulkan_device_logical.destroy_render_pass(self.vulkan_render_pass, None);
+            },
+            DD::DestroyVulkanSwapchainFrameBufferS => unsafe {
+                self.vulkan_swapchain_frame_buffer_s.iter().for_each(|frame_buffer|
+                    self.vulkan_device_logical.destroy_framebuffer(frame_buffer.clone(), None));
+            },
+            DD::DestroyVulkanSwapchainImageViewS => unsafe {
+                self.vulkan_swapchain_image_view_s.iter().for_each(|image_view|
+                    self.vulkan_device_logical.destroy_image_view(image_view.clone(), None));
+            },
+            DD::DestroyVulkanPipelineTriangleRed => unsafe {
+                self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline_triangle_red, None);
+            }
+            DD::DestroyVulkanPipelineTriangleColored => unsafe {
+                self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline_triangle_colored, None);
+            },
+            DD::DestroyVulkanPipelineLayout => unsafe {
+                self.vulkan_device_logical.destroy_pipeline_layout(self.vulkan_pipeline_layout, None);
+            },
+        }
+        Ok(())
     }
 
     //
