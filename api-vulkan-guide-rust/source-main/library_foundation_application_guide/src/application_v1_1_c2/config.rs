@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use ::library_foundation_reintroduction::window_uniform::WindowUniformDpiLogicalSize;
 use ::library_foundation_vulkan_cooked::config_vulkan::base::ConfigVulkanBase;
 use ::library_foundation_vulkan_cooked::config_vulkan::rank::ConfigVulkanRank;
@@ -15,6 +17,12 @@ pub struct ApplicationConfig<'t> {
     pub vulkan: ApplicationConfigVulkan<'t>,
     pub vulkan_rank: ApplicationConfigVulkanRank,
     pub vulkan_swapchain: ApplicationConfigVulkanSwapchain,
+    //
+    pub path_directory_shader: PathBuf,
+    pub file_name_shader_triangle_red_vertex: PathBuf,
+    pub file_name_shader_triangle_red_fragment: PathBuf,
+    pub file_name_shader_triangle_colored_vertex: PathBuf,
+    pub file_name_shader_triangle_colored_fragment: PathBuf,
 }
 
 impl<'t> ApplicationConfig<'t> {
@@ -23,7 +31,12 @@ impl<'t> ApplicationConfig<'t> {
         window_inner_size: WindowUniformDpiLogicalSize<i32>,
         base_vulkan_config: ApplicationConfigVulkan<'t>,
         base_rank_vulkan_config: ApplicationConfigVulkanRank,
-        swapchain_vulkan_config: ApplicationConfigVulkanSwapchain)
+        swapchain_vulkan_config: ApplicationConfigVulkanSwapchain,
+        shader_directory_path: PathBuf,
+        red_triangle_vertex_shader_file_name: PathBuf,
+        red_triangle_fragment_shader_file_name: PathBuf,
+        colored_triangle_vertex_shader_file_name: PathBuf,
+        colored_triangle_fragment_shader_file_name: PathBuf)
     -> Self
     {
         Self {
@@ -32,6 +45,12 @@ impl<'t> ApplicationConfig<'t> {
             vulkan: base_vulkan_config,
             vulkan_rank: base_rank_vulkan_config,
             vulkan_swapchain: swapchain_vulkan_config,
+            //
+            path_directory_shader: shader_directory_path,
+            file_name_shader_triangle_red_vertex: red_triangle_vertex_shader_file_name,
+            file_name_shader_triangle_red_fragment: red_triangle_fragment_shader_file_name,
+            file_name_shader_triangle_colored_vertex: colored_triangle_vertex_shader_file_name,
+            file_name_shader_triangle_colored_fragment: colored_triangle_fragment_shader_file_name,
         }
     }
 }
