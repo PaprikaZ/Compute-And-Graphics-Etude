@@ -28,6 +28,7 @@ use ::library_foundation_reintroduction::vulkan::VulkanFormat;
 use ::library_foundation_reintroduction::vulkan::VulkanFrameBuffer;
 use ::library_foundation_reintroduction::vulkan::VulkanFrameBufferCreateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanHandler;
+use ::library_foundation_reintroduction::vulkan::VulkanImage;
 use ::library_foundation_reintroduction::vulkan::VulkanImageLayout;
 use ::library_foundation_reintroduction::vulkan::VulkanImageView;
 use ::library_foundation_reintroduction::vulkan::VulkanInstance;
@@ -47,16 +48,22 @@ use ::library_foundation_reintroduction::vulkan::VulkanRenderPassCreateInformati
 use ::library_foundation_reintroduction::vulkan::VulkanSampleCountFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanSemaphore;
 use ::library_foundation_reintroduction::vulkan::VulkanSemaphoreCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanSharingMode;
 use ::library_foundation_reintroduction::vulkan::VulkanSubpassDependency;
 use ::library_foundation_reintroduction::vulkan::VulkanSubpassDescription;
 use ::library_foundation_reintroduction::vulkan::VULKAN_SUBPASS_EXTERNAL;
+use ::library_foundation_reintroduction::vulkan::VulkanSurfaceCapabilitySKhr;
+use ::library_foundation_reintroduction::vulkan::VulkanSurfaceFormatKhr;
 use ::library_foundation_reintroduction::vulkan::VulkanSurfaceKhr;
+use ::library_foundation_reintroduction::vulkan::VulkanSwapchainKhr;
 use ::library_foundation_reintroduction::vulkan::VulkanWindow;
 use ::library_foundation_reintroduction::vulkan::VULKAN_EXTENSION_GET_PHYSICAL_DEVICE_PROPERTIES2_KHR;
 use ::library_foundation_reintroduction::vulkan::VULKAN_EXTENSION_PORTABILITY_ENUMERATION_KHR;
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexGraphic;
+use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndex;
 use ::library_foundation_reintroduction::vulkan::version::VulkanVersionEntry;
 use ::library_foundation_reintroduction::vulkan::version::VulkanVersionApi;
+use ::library_foundation_reintroduction::vulkan::swapchain::VulkanSwapchainImageNumber;
 use ::library_foundation_reintroduction::vulkan::validation::VulkanValidationBeToEnable;
 use ::library_foundation_reintroduction::vulkan::portability::VULKAN_PORTABILITY_VERSION_ENTRY_MACOS_MIN;
 use ::library_foundation_vulkan_cooked::vulkan_requirement::instance::VulkanRequirementInstance;
@@ -165,6 +172,31 @@ impl ApplicationInitialization {
             Err(_e) => Err(ErrorFoundationApplicationGuideOwn::VulkanSurfaceCreateFail)?,
             Ok(s) => Ok(s),
         }
+    }
+
+    fn initialize_vulkan_swapchain_with_image_and_view_s(
+        vulkan_surface: VulkanSurfaceKhr,
+        vulkan_logical_device: &VulkanDeviceLogical,
+        vulkan_surface_capability_s: VulkanSurfaceCapabilitySKhr,
+        vulkan_sharing_mode: VulkanSharingMode,
+        vulkan_queue_family_index_s: &Vec<VulkanQueueFamilyIndex>,
+        vulkan_swapchain_image_number: VulkanSwapchainImageNumber,
+        vulkan_2d_extent: VulkanExtentD2,
+        vulkan_surface_format: VulkanSurfaceFormatKhr,
+        vulkan_present_mode: VulkanPresentModeKhr,
+        old_vulkan_swapchain_o: Option<VulkanSwapchainKhr>,
+        graphic_resource_destroy_stack: &mut ApplicationGraphicResourceDestroyStack)
+    -> Result<(VulkanSwapchainKhr, Vec<VulkanImage>, Vec<VulkanImageView>), ErrorFoundationApplicationGuide>
+    {
+        type DD = ApplicationGraphicResourceDestroyDirective;
+        let (vulkan_swapchain, vulkan_swapchain_image_s, vulkan_swapchain_image_view_s) =
+            InitializationVulkanSwapchain::initialize_with_image_and_view_s(
+                vulkan_surface, &vulkan_logical_device, vulkan_surface_capability_s,
+                vulkan_sharing_mode, &vulkan_queue_family_index_s,
+                vulkan_swapchain_image_number, vulkan_2d_extent, vulkan_surface_format, vulkan_present_mode, old_vulkan_swapchain_o)?;
+        graphic_resource_destroy_stack.push(DD::DestroyVulkanSwapchain);
+        graphic_resource_destroy_stack.push(DD::DestroyVulkanSwapchainImageViewS);
+        Ok((vulkan_swapchain, vulkan_swapchain_image_s, vulkan_swapchain_image_view_s))
     }
 
     fn initialize_render_pass(
