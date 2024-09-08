@@ -10,3 +10,5 @@ pub use ::winit::error::EventLoopError as WindowUniformErrorEventLoop;
 pub use ::winit::platform::windows::WindowExtWindows as WindowUniformPlatformWindowsExtension;
 pub use ::winit::window::Window as WindowUniformWindow;
 pub use ::winit::window::WindowBuilder as WindowUniformWindowBuilder;
+pub use ::winit::keyboard::PhysicalKey as WindowUniformPhysicalKey;
+pub use ::winit::keyboard::KeyCode as WindowUniformKeyCode;
