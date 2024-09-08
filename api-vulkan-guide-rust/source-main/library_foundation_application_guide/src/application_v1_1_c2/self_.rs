@@ -455,9 +455,6 @@ impl<'t> ApplicationPartMain<'t> {
         self.vulkan_debug_utility_messenger_o.map(|debug_messenger| unsafe {
             self.vulkan_instance.destroy_debug_utils_messenger_ext(debug_messenger, None);
         });
-        if let Some(vulkan_debug_utility_messenger) = self.vulkan_debug_utility_messenger_o {
-            unsafe { self.vulkan_instance.destroy_debug_utils_messenger_ext(vulkan_debug_utility_messenger, None) }
-        }
         unsafe { self.vulkan_instance.destroy_instance(None) };
         Ok(())
     }
