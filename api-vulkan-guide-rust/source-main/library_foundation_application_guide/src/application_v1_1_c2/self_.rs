@@ -365,6 +365,14 @@ impl<'t> ApplicationPartMain<'t> {
         self.scene_name_current
     }
 
+    pub fn set_scene_name_next(&mut self) {
+        self.scene_name_current =
+            match self.scene_name_current {
+                ApplicationSceneName::TriangleColored => ApplicationSceneName::TriangleRed,
+                ApplicationSceneName::TriangleRed => ApplicationSceneName::TriangleColored,
+            };
+    }
+
     pub fn get_vulkan_pipeline_scene_current(&self) -> VulkanPipeline {
         match self.scene_name_current {
             ApplicationSceneName::TriangleRed => self.vulkan_pipeline_triangle_red,
