@@ -11,9 +11,12 @@ pub(super) enum ApplicationGraphicResourceDestroyDirective {
     DestroyVulkanRenderPassMain,
     DestroyVulkanSwapchainFrameBufferS,
     DestroyVulkanSwapchainImageViewS,
+    DestroyVulkanImageDepthView,
     DestroyVulkanPipelineTriangleRed,
     DestroyVulkanPipelineTriangleColored,
-    DestroyVulkanPipelineLayout,
+    DestroyVulkanPipelineMesh,
+    DestroyVulkanPipelineLayoutStatic,
+    DestroyVulkanPipelineLayoutDynamic,
 }
 
 impl ApplicationGraphicResourceDestroyDirective {
