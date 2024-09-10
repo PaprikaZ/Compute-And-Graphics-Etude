@@ -78,6 +78,10 @@ impl ErrorEntryGuideHandler {
                     ("vulkan swapchain image s get fail", true),
                 ErrorFoundationVulkanCookedOwn::VulkanSwapchainImageViewSCreateFail =>
                     ("vulkan swapchain image view s create fail", true),
+                ErrorFoundationVulkanCookedOwn::PathFileGraphicMeshOpenFail =>
+                    ("path file graphic mesh open fail", true),
+                ErrorFoundationVulkanCookedOwn::PathFileGraphicMeshDataCorrupted =>
+                    ("path file graphic mesh data corrupted", true),
             };
         println!("{error_message}");
         if be_bypass { Some(error) } else { None }
