@@ -7,6 +7,7 @@ pub mod vulkan_rank;
 
 pub mod vulkan_vertex_input;
 pub mod graphic_mesh_vertex;
+pub mod graphic_mesh_loader;
 
 pub mod config_vulkan;
 
