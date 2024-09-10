@@ -1,4 +1,5 @@
 pub mod error;
+pub mod graphic_mesh_vertex_index;
 pub mod vulkan_device_physical;
 
 pub mod vulkan_requirement;
