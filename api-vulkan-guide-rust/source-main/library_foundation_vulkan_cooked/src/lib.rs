@@ -9,6 +9,8 @@ pub mod vulkan_vertex_input;
 pub mod graphic_mesh_vertex;
 pub mod graphic_mesh_loader;
 
+pub mod vulkan_queue_submit;
+
 pub mod config_vulkan;
 
 pub mod negotiation;
