@@ -13,6 +13,7 @@ use ::library_foundation_reintroduction::vulkan::VulkanSharingMode;
 use ::library_foundation_reintroduction::vulkan::VulkanMemoryAllocateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanBufferCopy;
 use ::library_foundation_reintroduction::vulkan::VulkanFence;
+use ::library_foundation_reintroduction::vulkan::VulkanMemoryMapFlagS;
 
 use crate::error::foundation_vulkan_cooked::ErrorFoundationVulkanCookedOwn;
 use crate::error::foundation_vulkan_cooked::ErrorFoundationVulkanCooked;
@@ -83,5 +84,54 @@ impl VulkanMemoryRawPrefabBuffer {
             Ok(())
         };
         one_time_vulkan_queue_submit_launcher.launch(action, vulkan_fence_o)
+    }
+}
+
+
+pub struct VulkanMemoryRawPrefabBufferGraphicMesh {}
+
+impl VulkanMemoryRawPrefabBufferGraphicMesh {
+    pub(super) fn allocate<T>(
+        vulkan_instance: &VulkanInstance,
+        vulkan_physical_device: VulkanDevicePhysical,
+        vulkan_logical_device: &VulkanDeviceLogical,
+        one_time_vulkan_queue_submit_launcher: VulkanQueueSubmitOneTimeLauncher,
+        vulkan_fence_o: Option<VulkanFence>,
+        vertex_s: &Vec<T>)
+    -> Result<(VulkanBuffer, VulkanDeviceMemory), ErrorFoundationVulkanCooked>
+    {
+        let vertex_number = vertex_s.len();
+        let vertex_s_buffer_size = (size_of::<T>() * vertex_number) as u64;
+        //
+        let (staging_vulkan_buffer, staging_vulkan_buffer_memory) =
+            VulkanMemoryRawPrefabBuffer::create_with_memory_bound(
+                &vulkan_instance,
+                vulkan_physical_device,
+                &vulkan_logical_device,
+                vertex_s_buffer_size,
+                VulkanBufferUsageFlagS::TRANSFER_SRC,
+                VulkanMemoryPropertyFlagS::HOST_COHERENT | VulkanMemoryPropertyFlagS::HOST_VISIBLE)?;
+        let staging_vulkan_vertex_s_buffer_memory_ptr =
+            unsafe { vulkan_logical_device.map_memory(
+                staging_vulkan_buffer_memory, 0, vertex_s_buffer_size, VulkanMemoryMapFlagS::empty()) }
+            .or(Err(ErrorFoundationVulkanCookedOwn::VulkanMemoryMapFail))?;
+        unsafe { std::ptr::copy_nonoverlapping(
+            vertex_s.as_ptr(), staging_vulkan_vertex_s_buffer_memory_ptr.cast(), vertex_number) };
+        unsafe { vulkan_logical_device.unmap_memory(staging_vulkan_buffer_memory) };
+        //
+        let (dedicated_device_vulkan_buffer, dedicated_device_vulkan_buffer_memory) =
+            VulkanMemoryRawPrefabBuffer::create_with_memory_bound(
+                &vulkan_instance,
+                vulkan_physical_device,
+                vulkan_logical_device,
+                vertex_s_buffer_size,
+                VulkanBufferUsageFlagS::TRANSFER_DST | VulkanBufferUsageFlagS::VERTEX_BUFFER,
+                VulkanMemoryPropertyFlagS::DEVICE_LOCAL)?;
+        VulkanMemoryRawPrefabBuffer::copy(
+            one_time_vulkan_queue_submit_launcher, vulkan_fence_o,
+            staging_vulkan_buffer, dedicated_device_vulkan_buffer, vertex_s_buffer_size)?;
+        unsafe { vulkan_logical_device.destroy_buffer(staging_vulkan_buffer, None) };
+        unsafe { vulkan_logical_device.free_memory(staging_vulkan_buffer_memory, None) };
+        Ok((dedicated_device_vulkan_buffer, dedicated_device_vulkan_buffer_memory))
     }
 }

@@ -38,6 +38,7 @@ pub enum ErrorFoundationVulkanCookedOwn {
     VulkanQueueWaitIdleFail,
     VulkanFenceWaitFail,
     VulkanFenceResetFail,
+    VulkanMemoryMapFail,
 }
 
 

@@ -112,6 +112,8 @@ impl ErrorEntryGuideHandler {
                     ("vulkan image memory bind fail", true),
                 ErrorFoundationVulkanCookedOwn::VulkanImageDepthFormatFeatureNotSupport =>
                     ("vulkan image depth format feature not support", true),
+                ErrorFoundationVulkanCookedOwn::VulkanMemoryMapFail =>
+                    ("vulkan memory map fail", true),
             };
         println!("{error_message}");
         if be_bypass { Some(error) } else { None }
