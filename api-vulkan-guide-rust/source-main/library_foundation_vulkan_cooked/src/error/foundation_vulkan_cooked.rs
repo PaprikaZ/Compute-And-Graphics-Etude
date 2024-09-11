@@ -41,6 +41,7 @@ pub enum ErrorFoundationVulkanCookedOwn {
     VulkanFenceWaitFail,
     VulkanFenceResetFail,
     VulkanMemoryMapFail,
+    VulkanImageDepthFormatFeatureNotSupport,
 }
 
 
