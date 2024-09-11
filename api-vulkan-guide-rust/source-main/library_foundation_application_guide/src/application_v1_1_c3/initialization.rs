@@ -292,14 +292,15 @@ impl ApplicationInitialization {
 
     fn initialize_render_pass(
         vulkan_logical_device: &VulkanDeviceLogical,
-        vulkan_swapchain_format: VulkanFormat,
+        swapchain_vulkan_format: VulkanFormat,
+        depth_image_vulkan_format: VulkanFormat,
         graphic_resource_destroy_stack: &mut ApplicationGraphicResourceDestroyStack)
     -> Result<VulkanRenderPass, ErrorFoundationApplicationGuide>
     {
         type DD = ApplicationGraphicResourceDestroyDirective;
-        let vulkan_color_attachment =
+        let color_vulkan_attachment_description =
             VulkanAttachmentDescription::builder()
-            .format(vulkan_swapchain_format)
+            .format(swapchain_vulkan_format)
             .samples(VulkanSampleCountFlagS::_1)
             .load_op(VulkanAttachmentLoadOperation::CLEAR)
             .store_op(VulkanAttachmentStoreOperation::STORE)
@@ -308,20 +309,37 @@ impl ApplicationInitialization {
             .initial_layout(VulkanImageLayout::UNDEFINED)
             .final_layout(VulkanImageLayout::PRESENT_SRC_KHR)
             .build();
-        let vulkan_color_attachment_reference =
+        let color_vulkan_attachment_reference =
             VulkanAttachmentReference::builder()
             .attachment(0)
             .layout(VulkanImageLayout::COLOR_ATTACHMENT_OPTIMAL)
             .build();
-        let vulkan_attachment_s = &[vulkan_color_attachment];
-        let vulkan_color_attachment_reference_s = &[vulkan_color_attachment_reference];
+        let depth_vulkan_attachment_description =
+            VulkanAttachmentDescription::builder()
+            .format(depth_image_vulkan_format)
+            .samples(VulkanSampleCountFlagS::_1)
+            .load_op(VulkanAttachmentLoadOperation::CLEAR)
+            .store_op(VulkanAttachmentStoreOperation::STORE)
+            .stencil_load_op(VulkanAttachmentLoadOperation::CLEAR)
+            .stencil_store_op(VulkanAttachmentStoreOperation::DONT_CARE)
+            .initial_layout(VulkanImageLayout::UNDEFINED)
+            .final_layout(VulkanImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+            .build();
+        let depth_vulkan_attachment_reference =
+            VulkanAttachmentReference::builder()
+            .attachment(1)
+            .layout(VulkanImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+            .build();
+        let vulkan_attachment_description_s = &[color_vulkan_attachment_description, depth_vulkan_attachment_description];
+        let color_vulkan_attachment_reference_s = &[color_vulkan_attachment_reference];
         //
         let vulkan_subpass_description =
             VulkanSubpassDescription::builder()
             .pipeline_bind_point(VulkanPipelineBindPoint::GRAPHICS)
-            .color_attachments(vulkan_color_attachment_reference_s)
+            .color_attachments(color_vulkan_attachment_reference_s)
+            .depth_stencil_attachment(&depth_vulkan_attachment_reference)
             .build();
-        let vulkan_subpass_dependency =
+        let color_vulkan_subpass_dependency =
             VulkanSubpassDependency::builder()
             .src_subpass(VULKAN_SUBPASS_EXTERNAL)
             .dst_subpass(0)
@@ -330,12 +348,21 @@ impl ApplicationInitialization {
             .dst_stage_mask(VulkanPipelineStageFlagS::COLOR_ATTACHMENT_OUTPUT)
             .dst_access_mask(VulkanAccessFlagS::COLOR_ATTACHMENT_WRITE)
             .build();
+        let depth_vulkan_subpass_dependency =
+            VulkanSubpassDependency::builder()
+            .src_subpass(VULKAN_SUBPASS_EXTERNAL)
+            .dst_subpass(0)
+            .src_stage_mask(VulkanPipelineStageFlagS::EARLY_FRAGMENT_TESTS | VulkanPipelineStageFlagS::LATE_FRAGMENT_TESTS)
+            .src_access_mask(VulkanAccessFlagS::empty())
+            .dst_stage_mask(VulkanPipelineStageFlagS::EARLY_FRAGMENT_TESTS | VulkanPipelineStageFlagS::LATE_FRAGMENT_TESTS)
+            .dst_access_mask(VulkanAccessFlagS::DEPTH_STENCIL_ATTACHMENT_WRITE)
+            .build();
         let vulkan_subpass_description_s = &[vulkan_subpass_description];
-        let vulkan_subpass_dependency_s = &[vulkan_subpass_dependency];
+        let vulkan_subpass_dependency_s = &[color_vulkan_subpass_dependency, depth_vulkan_subpass_dependency];
         //
         let vulkan_render_pass_create_information =
             VulkanRenderPassCreateInformation::builder()
-            .attachments(vulkan_attachment_s)
+            .attachments(vulkan_attachment_description_s)
             .subpasses(vulkan_subpass_description_s)
             .dependencies(vulkan_subpass_dependency_s)
             .build();
@@ -349,6 +376,7 @@ impl ApplicationInitialization {
     fn initialize_frame_buffer_s(
         vulkan_logical_device: &VulkanDeviceLogical,
         vulkan_image_view_s: &[VulkanImageView],
+        depth_vulkan_image_view: VulkanImageView,
         vulkan_render_pass: VulkanRenderPass,
         vulkan_extent: VulkanExtentD2,
         graphic_resource_destroy_stack: &mut ApplicationGraphicResourceDestroyStack)
@@ -362,7 +390,7 @@ impl ApplicationInitialization {
                 let vulkan_frame_buffer_create_information =
                     VulkanFrameBufferCreateInformation::builder()
                     .render_pass(vulkan_render_pass)
-                    .attachments(&[*iv])
+                    .attachments(&[*iv, depth_vulkan_image_view])
                     .width(vulkan_extent.width)
                     .height(vulkan_extent.height)
                     .layers(1)
@@ -690,7 +718,7 @@ impl ApplicationInitialization {
                 &vulkan_memory_allocator, &mut graphic_resource_destroy_stack)?;
         let vulkan_render_pass =
             Self::initialize_render_pass(
-                &vulkan_logical_device, vulkan_surface_format.format,
+                &vulkan_logical_device, vulkan_surface_format.format, vulkan_depth_image_format,
                 &mut graphic_resource_destroy_stack)?;
         let vulkan_swapchain_frame_buffer_s =
             Self::initialize_frame_buffer_s(
