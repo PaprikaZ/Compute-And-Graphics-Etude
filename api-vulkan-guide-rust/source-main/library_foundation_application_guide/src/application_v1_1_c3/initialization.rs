@@ -7,6 +7,7 @@ use ::library_foundation_reintroduction::vulkan::VulkanAttachmentLoadOperation;
 use ::library_foundation_reintroduction::vulkan::VulkanAttachmentReference;
 use ::library_foundation_reintroduction::vulkan::VulkanAttachmentStoreOperation;
 use ::library_foundation_reintroduction::vulkan::VulkanBuilderHas;
+use ::library_foundation_reintroduction::vulkan::VulkanColorComponentFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanCommandBuffer;
 use ::library_foundation_reintroduction::vulkan::VulkanCommandBufferAllocateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanCommandBufferLevel;
@@ -90,12 +91,12 @@ use ::library_foundation_reintroduction::vulkan::swapchain::VulkanSwapchainImage
 use ::library_foundation_reintroduction::vulkan::validation::VulkanValidationBeToEnable;
 use ::library_foundation_reintroduction::vulkan::portability::VULKAN_PORTABILITY_VERSION_ENTRY_MACOS_MIN;
 use ::library_foundation_vulkan_cooked::vulkan_requirement::instance::VulkanRequirementInstance;
+use ::library_foundation_vulkan_cooked::negotiation::vulkan_swapchain::NegotiationVulkanSwapchain;
 use ::library_foundation_vulkan_cooked::initialization::window::InitializationWindowUniform;
 use ::library_foundation_vulkan_cooked::initialization::vulkan_library_loader::InitializationVulkanLibraryLoader;
 use ::library_foundation_vulkan_cooked::initialization::vulkan_entry::InitializationVulkanEntry;
 use ::library_foundation_vulkan_cooked::initialization::vulkan_device_logical::InitializationVulkanDeviceLogical;
 use ::library_foundation_vulkan_cooked::initialization::vulkan_swapchain::InitializationVulkanSwapchain;
-use ::library_foundation_vulkan_cooked::negotiation::vulkan_swapchain::NegotiationVulkanSwapchain;
 
 use crate::error::foundation_application_guide::ErrorFoundationApplicationGuideOwn;
 use crate::error::foundation_application_guide::ErrorFoundationApplicationGuide;
@@ -195,6 +196,40 @@ impl ApplicationInitialization {
             Err(_e) => Err(ErrorFoundationApplicationGuideOwn::VulkanSurfaceCreateFail)?,
             Ok(s) => Ok(s),
         }
+    }
+
+    fn initialize_command_pool_and_buffer_s(
+        vulkan_logical_device: &VulkanDeviceLogical,
+        vulkan_graphic_queue_family_index: VulkanQueueFamilyIndexGraphic,
+        graphic_resource_destroy_stack: &mut ApplicationGraphicResourceDestroyStack)
+    -> Result<(VulkanCommandPool, VulkanCommandBuffer, VulkanCommandBuffer), ErrorFoundationApplicationGuide>
+    {
+        type DD = ApplicationGraphicResourceDestroyDirective;
+        let vulkan_command_pool_create_information =
+            VulkanCommandPoolCreateInformation::builder()
+            .flags(VulkanCommandPoolCreateFlagS::RESET_COMMAND_BUFFER)
+            .queue_family_index(vulkan_graphic_queue_family_index.as_raw())
+            .build();
+        let main_vulkan_command_pool =
+            unsafe { vulkan_logical_device.create_command_pool(&vulkan_command_pool_create_information, None) }
+            .or(Err(ErrorFoundationApplicationGuideOwn::VulkanCommandPoolCreateFail))?;
+        //
+        let versatile_vulkan_command_buffer_allocate_information =
+            VulkanCommandBufferAllocateInformation::builder()
+            .command_pool(main_vulkan_command_pool)
+            .level(VulkanCommandBufferLevel::PRIMARY)
+            .command_buffer_count(2)
+            .build();
+        //
+        let vulkan_command_buffer_s =
+            unsafe { vulkan_logical_device.allocate_command_buffers(&versatile_vulkan_command_buffer_allocate_information) }
+            .or(Err(ErrorFoundationApplicationGuideOwn::VulkanCommandBufferAllocateFail))?;
+        assert!(vulkan_command_buffer_s.len() == 2);
+        let graphic_vulkan_command_buffer = vulkan_command_buffer_s[0];
+        let transfer_vulkan_command_buffer = vulkan_command_buffer_s[1];
+        //
+        graphic_resource_destroy_stack.push(DD::DestroyVulkanCommandPoolMain);
+        Ok((main_vulkan_command_pool, graphic_vulkan_command_buffer, transfer_vulkan_command_buffer))
     }
 
     fn initialize_vulkan_swapchain_with_image_and_view_s(
@@ -305,36 +340,6 @@ impl ApplicationInitialization {
             .or(Err(ErrorFoundationApplicationGuideOwn::VulkanFrameBufferCreateFail))?;
         graphic_resource_destroy_stack.push(DD::DestroyVulkanSwapchainFrameBufferS);
         Ok(vulkan_frame_buffer_s)
-    }
-
-    fn initialize_command_pool_and_buffer_main(
-        vulkan_logical_device: &VulkanDeviceLogical,
-        vulkan_graphic_queue_family_index: VulkanQueueFamilyIndexGraphic,
-        graphic_resource_destroy_stack: &mut ApplicationGraphicResourceDestroyStack)
-    -> Result<(VulkanCommandPool, VulkanCommandBuffer), ErrorFoundationApplicationGuide>
-    {
-        type DD = ApplicationGraphicResourceDestroyDirective;
-        let vulkan_command_pool_create_information =
-            VulkanCommandPoolCreateInformation::builder()
-            .flags(VulkanCommandPoolCreateFlagS::RESET_COMMAND_BUFFER)
-            .queue_family_index(vulkan_graphic_queue_family_index.as_raw())
-            .build();
-        let main_vulkan_command_pool =
-            unsafe { vulkan_logical_device.create_command_pool(&vulkan_command_pool_create_information, None) }
-            .or(Err(ErrorFoundationApplicationGuideOwn::VulkanCommandPoolCreateFail))?;
-        graphic_resource_destroy_stack.push(DD::DestroyVulkanCommandPoolMain);
-        let vulkan_command_buffer_allocate_information =
-            VulkanCommandBufferAllocateInformation::builder()
-            .command_pool(main_vulkan_command_pool)
-            .level(VulkanCommandBufferLevel::PRIMARY)
-            .command_buffer_count(1)
-            .build();
-        let vulkan_command_buffer_s =
-            unsafe { vulkan_logical_device.allocate_command_buffers(&vulkan_command_buffer_allocate_information) }
-            .or(Err(ErrorFoundationApplicationGuideOwn::VulkanCommandBufferAllocateFail))?;
-        assert!(vulkan_command_buffer_s.len() == 1);
-        let main_vulkan_command_buffer = vulkan_command_buffer_s[0];
-        Ok((main_vulkan_command_pool, main_vulkan_command_buffer))
     }
 
     fn initialize_synchronization_primitive_set(
@@ -634,6 +639,11 @@ impl ApplicationInitialization {
         let (vulkan_swapchain_sharing_mode, vulkan_swapchain_queue_family_index_s) =
             NegotiationVulkanSwapchain::negotiate_sharing_mode_and_queue_family_index_s_graphic_present(
                 vulkan_graphic_queue_family_index, vulkan_present_queue_family_index);
+        //
+        let (main_vulkan_command_pool, graphic_vulkan_command_buffer, transfer_vulkan_command_buffer) =
+            Self::initialize_command_pool_and_buffer_s(
+                &vulkan_logical_device, vulkan_graphic_queue_family_index,
+                &mut graphic_resource_destroy_stack)?;
         let (vulkan_swapchain, vulkan_swapchain_image_s, vulkan_swapchain_image_view_s) =
             Self::initialize_vulkan_swapchain_with_image_and_view_s(
                 vulkan_surface, &vulkan_logical_device, vulkan_surface_capability_s,
@@ -647,12 +657,8 @@ impl ApplicationInitialization {
         let vulkan_swapchain_frame_buffer_s =
             Self::initialize_frame_buffer_s(
                 &vulkan_logical_device,
-                &vulkan_swapchain_image_view_s, vulkan_render_pass, vulkan_2d_extent,
-                &mut graphic_resource_destroy_stack)?;
-        let (main_vulkan_command_pool, main_vulkan_command_buffer) =
-            Self::initialize_command_pool_and_buffer_main(
-                &vulkan_logical_device, vulkan_graphic_queue_family_index,
-                &mut graphic_resource_destroy_stack)?;
+                &vulkan_swapchain_image_view_s, vulkan_depth_image_view,
+                vulkan_render_pass, vulkan_2d_extent, &mut graphic_resource_destroy_stack)?;
         let (render_finished_vulkan_fence, render_finished_vulkan_semaphore, image_available_vulkan_semaphore) =
             Self::initialize_synchronization_primitive_set(
                 &vulkan_logical_device, &mut graphic_resource_destroy_stack)?;
