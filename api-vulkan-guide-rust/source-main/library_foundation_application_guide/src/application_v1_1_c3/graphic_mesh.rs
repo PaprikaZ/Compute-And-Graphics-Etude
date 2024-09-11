@@ -70,3 +70,13 @@ impl ApplicationGraphicMeshDeviceLoadedN {
             self.vertex_s, dedicated_device_buffer, dedidcated_device_buffer_memory))
     }
 }
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ApplicationGraphicMeshName {
+    Triangle,
+    Monkey,
+}
+
+impl ApplicationGraphicMeshName {
+}
