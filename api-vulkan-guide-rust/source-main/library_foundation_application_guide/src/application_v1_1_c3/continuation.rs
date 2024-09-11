@@ -49,7 +49,7 @@ impl ApplicationContinuation {
                 WE::WindowEvent { event: WEW::KeyboardInput { event: keyboard_input_event, .. }, .. } =>
                     match (keyboard_input_event.state, keyboard_input_event.physical_key) {
                         (KS::Pressed, PK::Code(KC::Escape)) => window_target.exit(),
-                        (KS::Pressed, PK::Code(KC::Space)) => mp_application.set_scene_name_next(),
+                        //(KS::Pressed, PK::Code(KC::Space)) => mp_application.set_scene_name_next(),
                         _ => (),
                     },
                 _ => (),
