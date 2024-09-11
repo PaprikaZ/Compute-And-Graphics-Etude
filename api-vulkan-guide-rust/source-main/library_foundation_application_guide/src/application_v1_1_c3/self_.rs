@@ -41,6 +41,7 @@ use ::library_foundation_reintroduction::vulkan::VulkanCommandBufferBeginInforma
 use ::library_foundation_reintroduction::vulkan::VulkanCommandBufferUsageFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanClearValue;
 use ::library_foundation_reintroduction::vulkan::VulkanClearColorValue;
+use ::library_foundation_reintroduction::vulkan::VulkanClearDepthStencilValue;
 use ::library_foundation_reintroduction::vulkan::VulkanRectangleD2;
 use ::library_foundation_reintroduction::vulkan::VulkanOffsetD2;
 use ::library_foundation_reintroduction::vulkan::VulkanSubpassContents;
@@ -52,6 +53,7 @@ use ::library_foundation_reintroduction::vulkan::VulkanSuccessCode_;
 use ::library_foundation_reintroduction::vulkan::VulkanPipelineLayout;
 use ::library_foundation_reintroduction::vulkan::VulkanPipeline;
 use ::library_foundation_reintroduction::vulkan::VulkanDeviceMemory;
+use ::library_foundation_reintroduction::vulkan::VulkanShaderStageFlagS;
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexGraphic;
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexPresent;
 use ::library_foundation_reintroduction::vulkan::swapchain::VulkanSwapchainImageNumber;
@@ -67,6 +69,7 @@ use crate::application_v1_1_c3::graphic_resource::ApplicationGraphicResourceDest
 use crate::application_v1_1_c3::graphic_mesh::ApplicationGraphicMeshDeviceLoadedY;
 use crate::application_v1_1_c3::graphic_mesh::ApplicationGraphicMeshName;
 use crate::application_v1_1_c3::graphic_mesh::ApplicationGraphicMeshLoader;
+use crate::application_v1_1_c3::vulkan_push_constant::ApplicationVulkanPushConstantData;
 
 
 #[derive(Debug)]
@@ -572,12 +575,16 @@ impl<'t> ApplicationPartMain<'t> {
         let vulkan_clear_color_value =
             VulkanClearValue {
                 color: VulkanClearColorValue { float32: [0.0, 0.0, vulkan_clear_color_value_blue, 1.0] } };
+        let vulkan_clear_depth_value =
+            VulkanClearValue {
+                depth_stencil: VulkanClearDepthStencilValue { depth: 1.0, ..Default::default() },
+            };
         let vulkan_render_pass_begin_information =
             VulkanRenderPassBeginInformation::builder()
             .render_pass(self.vulkan_render_pass)
             .framebuffer(self.vulkan_swapchain_frame_buffer_s[next_available_vulkan_swapchain_image_index.as_raw() as usize])
             .render_area(vulkan_render_area)
-            .clear_values(&[vulkan_clear_color_value])
+            .clear_values(&[vulkan_clear_color_value, vulkan_clear_depth_value])
             .build();
         unsafe { self.vulkan_device_logical.cmd_begin_render_pass(
             self.vulkan_command_buffer_graphic, &vulkan_render_pass_begin_information, VulkanSubpassContents::INLINE) };
@@ -588,7 +595,22 @@ impl<'t> ApplicationPartMain<'t> {
                 VulkanPipelineBindPoint::GRAPHICS,
                 self.vulkan_pipeline_mesh)
         }
-        unsafe { self.vulkan_device_logical.cmd_draw(self.vulkan_command_buffer_main, 3, 1, 0, 0); }
+        let vulkan_push_constant_data =
+            ApplicationVulkanPushConstantData::create(self.number_frame_rendered);
+        let (_, mvp_transform_byte_s, _) = unsafe { vulkan_push_constant_data.mvp_transform.as_slice().align_to::<u8>() };
+        unsafe {
+            self.vulkan_device_logical.cmd_push_constants(
+                self.vulkan_command_buffer_graphic,
+                self.vulkan_pipeline_layout_mesh,
+                VulkanShaderStageFlagS::VERTEX,
+                0,
+                mvp_transform_byte_s)
+        };
+        let monkey_graphic_mesh =
+            self.graphic_mesh_table.get(&ApplicationGraphicMeshName::Monkey)
+            .expect("ApplicationPartMain: monkey graphic mesh should be loaded already");
+        unsafe { self.vulkan_device_logical.cmd_draw(
+            self.vulkan_command_buffer_graphic, monkey_graphic_mesh.vertex_s.len() as u32, 1, 0, 0); }
         //
         unsafe { self.vulkan_device_logical.cmd_end_render_pass(self.vulkan_command_buffer_graphic) };
         unsafe { self.vulkan_device_logical.end_command_buffer(self.vulkan_command_buffer_graphic) }
