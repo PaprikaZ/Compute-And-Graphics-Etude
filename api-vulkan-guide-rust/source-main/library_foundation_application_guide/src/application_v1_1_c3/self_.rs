@@ -1,6 +1,9 @@
+use std::collections::HashMap;
+
 use ::library_foundation_reintroduction::window_uniform::WindowUniformEventLoop;
 use ::library_foundation_reintroduction::window_uniform::WindowUniformWindow;
 use ::library_foundation_reintroduction::vulkan::VulkanHandler;
+use ::library_foundation_reintroduction::vulkan::VulkanFormat;
 use ::library_foundation_reintroduction::vulkan::VulkanPipelineBindPoint;
 use ::library_foundation_reintroduction::vulkan::VulkanBuilderHas;
 use ::library_foundation_reintroduction::vulkan::VulkanInstanceVersion1_0;
@@ -46,19 +49,21 @@ use ::library_foundation_reintroduction::vulkan::VulkanErrorCode_;
 use ::library_foundation_reintroduction::vulkan::VulkanSuccessCode_;
 use ::library_foundation_reintroduction::vulkan::VulkanPipelineLayout;
 use ::library_foundation_reintroduction::vulkan::VulkanPipeline;
-
+use ::library_foundation_reintroduction::vulkan::VulkanDeviceMemory;
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexGraphic;
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexPresent;
 use ::library_foundation_reintroduction::vulkan::swapchain::VulkanSwapchainImageNumber;
 use ::library_foundation_reintroduction::vulkan::swapchain::VulkanSwapchainImageIndex;
 use ::library_foundation_vulkan_cooked::vulkan_device_physical::feature::VulkanDevicePhysicalFeatureStandardName;
+use ::library_foundation_vulkan_cooked::vulkan_memory_raw_prefab::allocator::VulkanMemoryRawPrefabAllocator;
 
 use crate::error::foundation_application_guide::ErrorFoundationApplicationGuideOwn;
 use crate::error::foundation_application_guide::ErrorFoundationApplicationGuide;
 use crate::application_v1_1_c3::config::ApplicationConfig;
 use crate::application_v1_1_c3::graphic_resource::ApplicationGraphicResourceDestroyDirective;
 use crate::application_v1_1_c3::graphic_resource::ApplicationGraphicResourceDestroyStack;
-use crate::application_v1_1_c3::scene::ApplicationSceneName;
+use crate::application_v1_1_c3::graphic_mesh::ApplicationGraphicMeshDeviceLoadedY;
+use crate::application_v1_1_c3::graphic_mesh::ApplicationGraphicMeshName;
 
 
 #[derive(Debug)]
@@ -96,6 +101,9 @@ pub struct ApplicationPartMain<'t> {
     vulkan_entry: VulkanEntry,
     vulkan_instance: VulkanInstance,
     vulkan_debug_utility_messenger_o: Option<VulkanExtensionDebugUtilityMessenger>,
+    //TODO trait VulkanMemoryAllocator
+    vulkan_memory_allocator: VulkanMemoryRawPrefabAllocator<'t>,
+    //
     vulkan_surface: VulkanSurfaceKhr,
     vulkan_device_physical: VulkanDevicePhysical,
     vulkan_queue_family_index_graphic: VulkanQueueFamilyIndexGraphic,
@@ -114,22 +122,30 @@ pub struct ApplicationPartMain<'t> {
     vulkan_swapchain_image_number: VulkanSwapchainImageNumber,
     vulkan_swapchain_sharing_mode: VulkanSharingMode,
     vulkan_swapchain: VulkanSwapchainKhr,
-    vulkan_swapchain_image_s: Vec<VulkanImage>,
-    vulkan_swapchain_image_view_s: Vec<VulkanImageView>,
+    vulkan_image_swapchain_s: Vec<VulkanImage>,
+    vulkan_image_swapchain_view_s: Vec<VulkanImageView>,
+    vulkan_image_depth: VulkanImage,
+    vulkan_image_depth_memory: VulkanDeviceMemory,
+    vulkan_image_depth_view: VulkanImageView,
+    vulkan_image_depth_format: VulkanFormat,
     vulkan_render_pass: VulkanRenderPass,
     vulkan_swapchain_frame_buffer_s: Vec<VulkanFrameBuffer>,
+    //
     vulkan_command_pool_main: VulkanCommandPool,
-    vulkan_command_buffer_main: VulkanCommandBuffer,
+    vulkan_command_buffer_graphic: VulkanCommandBuffer,
+    vulkan_command_buffer_transfer: VulkanCommandBuffer,
     vulkan_fence_render_finished: VulkanFence,
     vulkan_semaphore_render_finished: VulkanSemaphore,
     vulkan_semaphore_image_available: VulkanSemaphore,
-    vulkan_pipeline_layout: VulkanPipelineLayout,
+    vulkan_pipeline_layout_triangle: VulkanPipelineLayout,
     vulkan_pipeline_triangle_red: VulkanPipeline,
     vulkan_pipeline_triangle_colored: VulkanPipeline,
+    vulkan_pipeline_layout_mesh: VulkanPipelineLayout,
+    vulkan_pipeline_mesh: VulkanPipeline,
     //
     graphic_resource_destroy_stack: ApplicationGraphicResourceDestroyStack,
     //
-    scene_name_current: ApplicationSceneName,
+    graphic_mesh_table: HashMap<ApplicationGraphicMeshName, ApplicationGraphicMeshDeviceLoadedY>,
     //
     number_frame_rendered: u32,
     //
@@ -144,6 +160,7 @@ impl<'t> ApplicationPartMain<'t> {
         vulkan_entry: VulkanEntry,
         vulkan_instance: VulkanInstance,
         vulkan_debug_utility_messenger_o: Option<VulkanExtensionDebugUtilityMessenger>,
+        //
         vulkan_surface: VulkanSurfaceKhr,
         vulkan_physical_device: VulkanDevicePhysical,
         vulkan_graphic_queue_family_index: VulkanQueueFamilyIndexGraphic,
@@ -166,14 +183,25 @@ impl<'t> ApplicationPartMain<'t> {
         vulkan_swapchain_image_view_s: Vec<VulkanImageView>,
         vulkan_render_pass: VulkanRenderPass,
         vulkan_swapchain_frame_buffer_s: Vec<VulkanFrameBuffer>,
+        //
+        vulkan_depth_image_view: VulkanImageView,
+        vulkan_depth_image: VulkanImage,
+        vulkan_depth_image_memory: VulkanDeviceMemory,
+        vulkan_depth_image_format: VulkanFormat,
+        //
         main_vulkan_command_pool: VulkanCommandPool,
-        main_vulkan_command_buffer: VulkanCommandBuffer,
+        graphic_vulkan_command_buffer: VulkanCommandBuffer,
+        transfer_vulkan_command_buffer: VulkanCommandBuffer,
         render_finished_vulkan_fence: VulkanFence,
         render_finished_vulkan_semaphore: VulkanSemaphore,
         image_available_vulkan_semaphore: VulkanSemaphore,
-        vulkan_pipeline_layout: VulkanPipelineLayout,
+        //
+        triangle_vulkan_pipeline_layout: VulkanPipelineLayout,
         red_triangle_vulkan_pipeline: VulkanPipeline,
         colored_triangle_vulkan_pipeline: VulkanPipeline,
+        mesh_vulkan_pipeline_layout: VulkanPipelineLayout,
+        mesh_vulkan_pipeline: VulkanPipeline,
+        //
         graphic_resource_destroy_stack: ApplicationGraphicResourceDestroyStack)
     -> Self
     {
@@ -314,11 +342,11 @@ impl<'t> ApplicationPartMain<'t> {
     }
 
     pub fn get_vulkan_swapchain_image_s(&self) -> &Vec<VulkanImage> {
-        &self.vulkan_swapchain_image_s
+        &self.vulkan_image_swapchain_s
     }
 
     pub fn get_vulkan_swapchain_image_view_s(&self) -> &Vec<VulkanImageView> {
-        &self.vulkan_swapchain_image_view_s
+        &self.vulkan_image_swapchain_view_s
     }
 
     pub fn get_vulkan_render_pass(&self) -> &VulkanRenderPass {
@@ -334,7 +362,7 @@ impl<'t> ApplicationPartMain<'t> {
     }
 
     pub fn get_vulkan_command_buffer_main(&self) -> &VulkanCommandBuffer {
-        &self.vulkan_command_buffer_main
+        &self.vulkan_command_buffer_graphic
     }
 
     pub fn get_vulkan_fence_render_finished(&self) -> &VulkanFence {
@@ -350,7 +378,7 @@ impl<'t> ApplicationPartMain<'t> {
     }
 
     pub fn get_vulkan_pipeline_layout(&self) -> &VulkanPipelineLayout {
-        &self.vulkan_pipeline_layout
+        &self.vulkan_pipeline_layout_triangle
     }
 
     pub fn get_vulkan_pipeline_triangle_red(&self) -> &VulkanPipeline {
@@ -359,25 +387,6 @@ impl<'t> ApplicationPartMain<'t> {
 
     pub fn get_vulkan_pipeline_triangle_colored(&self) -> &VulkanPipeline {
         &self.vulkan_pipeline_triangle_colored
-    }
-
-    pub fn get_scene_name_current(&self) -> ApplicationSceneName {
-        self.scene_name_current
-    }
-
-    pub fn set_scene_name_next(&mut self) {
-        self.scene_name_current =
-            match self.scene_name_current {
-                ApplicationSceneName::TriangleColored => ApplicationSceneName::TriangleRed,
-                ApplicationSceneName::TriangleRed => ApplicationSceneName::TriangleColored,
-            };
-    }
-
-    pub fn get_vulkan_pipeline_scene_current(&self) -> VulkanPipeline {
-        match self.scene_name_current {
-            ApplicationSceneName::TriangleRed => self.vulkan_pipeline_triangle_red,
-            ApplicationSceneName::TriangleColored => self.vulkan_pipeline_triangle_colored,
-        }
     }
 
     pub fn is_destroying(&self) -> bool {
@@ -432,8 +441,13 @@ impl<'t> ApplicationPartMain<'t> {
                     self.vulkan_device_logical.destroy_framebuffer(frame_buffer.clone(), None));
             },
             DD::DestroyVulkanSwapchainImageViewS => unsafe {
-                self.vulkan_swapchain_image_view_s.iter().for_each(|image_view|
+                self.vulkan_image_swapchain_view_s.iter().for_each(|image_view|
                     self.vulkan_device_logical.destroy_image_view(image_view.clone(), None));
+            },
+            DD::DestroyVulkanImageDepthView => unsafe {
+                self.vulkan_device_logical.destroy_image_view(self.vulkan_image_depth_view, None);
+                self.vulkan_device_logical.free_memory(self.vulkan_image_depth_memory, None);
+                self.vulkan_device_logical.destroy_image(self.vulkan_image_depth, None);
             },
             DD::DestroyVulkanPipelineTriangleRed => unsafe {
                 self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline_triangle_red, None);
@@ -441,8 +455,14 @@ impl<'t> ApplicationPartMain<'t> {
             DD::DestroyVulkanPipelineTriangleColored => unsafe {
                 self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline_triangle_colored, None);
             },
-            DD::DestroyVulkanPipelineLayout => unsafe {
-                self.vulkan_device_logical.destroy_pipeline_layout(self.vulkan_pipeline_layout, None);
+            DD::DestroyVulkanPipelineMesh => unsafe {
+                self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline_mesh, None);
+            },
+            DD::DestroyVulkanPipelineLayoutStatic => unsafe {
+                self.vulkan_device_logical.destroy_pipeline_layout(self.vulkan_pipeline_layout_triangle, None);
+            },
+            DD::DestroyVulkanPipelineLayoutDynamic => unsafe {
+                self.vulkan_device_logical.destroy_pipeline_layout(self.vulkan_pipeline_layout_mesh, None);
             },
         }
         Ok(())
@@ -478,7 +498,7 @@ impl<'t> ApplicationPartMain<'t> {
         .or(Err(ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalFenceResetFail))?;
         //
         unsafe { self.vulkan_device_logical.reset_command_buffer(
-            self.vulkan_command_buffer_main, VulkanCommandBufferResetFlagS::RELEASE_RESOURCES) }
+            self.vulkan_command_buffer_graphic, VulkanCommandBufferResetFlagS::RELEASE_RESOURCES) }
         .or(Err(ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalCommandBufferResetFail))?;
         //
         let next_available_vulkan_swapchain_image_index =
@@ -491,7 +511,7 @@ impl<'t> ApplicationPartMain<'t> {
             .flags(VulkanCommandBufferUsageFlagS::ONE_TIME_SUBMIT)
             .build();
         unsafe { self.vulkan_device_logical.begin_command_buffer(
-            self.vulkan_command_buffer_main, &vulkan_command_buffer_begin_information) }
+            self.vulkan_command_buffer_graphic, &vulkan_command_buffer_begin_information) }
         .or(Err(ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalCommandBufferBeginFail))?;
         //
         let vulkan_render_area =
@@ -500,7 +520,7 @@ impl<'t> ApplicationPartMain<'t> {
             .extent(self.vulkan_extent_d2)
             .build();
         let vulkan_clear_color_value_blue = ((self.number_frame_rendered as f32) / 120.0f32).sin().abs();
-        let vulkan_clear_value =
+        let vulkan_clear_color_value =
             VulkanClearValue {
                 color: VulkanClearColorValue { float32: [0.0, 0.0, vulkan_clear_color_value_blue, 1.0] } };
         let vulkan_render_pass_begin_information =
@@ -508,27 +528,27 @@ impl<'t> ApplicationPartMain<'t> {
             .render_pass(self.vulkan_render_pass)
             .framebuffer(self.vulkan_swapchain_frame_buffer_s[next_available_vulkan_swapchain_image_index.as_raw() as usize])
             .render_area(vulkan_render_area)
-            .clear_values(&[vulkan_clear_value])
+            .clear_values(&[vulkan_clear_color_value])
             .build();
         unsafe { self.vulkan_device_logical.cmd_begin_render_pass(
-            self.vulkan_command_buffer_main, &vulkan_render_pass_begin_information, VulkanSubpassContents::INLINE) };
+            self.vulkan_command_buffer_graphic, &vulkan_render_pass_begin_information, VulkanSubpassContents::INLINE) };
         //
         unsafe {
             self.vulkan_device_logical.cmd_bind_pipeline(
-                self.vulkan_command_buffer_main,
+                self.vulkan_command_buffer_graphic,
                 VulkanPipelineBindPoint::GRAPHICS,
-                self.get_vulkan_pipeline_scene_current())
+                self.vulkan_pipeline_mesh)
         }
         unsafe { self.vulkan_device_logical.cmd_draw(self.vulkan_command_buffer_main, 3, 1, 0, 0); }
         //
-        unsafe { self.vulkan_device_logical.cmd_end_render_pass(self.vulkan_command_buffer_main) };
-        unsafe { self.vulkan_device_logical.end_command_buffer(self.vulkan_command_buffer_main) }
+        unsafe { self.vulkan_device_logical.cmd_end_render_pass(self.vulkan_command_buffer_graphic) };
+        unsafe { self.vulkan_device_logical.end_command_buffer(self.vulkan_command_buffer_graphic) }
         .or(Err(ErrorFoundationApplicationGuideOwn::VulkanDeviceLogicalCommandBufferEndFail))?;
         //
         let submit_wait_vulkan_semaphore_s = &[self.vulkan_semaphore_image_available];
         let submit_signal_vulkan_semaphore_s = &[self.vulkan_semaphore_render_finished];
         let submit_wait_vulkan_pipeline_stage_flag_s = &[VulkanPipelineStageFlagS::COLOR_ATTACHMENT_OUTPUT];
-        let submit_vulkan_command_buffer_s = &[self.vulkan_command_buffer_main];
+        let submit_vulkan_command_buffer_s = &[self.vulkan_command_buffer_graphic];
         let vulkan_submit_information =
             VulkanSubmitInformation::builder()
             .wait_semaphores(submit_wait_vulkan_semaphore_s)
