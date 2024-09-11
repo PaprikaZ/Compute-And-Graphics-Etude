@@ -18,6 +18,7 @@ use ::library_foundation_reintroduction::vulkan::VulkanCullModeFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanDescriptorSetLayout;
 use ::library_foundation_reintroduction::vulkan::VulkanDeviceLogical;
 use ::library_foundation_reintroduction::vulkan::VulkanDeviceLogicalCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanDeviceMemory;
 use ::library_foundation_reintroduction::vulkan::VulkanDeviceVersion1_0;
 use ::library_foundation_reintroduction::vulkan::VulkanEntry;
 use ::library_foundation_reintroduction::vulkan::VulkanExtensionDebugUtility;
@@ -34,8 +35,12 @@ use ::library_foundation_reintroduction::vulkan::VulkanFrontFace;
 use ::library_foundation_reintroduction::vulkan::VulkanGraphicsPipelineCreateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanHandler;
 use ::library_foundation_reintroduction::vulkan::VulkanImage;
+use ::library_foundation_reintroduction::vulkan::VulkanImageAspectFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanImageLayout;
+use ::library_foundation_reintroduction::vulkan::VulkanImageSubResourceRange;
 use ::library_foundation_reintroduction::vulkan::VulkanImageView;
+use ::library_foundation_reintroduction::vulkan::VulkanImageViewCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanImageViewType;
 use ::library_foundation_reintroduction::vulkan::VulkanInstance;
 use ::library_foundation_reintroduction::vulkan::VulkanInstanceCreateFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanInstanceCreateInformation;
@@ -91,6 +96,7 @@ use ::library_foundation_reintroduction::vulkan::swapchain::VulkanSwapchainImage
 use ::library_foundation_reintroduction::vulkan::validation::VulkanValidationBeToEnable;
 use ::library_foundation_reintroduction::vulkan::portability::VULKAN_PORTABILITY_VERSION_ENTRY_MACOS_MIN;
 use ::library_foundation_vulkan_cooked::vulkan_requirement::instance::VulkanRequirementInstance;
+use ::library_foundation_vulkan_cooked::vulkan_memory_raw_prefab::allocator::VulkanMemoryRawPrefabAllocator;
 use ::library_foundation_vulkan_cooked::negotiation::vulkan_swapchain::NegotiationVulkanSwapchain;
 use ::library_foundation_vulkan_cooked::initialization::window::InitializationWindowUniform;
 use ::library_foundation_vulkan_cooked::initialization::vulkan_library_loader::InitializationVulkanLibraryLoader;
@@ -243,18 +249,45 @@ impl ApplicationInitialization {
         vulkan_surface_format: VulkanSurfaceFormatKhr,
         vulkan_present_mode: VulkanPresentModeKhr,
         old_vulkan_swapchain_o: Option<VulkanSwapchainKhr>,
+        vulkan_memory_allocator: &VulkanMemoryRawPrefabAllocator,
         graphic_resource_destroy_stack: &mut ApplicationGraphicResourceDestroyStack)
-    -> Result<(VulkanSwapchainKhr, Vec<VulkanImage>, Vec<VulkanImageView>), ErrorFoundationApplicationGuide>
+    -> Result<(VulkanSwapchainKhr, Vec<VulkanImage>, Vec<VulkanImageView>,
+               VulkanFormat, VulkanImage, VulkanDeviceMemory, VulkanImageView),
+              ErrorFoundationApplicationGuide>
     {
         type DD = ApplicationGraphicResourceDestroyDirective;
-        let (vulkan_swapchain, vulkan_swapchain_image_s, vulkan_swapchain_image_view_s) =
+        let (vulkan_swapchain, swapchain_vulkan_image_s, swapchain_vulkan_image_view_s) =
             InitializationVulkanSwapchain::initialize_with_image_and_view_s(
                 vulkan_surface, &vulkan_logical_device, vulkan_surface_capability_s,
                 vulkan_sharing_mode, &vulkan_queue_family_index_s,
                 vulkan_swapchain_image_number, vulkan_2d_extent, vulkan_surface_format, vulkan_present_mode, old_vulkan_swapchain_o)?;
         graphic_resource_destroy_stack.push(DD::DestroyVulkanSwapchain);
         graphic_resource_destroy_stack.push(DD::DestroyVulkanSwapchainImageViewS);
-        Ok((vulkan_swapchain, vulkan_swapchain_image_s, vulkan_swapchain_image_view_s))
+        //
+        let (depth_vulkan_image_format, depth_vulkan_image, depth_vulkan_image_memory) =
+            vulkan_memory_allocator.allocate_image_depth(
+                (vulkan_2d_extent.width, vulkan_2d_extent.height))?;
+        let depth_vulkan_image_sub_resource_range =
+            VulkanImageSubResourceRange::builder()
+            .aspect_mask(VulkanImageAspectFlagS::DEPTH)
+            .base_mip_level(0)
+            .level_count(1)
+            .base_array_layer(0)
+            .layer_count(1)
+            .build();
+        let depth_vulkan_image_view_create_information   =
+            VulkanImageViewCreateInformation::builder()
+            .image(depth_vulkan_image)
+            .view_type(VulkanImageViewType::_2D)
+            .format(depth_vulkan_image_format)
+            .subresource_range(depth_vulkan_image_sub_resource_range)
+            .build();
+        let depth_vulkan_image_view =
+            unsafe { vulkan_logical_device.create_image_view(&depth_vulkan_image_view_create_information, None) }
+            .or(Err(ErrorFoundationApplicationGuideOwn::VulkanImageViewDepthCreateFail))?;
+        graphic_resource_destroy_stack.push(DD::DestroyVulkanImageDepthView);
+        Ok((vulkan_swapchain, swapchain_vulkan_image_s, swapchain_vulkan_image_view_s,
+            depth_vulkan_image_format, depth_vulkan_image, depth_vulkan_image_memory, depth_vulkan_image_view))
     }
 
     fn initialize_render_pass(
@@ -644,12 +677,17 @@ impl ApplicationInitialization {
             Self::initialize_command_pool_and_buffer_s(
                 &vulkan_logical_device, vulkan_graphic_queue_family_index,
                 &mut graphic_resource_destroy_stack)?;
-        let (vulkan_swapchain, vulkan_swapchain_image_s, vulkan_swapchain_image_view_s) =
+        let vulkan_memory_allocator =
+            VulkanMemoryRawPrefabAllocator::new(
+                &vulkan_instance, vulkan_physical_device, &vulkan_logical_device,
+                vulkan_graphic_queue, transfer_vulkan_command_buffer);
+        let (vulkan_swapchain, vulkan_swapchain_image_s, vulkan_swapchain_image_view_s,
+             vulkan_depth_image_format, vulkan_depth_image, vulkan_depth_image_memory, vulkan_depth_image_view) =
             Self::initialize_vulkan_swapchain_with_image_and_view_s(
                 vulkan_surface, &vulkan_logical_device, vulkan_surface_capability_s,
                 vulkan_swapchain_sharing_mode, &vulkan_swapchain_queue_family_index_s,
                 vulkan_swapchain_image_number, vulkan_2d_extent, vulkan_surface_format, vulkan_present_mode, None,
-                &mut graphic_resource_destroy_stack)?;
+                &vulkan_memory_allocator, &mut graphic_resource_destroy_stack)?;
         let vulkan_render_pass =
             Self::initialize_render_pass(
                 &vulkan_logical_device, vulkan_surface_format.format,
