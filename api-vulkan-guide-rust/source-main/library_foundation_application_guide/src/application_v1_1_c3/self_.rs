@@ -1,3 +1,5 @@
+use std::mem::MaybeUninit;
+use std::ptr::addr_of_mut;
 use std::collections::HashMap;
 
 use ::library_foundation_reintroduction::window_uniform::WindowUniformEventLoop;
@@ -64,6 +66,7 @@ use crate::application_v1_1_c3::graphic_resource::ApplicationGraphicResourceDest
 use crate::application_v1_1_c3::graphic_resource::ApplicationGraphicResourceDestroyStack;
 use crate::application_v1_1_c3::graphic_mesh::ApplicationGraphicMeshDeviceLoadedY;
 use crate::application_v1_1_c3::graphic_mesh::ApplicationGraphicMeshName;
+use crate::application_v1_1_c3::graphic_mesh::ApplicationGraphicMeshLoader;
 
 
 #[derive(Debug)]
@@ -155,7 +158,7 @@ pub struct ApplicationPartMain<'t> {
 }
 
 impl<'t> ApplicationPartMain<'t> {
-    pub(super) fn new(
+    pub(super) fn create_with_memory_allocator_uninitialized(
         config: ApplicationConfig<'t>,
         vulkan_entry: VulkanEntry,
         vulkan_instance: VulkanInstance,
@@ -203,54 +206,100 @@ impl<'t> ApplicationPartMain<'t> {
         mesh_vulkan_pipeline: VulkanPipeline,
         //
         graphic_resource_destroy_stack: ApplicationGraphicResourceDestroyStack)
-    -> Self
+    -> MaybeUninit<Self>
     {
-        Self {
-            config: config,
-            vulkan_entry: vulkan_entry,
-            vulkan_instance: vulkan_instance,
-            vulkan_debug_utility_messenger_o: vulkan_debug_utility_messenger_o,
-            vulkan_surface: vulkan_surface,
-            vulkan_device_physical: vulkan_physical_device,
-            vulkan_queue_family_index_graphic: vulkan_graphic_queue_family_index,
-            vulkan_queue_family_index_present: vulkan_present_queue_family_index,
-            vulkan_device_physical_extension_name_s_matched: matched_vulkan_physical_device_extension_name_s,
-            vulkan_device_physical_feature_name_s_matched: matched_vulkan_physical_device_feature_name_s,
-            vulkan_surface_capability_s: vulkan_surface_capability_s,
-            vulkan_surface_format_s_available: available_vulkan_surface_format_s,
-            vulkan_present_mode_s_available: available_vulkan_present_mode_s,
-            vulkan_device_logical: vulkan_logical_device,
-            vulkan_queue_graphic: vulkan_graphic_queue,
-            vulkan_queue_present: vulkan_present_queue,
-            vulkan_surface_format: vulkan_surface_format,
-            vulkan_present_mode: vulkan_present_mode,
-            vulkan_extent_d2: vulkan_2d_extent,
-            vulkan_swapchain_image_number: vulkan_swapchain_image_number,
-            vulkan_swapchain_sharing_mode: vulkan_swapchain_sharing_mode,
-            vulkan_swapchain: vulkan_swapchain,
-            vulkan_swapchain_image_s: vulkan_swapchain_image_s,
-            vulkan_swapchain_image_view_s: vulkan_swapchain_image_view_s,
-            vulkan_render_pass: vulkan_render_pass,
-            vulkan_swapchain_frame_buffer_s: vulkan_swapchain_frame_buffer_s,
-            vulkan_command_pool_main: main_vulkan_command_pool,
-            vulkan_command_buffer_main: main_vulkan_command_buffer,
-            vulkan_fence_render_finished: render_finished_vulkan_fence,
-            vulkan_semaphore_render_finished: render_finished_vulkan_semaphore,
-            vulkan_semaphore_image_available: image_available_vulkan_semaphore,
-            vulkan_pipeline_layout: vulkan_pipeline_layout,
-            vulkan_pipeline_triangle_red: red_triangle_vulkan_pipeline,
-            vulkan_pipeline_triangle_colored: colored_triangle_vulkan_pipeline,
-            //
-            graphic_resource_destroy_stack: graphic_resource_destroy_stack,
-            //
-            scene_name_current: ApplicationSceneName::TriangleColored,
-            //
-            number_frame_rendered: 0,
-            //
-            be_destroying: false,
-            be_window_minimized: false,
-            flag_signal_window_resized: false,
+        let mut new_mp_application: MaybeUninit<Self> = MaybeUninit::uninit();
+        let ptr = new_mp_application.as_mut_ptr();
+        unsafe {
+        addr_of_mut!((*ptr).config).write(config);
+        addr_of_mut!((*ptr).vulkan_entry).write(vulkan_entry);
+        addr_of_mut!((*ptr).vulkan_instance).write(vulkan_instance);
+        addr_of_mut!((*ptr).vulkan_debug_utility_messenger_o).write(vulkan_debug_utility_messenger_o);
+        //addr_of_mut!((*ptr).vulkan_memory_allocator).write(raw_prefab_vulkan_memory_allocator);
+        //
+        addr_of_mut!((*ptr).vulkan_surface).write(vulkan_surface);
+        addr_of_mut!((*ptr).vulkan_device_physical).write(vulkan_physical_device);
+        addr_of_mut!((*ptr).vulkan_queue_family_index_graphic).write(vulkan_graphic_queue_family_index);
+        addr_of_mut!((*ptr).vulkan_queue_family_index_present).write(vulkan_present_queue_family_index);
+        addr_of_mut!((*ptr).vulkan_device_physical_extension_name_s_matched).write(matched_vulkan_physical_device_extension_name_s);
+        addr_of_mut!((*ptr).vulkan_device_physical_feature_name_s_matched).write(matched_vulkan_physical_device_feature_name_s);
+        addr_of_mut!((*ptr).vulkan_surface_capability_s).write(vulkan_surface_capability_s);
+        addr_of_mut!((*ptr).vulkan_surface_format_s_available).write(available_vulkan_surface_format_s);
+        addr_of_mut!((*ptr).vulkan_present_mode_s_available).write(available_vulkan_present_mode_s);
+        addr_of_mut!((*ptr).vulkan_device_logical).write(vulkan_logical_device);
+        addr_of_mut!((*ptr).vulkan_queue_graphic).write(vulkan_graphic_queue);
+        addr_of_mut!((*ptr).vulkan_queue_present).write(vulkan_present_queue);
+        addr_of_mut!((*ptr).vulkan_surface_format).write(vulkan_surface_format);
+        addr_of_mut!((*ptr).vulkan_present_mode).write(vulkan_present_mode);
+        addr_of_mut!((*ptr).vulkan_extent_d2).write(vulkan_2d_extent);
+        addr_of_mut!((*ptr).vulkan_swapchain_image_number).write(vulkan_swapchain_image_number);
+        addr_of_mut!((*ptr).vulkan_swapchain_sharing_mode).write(vulkan_swapchain_sharing_mode);
+        addr_of_mut!((*ptr).vulkan_swapchain).write(vulkan_swapchain);
+        addr_of_mut!((*ptr).vulkan_image_swapchain_s).write(vulkan_swapchain_image_s);
+        addr_of_mut!((*ptr).vulkan_image_swapchain_view_s).write(vulkan_swapchain_image_view_s);
+        addr_of_mut!((*ptr).vulkan_image_depth).write(vulkan_depth_image);
+        addr_of_mut!((*ptr).vulkan_image_depth_memory).write(vulkan_depth_image_memory);
+        addr_of_mut!((*ptr).vulkan_image_depth_view).write(vulkan_depth_image_view);
+        addr_of_mut!((*ptr).vulkan_image_depth_format).write(vulkan_depth_image_format);
+        addr_of_mut!((*ptr).vulkan_render_pass).write(vulkan_render_pass);
+        addr_of_mut!((*ptr).vulkan_swapchain_frame_buffer_s).write(vulkan_swapchain_frame_buffer_s);
+        //
+        addr_of_mut!((*ptr).vulkan_command_pool_main).write(main_vulkan_command_pool);
+        addr_of_mut!((*ptr).vulkan_command_buffer_graphic).write(graphic_vulkan_command_buffer);
+        addr_of_mut!((*ptr).vulkan_command_buffer_transfer).write(transfer_vulkan_command_buffer);
+        addr_of_mut!((*ptr).vulkan_fence_render_finished).write(render_finished_vulkan_fence);
+        addr_of_mut!((*ptr).vulkan_semaphore_render_finished).write(render_finished_vulkan_semaphore);
+        addr_of_mut!((*ptr).vulkan_semaphore_image_available).write(image_available_vulkan_semaphore);
+        addr_of_mut!((*ptr).vulkan_pipeline_layout_triangle).write(triangle_vulkan_pipeline_layout);
+        addr_of_mut!((*ptr).vulkan_pipeline_triangle_red).write(red_triangle_vulkan_pipeline);
+        addr_of_mut!((*ptr).vulkan_pipeline_triangle_colored).write(colored_triangle_vulkan_pipeline);
+        addr_of_mut!((*ptr).vulkan_pipeline_layout_mesh).write(mesh_vulkan_pipeline_layout);
+        addr_of_mut!((*ptr).vulkan_pipeline_mesh).write(mesh_vulkan_pipeline);
+        //
+        addr_of_mut!((*ptr).graphic_resource_destroy_stack).write(graphic_resource_destroy_stack);
+        //
+        addr_of_mut!((*ptr).graphic_mesh_table).write(HashMap::new());
+        //
+        addr_of_mut!((*ptr).number_frame_rendered).write(0);
+        //
+        addr_of_mut!((*ptr).be_destroying).write(false);
+        addr_of_mut!((*ptr).be_window_minimized).write(false);
+        addr_of_mut!((*ptr).flag_signal_window_resized).write(false);
         }
+        new_mp_application
+    }
+
+    pub fn initialize_memory_allocator(mut memory_allocator_uninitialized_application: MaybeUninit<Self>) -> Self
+    {
+        let ptr = memory_allocator_uninitialized_application.as_mut_ptr();
+        let application = unsafe {
+            let raw_prefab_vulkan_memory_allocator =
+                VulkanMemoryRawPrefabAllocator::new(
+                    &(*ptr).vulkan_instance,
+                    (*ptr).vulkan_device_physical,
+                    &(*ptr).vulkan_device_logical,
+                    (*ptr).vulkan_queue_graphic,
+                    (*ptr).vulkan_command_buffer_transfer);
+            addr_of_mut!((*ptr).vulkan_memory_allocator).write(raw_prefab_vulkan_memory_allocator);
+            MaybeUninit::assume_init(memory_allocator_uninitialized_application)
+        };
+        application
+    }
+
+    pub fn initialize_graphic_mesh_all_device_loaded(&mut self)
+    -> Result<(), ErrorFoundationApplicationGuide>
+    {
+        let triangle_graphic_mesh =
+            ApplicationGraphicMeshLoader
+            ::create_mesh_triangle()
+            .load_to_device(&self.vulkan_memory_allocator)?;
+        self.graphic_mesh_table.insert(ApplicationGraphicMeshName::Triangle, triangle_graphic_mesh);
+        let monkey_graphic_mesh =
+            ApplicationGraphicMeshLoader
+            ::load_mesh_monkey(&self.config)?
+            .load_to_device(&self.vulkan_memory_allocator)?;
+        self.graphic_mesh_table.insert(ApplicationGraphicMeshName::Monkey, monkey_graphic_mesh);
+        Ok(())
     }
 
     pub fn get_config(&self) -> &ApplicationConfig {
