@@ -32,21 +32,21 @@ impl Launcher {
             },
             EntryArgument::RunApplication(ApplicationName::VulkanV1_1Chapter1) => {
                 let application_config = PredefineConfigApplicationV1_1Chapter1::get();
-                ApplicationV1_1Chapter1Initialization::initialize(application_config)
-                .and_then(|application|
-                    ApplicationV1_1Chapter1Continuation::continue_loop_window_event(application))
-                .and_then(|(uniform_window, mp_application)|
-                    ApplicationV1_1Chapter1Termination::terminate(uniform_window, mp_application))
-                .map_err(|e| e.into())
+                let application =
+                    ApplicationV1_1Chapter1Initialization::initialize(application_config)?;
+                let (uniform_window, mp_application) =
+                    ApplicationV1_1Chapter1Continuation::continue_loop_window_event(application)?;
+                ApplicationV1_1Chapter1Termination::terminate(uniform_window, mp_application)?;
+                Ok(())
             },
             EntryArgument::RunApplication(ApplicationName::VulkanV1_1Chapter2) => {
                 let application_config = PredefineConfigApplicationV1_1Chapter2::get();
-                ApplicationV1_1Chapter2Initialization::initialize(application_config)
-                .and_then(|application|
-                    ApplicationV1_1Chapter2Continuation::continue_loop_window_event(application))
-                .and_then(|(uniform_window, mp_application)|
-                    ApplicationV1_1Chapter2Termination::terminate(uniform_window, mp_application))
-                .map_err(|e| e.into())
+                let application =
+                    ApplicationV1_1Chapter2Initialization::initialize(application_config)?;
+                let (uniform_window, mp_application) =
+                    ApplicationV1_1Chapter2Continuation::continue_loop_window_event(application)?;
+                ApplicationV1_1Chapter2Termination::terminate(uniform_window, mp_application)?;
+                Ok(())
             },
         }
     }
