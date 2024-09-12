@@ -810,10 +810,11 @@ impl ApplicationInitialization {
                 &vulkan_logical_device, vulkan_2d_extent, vulkan_render_pass,
                 &config, &mut graphic_resource_destroy_stack)?;
         let wp_application = ApplicationPartWindow::new(window, window_event_loop);
-        let mp_application =
-            ApplicationPartMain::new(
-                config, vulkan_entry, vulkan_instance, vulkan_debug_utility_messenger_o, vulkan_surface,
-                vulkan_physical_device, vulkan_graphic_queue_family_index, vulkan_present_queue_family_index,
+        let partial_initialized_mp_application =
+            ApplicationPartMain::create_with_memory_allocator_uninitialized(
+                config, vulkan_entry, vulkan_instance, None,
+                vulkan_surface, vulkan_physical_device,
+                vulkan_graphic_queue_family_index, vulkan_present_queue_family_index,
                 matched_vulkan_extension_name_s, matched_vulkan_physical_device_feature_name_s,
                 vulkan_surface_capability_s, available_vulkan_surface_format_s, available_vulkan_present_mode_s,
                 vulkan_logical_device, vulkan_graphic_queue, vulkan_present_queue,
@@ -821,11 +822,15 @@ impl ApplicationInitialization {
                 vulkan_swapchain_image_number, vulkan_swapchain_sharing_mode,
                 vulkan_swapchain, vulkan_swapchain_image_s, vulkan_swapchain_image_view_s,
                 vulkan_render_pass, vulkan_swapchain_frame_buffer_s,
-                main_vulkan_command_pool, main_vulkan_command_buffer,
+                vulkan_depth_image_view, vulkan_depth_image, vulkan_depth_image_memory, vulkan_depth_image_format,
+                main_vulkan_command_pool, graphic_vulkan_command_buffer, transfer_vulkan_command_buffer,
                 render_finished_vulkan_fence, render_finished_vulkan_semaphore, image_available_vulkan_semaphore,
-                vulkan_pipeline_layout, red_triangle_vulkan_pipeline, colored_triangle_vulkan_pipeline,
-                graphic_resource_destroy_stack
-            );
-        Ok(Application::<'t>::new(wp_application, mp_application))
+                triangle_vulkan_pipeline_layout, red_triangle_vulkan_pipeline, colored_triangle_vulkan_pipeline,
+                mesh_vulkan_pipeline_layout, mesh_vulkan_pipeline,
+                graphic_resource_destroy_stack);
+        let mut mp_application =
+            ApplicationPartMain::initialize_memory_allocator(partial_initialized_mp_application);
+        mp_application.initialize_graphic_mesh_all_device_loaded()?;
+        Ok(Application::new(wp_application, mp_application))
     }
 }
