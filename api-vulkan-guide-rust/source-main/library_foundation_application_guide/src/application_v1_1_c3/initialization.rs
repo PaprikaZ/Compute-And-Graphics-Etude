@@ -14,6 +14,7 @@ use ::library_foundation_reintroduction::vulkan::VulkanCommandBufferLevel;
 use ::library_foundation_reintroduction::vulkan::VulkanCommandPool;
 use ::library_foundation_reintroduction::vulkan::VulkanCommandPoolCreateFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanCommandPoolCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanCompareOperation;
 use ::library_foundation_reintroduction::vulkan::VulkanCullModeFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanDescriptorSetLayout;
 use ::library_foundation_reintroduction::vulkan::VulkanDeviceLogical;
@@ -51,6 +52,7 @@ use ::library_foundation_reintroduction::vulkan::VulkanPipelineBindPoint;
 use ::library_foundation_reintroduction::vulkan::VulkanPipelineCache;
 use ::library_foundation_reintroduction::vulkan::VulkanPipelineColorBlendAttachmentState;
 use ::library_foundation_reintroduction::vulkan::VulkanPipelineColorBlendStateCreateInformation;
+use ::library_foundation_reintroduction::vulkan::VulkanPipelineDepthStencilStateCreateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanPipelineInputAssemblyStateCreateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanPipelineLayout;
 use ::library_foundation_reintroduction::vulkan::VulkanPipelineLayoutCreateFlagS;
@@ -112,6 +114,8 @@ use crate::application_v1_1_c3::negotiation_vulkan_device_physical::ApplicationN
 use crate::application_v1_1_c3::negotiation_vulkan_swapchain::ApplicationNegotiationVulkanSwapchain;
 use crate::application_v1_1_c3::graphic_resource::ApplicationGraphicResourceDestroyDirective;
 use crate::application_v1_1_c3::graphic_resource::ApplicationGraphicResourceDestroyStack;
+use crate::application_v1_1_c3::graphic_mesh::ApplicationGraphicMeshLoader;
+use crate::application_v1_1_c3::vulkan_push_constant::ApplicationVulkanPushConstantData;
 use crate::application_v1_1_c3::self_::ApplicationPartWindow;
 use crate::application_v1_1_c3::self_::ApplicationPartMain;
 use crate::application_v1_1_c3::self_::Application;
@@ -527,42 +531,86 @@ impl ApplicationInitialization {
         vulkan_render_pass: VulkanRenderPass,
         config: &ApplicationConfig<'t>,
         graphic_resource_destroy_stack: &mut ApplicationGraphicResourceDestroyStack)
-    -> Result<(VulkanPipelineLayout, VulkanPipeline, VulkanPipeline),
+    -> Result<((VulkanPipelineLayout, VulkanPipeline, VulkanPipeline),
+               (VulkanPipelineLayout, VulkanPipeline)),
               ErrorFoundationApplicationGuide>
     {
         type DD = ApplicationGraphicResourceDestroyDirective;
-        let (red_triangle_vertex_shader_stage_create_information,
-             red_triangle_fragment_shader_stage_create_information,
-             colored_triangle_vertex_shader_stage_create_information,
-             colored_triangle_fragment_shader_stage_create_information,
+        let (red_triangle_vertex_vulkan_pipeline_shader_stage_create_information,
+             red_triangle_fragment_vulkan_pipeline_shader_stage_create_information,
+             colored_triangle_vertex_vulkan_pipeline_shader_stage_create_information,
+             dynamic_colored_triangle_vertex_vulkan_pipeline_shader_stage_create_information,
+             colored_triangle_fragment_vulkan_pipeline_shader_stage_create_information,
              destroy_shader_module_s)
             =
             Self::create_shader_module_s(vulkan_logical_device, config)?;
-        let red_triangle_shader_stage_create_information_s =
-            &[red_triangle_vertex_shader_stage_create_information,
-              red_triangle_fragment_shader_stage_create_information];
-        let colored_triangle_shader_stage_create_information_s =
-            &[colored_triangle_vertex_shader_stage_create_information,
-              colored_triangle_fragment_shader_stage_create_information];
+        let red_triangle_vulkan_pipeline_shader_stage_create_information_s =
+            &[red_triangle_vertex_vulkan_pipeline_shader_stage_create_information,
+              red_triangle_fragment_vulkan_pipeline_shader_stage_create_information];
+        let colored_triangle_vulkan_pipeline_shader_stage_create_information_s =
+            &[colored_triangle_vertex_vulkan_pipeline_shader_stage_create_information,
+              colored_triangle_fragment_vulkan_pipeline_shader_stage_create_information];
+        let dynamic_colored_triangle_vulkan_pipeline_shader_stage_create_information_s =
+            &[dynamic_colored_triangle_vertex_vulkan_pipeline_shader_stage_create_information,
+              colored_triangle_fragment_vulkan_pipeline_shader_stage_create_information];
         //
-        let vulkan_descriptor_set_layout_s: &[VulkanDescriptorSetLayout] = &[];
-        let vulkan_push_constant_range_s: &[VulkanPushConstantRange] = &[];
-        let vulkan_pipeline_layout_create_information =
+        let static_vulkan_descriptor_set_layout_s: &[VulkanDescriptorSetLayout] = &[];
+        let static_vulkan_push_constant_range_s: &[VulkanPushConstantRange] = &[];
+        let static_vulkan_pipeline_layout_create_information =
             VulkanPipelineLayoutCreateInformation::builder()
             .flags(VulkanPipelineLayoutCreateFlagS::empty())
-            .set_layouts(vulkan_descriptor_set_layout_s)
-            .push_constant_ranges(vulkan_push_constant_range_s)
+            .set_layouts(static_vulkan_descriptor_set_layout_s)
+            .push_constant_ranges(static_vulkan_push_constant_range_s)
             .build();
-        let vulkan_pipeline_layout =
-            unsafe { vulkan_logical_device.create_pipeline_layout(&vulkan_pipeline_layout_create_information, None) }
+        let static_vulkan_pipeline_layout =
+            unsafe { vulkan_logical_device.create_pipeline_layout(&static_vulkan_pipeline_layout_create_information, None) }
             .or(Err(ErrorFoundationApplicationGuideOwn::VulkanPipelineLayoutCreateFail))?;
-        graphic_resource_destroy_stack.push(DD::DestroyVulkanPipelineLayout);
-        let vulkan_vertex_input_binding_description_s: &[VulkanVertexInputBindingDescription] = &[];
-        let vulkan_vertex_input_attribute_description_s: &[VulkanVertexInputAttributeDescription] = &[];
-        let vulkan_pipeline_vertex_input_information =
+        graphic_resource_destroy_stack.push(DD::DestroyVulkanPipelineLayoutStatic);
+        //
+        let dynamic_vulkan_vertex_push_constant_range =
+            VulkanPushConstantRange::builder()
+            .stage_flags(VulkanShaderStageFlagS::VERTEX)
+            .offset(0)
+            .size(size_of::<ApplicationVulkanPushConstantData>() as u32)
+            .build();
+        let dynamic_vulkan_descriptor_set_layout_s: &[VulkanDescriptorSetLayout] = &[];
+        let dynamic_vulkan_push_constant_range_s = &[dynamic_vulkan_vertex_push_constant_range];
+        let dynamic_vulkan_pipeline_layout_create_information =
+            VulkanPipelineLayoutCreateInformation::builder()
+            .flags(VulkanPipelineLayoutCreateFlagS::empty())
+            .set_layouts(dynamic_vulkan_descriptor_set_layout_s)
+            .push_constant_ranges(dynamic_vulkan_push_constant_range_s)
+            .build();
+        let dynamic_vulkan_pipeline_layout =
+            unsafe { vulkan_logical_device.create_pipeline_layout(&dynamic_vulkan_pipeline_layout_create_information, None) }
+            .or(Err(ErrorFoundationApplicationGuideOwn::VulkanPipelineCreateFail))?;
+        graphic_resource_destroy_stack.push(DD::DestroyVulkanPipelineLayoutDynamic);
+        //
+        let empty_vulkan_vertex_input_binding_description_s: &[VulkanVertexInputBindingDescription] = &[];
+        let empty_vulkan_vertex_input_attribute_description_s: &[VulkanVertexInputAttributeDescription] = &[];
+        let empty_vulkan_pipeline_vertex_input_information =
             VulkanPipelineVertexInputStateCreateInformation::builder()
-            .vertex_binding_descriptions(vulkan_vertex_input_binding_description_s)
-            .vertex_attribute_descriptions(vulkan_vertex_input_attribute_description_s)
+            .vertex_binding_descriptions(empty_vulkan_vertex_input_binding_description_s)
+            .vertex_attribute_descriptions(empty_vulkan_vertex_input_attribute_description_s)
+            .build();
+        //
+        let mesh_vulkan_vertex_input_description_s =
+            ApplicationGraphicMeshLoader::create_vulkan_vertex_input_description_s();
+        let mesh_vulkan_pipeline_vertex_input_information =
+            VulkanPipelineVertexInputStateCreateInformation::builder()
+            .vertex_binding_descriptions(mesh_vulkan_vertex_input_description_s.get_binding_s())
+            .vertex_attribute_descriptions(mesh_vulkan_vertex_input_description_s.get_attribute_s())
+            .build();
+        //
+        let vulkan_depth_stencil_state_create_information =
+            VulkanPipelineDepthStencilStateCreateInformation::builder()
+            .depth_test_enable(true)
+            .depth_write_enable(true)
+            .depth_compare_op(VulkanCompareOperation::LESS_OR_EQUAL)
+            .depth_bounds_test_enable(false)
+            .min_depth_bounds(0.0)
+            .max_depth_bounds(1.0)
+            .stencil_test_enable(false)
             .build();
         let vulkan_pipeline_input_assembly_state_create_information =
             VulkanPipelineInputAssemblyStateCreateInformation::builder()
@@ -608,8 +656,6 @@ impl ApplicationInitialization {
             .alpha_to_coverage_enable(false)
             .alpha_to_one_enable(false)
             .build();
-        use ::library_foundation_reintroduction::vulkan::VulkanSampleCountFlagS;
-        use ::library_foundation_reintroduction::vulkan::VulkanColorComponentFlagS;
         let vulkan_pipeline_color_blend_attachment_state =
             VulkanPipelineColorBlendAttachmentState::builder()
             .blend_enable(false)
@@ -624,37 +670,53 @@ impl ApplicationInitialization {
         let partial_vulkan_graphics_pipeline_create_information =
             VulkanGraphicsPipelineCreateInformation::builder()
             //.stages()
-            .vertex_input_state(&vulkan_pipeline_vertex_input_information)
+            //.vertex_input_state(&vulkan_empty_pipeline_vertex_input_information)
             .input_assembly_state(&vulkan_pipeline_input_assembly_state_create_information)
             .viewport_state(&vulkan_pipeline_viewport_state_create_information)
             .rasterization_state(&vulkan_pipeline_rasterization_state_create_information)
             .multisample_state(&vulkan_pipeline_multisample_state_create_information)
+            .depth_stencil_state(&vulkan_depth_stencil_state_create_information)
             .color_blend_state(&vulkan_pipeline_color_blend_state_create_information)
-            .layout(vulkan_pipeline_layout)
+            //.layout(vulkan_static_pipeline_layout)
             .render_pass(vulkan_render_pass)
             .subpass(0);
+        //
         let red_triangle_vulkan_graphics_pipeline_create_information =
             partial_vulkan_graphics_pipeline_create_information
             .clone()
-            .stages(red_triangle_shader_stage_create_information_s)
+            .stages(red_triangle_vulkan_pipeline_shader_stage_create_information_s)
+            .vertex_input_state(&empty_vulkan_pipeline_vertex_input_information)
+            .layout(static_vulkan_pipeline_layout)
             .build();
         let colored_triangle_vulkan_graphics_pipeline_create_information =
             partial_vulkan_graphics_pipeline_create_information
             .clone()
-            .stages(colored_triangle_shader_stage_create_information_s)
+            .stages(colored_triangle_vulkan_pipeline_shader_stage_create_information_s)
+            .vertex_input_state(&empty_vulkan_pipeline_vertex_input_information)
+            .layout(static_vulkan_pipeline_layout)
+            .build();
+        let dynamic_colored_triangle_vulkan_graphic_pipeline_create_information =
+            partial_vulkan_graphics_pipeline_create_information
+            .clone()
+            .stages(dynamic_colored_triangle_vulkan_pipeline_shader_stage_create_information_s)
+            .vertex_input_state(&mesh_vulkan_pipeline_vertex_input_information)
+            .layout(dynamic_vulkan_pipeline_layout)
             .build();
         let (vulkan_graphics_pipeline_s, _) =
             unsafe { vulkan_logical_device.create_graphics_pipelines(
                 VulkanPipelineCache::null(),
                 &[red_triangle_vulkan_graphics_pipeline_create_information,
-                 colored_triangle_vulkan_graphics_pipeline_create_information],
+                  colored_triangle_vulkan_graphics_pipeline_create_information,
+                  dynamic_colored_triangle_vulkan_graphic_pipeline_create_information],
                 None) }
             .or(Err(ErrorFoundationApplicationGuideOwn::VulkanPipelineCreateFail))?;
-        assert!(vulkan_graphics_pipeline_s.len() == 2);
+        assert!(vulkan_graphics_pipeline_s.len() == 3);
         graphic_resource_destroy_stack.push(DD::DestroyVulkanPipelineTriangleRed);
         graphic_resource_destroy_stack.push(DD::DestroyVulkanPipelineTriangleColored);
+        graphic_resource_destroy_stack.push(DD::DestroyVulkanPipelineMesh);
         destroy_shader_module_s();
-        Ok((vulkan_pipeline_layout, vulkan_graphics_pipeline_s[0], vulkan_graphics_pipeline_s[1]))
+        Ok(((static_vulkan_pipeline_layout, vulkan_graphics_pipeline_s[0], vulkan_graphics_pipeline_s[1]),
+            (dynamic_vulkan_pipeline_layout, vulkan_graphics_pipeline_s[2])))
     }
 
     //
@@ -742,7 +804,8 @@ impl ApplicationInitialization {
         let (render_finished_vulkan_fence, render_finished_vulkan_semaphore, image_available_vulkan_semaphore) =
             Self::initialize_synchronization_primitive_set(
                 &vulkan_logical_device, &mut graphic_resource_destroy_stack)?;
-        let (vulkan_pipeline_layout, red_triangle_vulkan_pipeline, colored_triangle_vulkan_pipeline) =
+        let ((triangle_vulkan_pipeline_layout, red_triangle_vulkan_pipeline, colored_triangle_vulkan_pipeline),
+             (mesh_vulkan_pipeline_layout, mesh_vulkan_pipeline)) =
             Self::initialize_pipeline_s(
                 &vulkan_logical_device, vulkan_2d_extent, vulkan_render_pass,
                 &config, &mut graphic_resource_destroy_stack)?;
