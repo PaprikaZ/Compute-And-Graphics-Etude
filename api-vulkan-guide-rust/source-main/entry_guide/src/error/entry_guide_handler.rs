@@ -186,6 +186,8 @@ impl ErrorEntryGuideHandler {
                     ("vulkan pipeline layout create fail", true),
                 ErrorFoundationApplicationGuideOwn::VulkanPipelineCreateFail =>
                     ("vulkan pipeline create fail", true),
+                ErrorFoundationApplicationGuideOwn::VulkanImageViewDepthCreateFail =>
+                    ("vulkan image view depth create fail", true),
             };
         println!("{error_message}");
         if be_bypass { Some(error) } else { None }
