@@ -25,6 +25,23 @@ pub enum ErrorFoundationVulkanCookedOwn {
     VulkanSwapchainCreateFail,
     VulkanSwapchainImageSGetFail,
     VulkanSwapchainImageViewSCreateFail,
+    PathFileGraphicMeshOpenFail,
+    PathFileGraphicMeshDataCorrupted,
+    VulkanMemoryTypeNotSupport,
+    VulkanMemoryAllocateFail,
+    VulkanBufferCreateFail,
+    VulkanImageCreateFail,
+    VulkanBufferMemoryBindFail,
+    VulkanImageMemoryBindFail,
+    VulkanCommandBufferBeginFail,
+    VulkanCommandBufferEndFail,
+    VulkanCommandBufferSubmitFail,
+    VulkanCommandBufferResetFail,
+    VulkanQueueWaitIdleFail,
+    VulkanFenceWaitFail,
+    VulkanFenceResetFail,
+    VulkanMemoryMapFail,
+    VulkanImageDepthFormatFeatureNotSupport,
 }
 
 

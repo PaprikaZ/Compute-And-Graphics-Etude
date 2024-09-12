@@ -78,6 +78,48 @@ impl ErrorEntryGuideHandler {
                     ("vulkan swapchain image s get fail", true),
                 ErrorFoundationVulkanCookedOwn::VulkanSwapchainImageViewSCreateFail =>
                     ("vulkan swapchain image view s create fail", true),
+                ErrorFoundationVulkanCookedOwn::PathFileGraphicMeshOpenFail =>
+                    ("path file graphic mesh open fail", true),
+                ErrorFoundationVulkanCookedOwn::PathFileGraphicMeshDataCorrupted =>
+                    ("path file graphic mesh data corrupted", true),
+                ErrorFoundationVulkanCookedOwn::VulkanMemoryTypeNotSupport =>
+                    ("vulkan memory type not support", true),
+                ErrorFoundationVulkanCookedOwn::VulkanBufferCreateFail =>
+                    ("vulkan buffer create fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanMemoryAllocateFail =>
+                    ("vulkan memory allocate fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanBufferMemoryBindFail =>
+                    ("vulkan buffer memory bind fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanCommandBufferBeginFail =>
+                    ("vulkan command buffer begin fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanCommandBufferEndFail =>
+                    ("vulkan command buffer end fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanCommandBufferSubmitFail =>
+                    ("vulkan command buffer submit fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanCommandBufferResetFail =>
+                    ("vulkan command buffer reset fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanQueueWaitIdleFail =>
+                    ("vulkan queue wait idle fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanFenceWaitFail =>
+                    ("vulkan fence wait fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanFenceResetFail =>
+                    ("vulkan fence reset fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanMemoryMapFail =>
+                    ("vulkan memory map fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanImageCreateFail =>
+                    ("vulkan image create fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanImageMemoryBindFail =>
+                    ("vulkan image memory bind fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanImageDepthFormatFeatureNotSupport =>
+                    ("vulkan image depth format feature not support", true),
+                ErrorFoundationVulkanCookedOwn::VulkanMemoryMapFail =>
+                    ("vulkan memory map fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanImageCreateFail =>
+                    ("vulkan image create fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanImageMemoryBindFail =>
+                    ("vulkan image memory bind fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanImageDepthFormatFeatureNotSupport =>
+                    ("vulkan image depth format feature not support", true),
             };
         println!("{error_message}");
         if be_bypass { Some(error) } else { None }
