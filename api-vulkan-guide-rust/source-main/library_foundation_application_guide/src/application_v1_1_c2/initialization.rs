@@ -7,6 +7,7 @@ use ::library_foundation_reintroduction::vulkan::VulkanAttachmentLoadOperation;
 use ::library_foundation_reintroduction::vulkan::VulkanAttachmentReference;
 use ::library_foundation_reintroduction::vulkan::VulkanAttachmentStoreOperation;
 use ::library_foundation_reintroduction::vulkan::VulkanBuilderHas;
+use ::library_foundation_reintroduction::vulkan::VulkanColorComponentFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanCommandBuffer;
 use ::library_foundation_reintroduction::vulkan::VulkanCommandBufferAllocateInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanCommandBufferLevel;
@@ -90,12 +91,12 @@ use ::library_foundation_reintroduction::vulkan::swapchain::VulkanSwapchainImage
 use ::library_foundation_reintroduction::vulkan::validation::VulkanValidationBeToEnable;
 use ::library_foundation_reintroduction::vulkan::portability::VULKAN_PORTABILITY_VERSION_ENTRY_MACOS_MIN;
 use ::library_foundation_vulkan_cooked::vulkan_requirement::instance::VulkanRequirementInstance;
+use ::library_foundation_vulkan_cooked::negotiation::vulkan_swapchain::NegotiationVulkanSwapchain;
 use ::library_foundation_vulkan_cooked::initialization::window::InitializationWindowUniform;
 use ::library_foundation_vulkan_cooked::initialization::vulkan_library_loader::InitializationVulkanLibraryLoader;
 use ::library_foundation_vulkan_cooked::initialization::vulkan_entry::InitializationVulkanEntry;
 use ::library_foundation_vulkan_cooked::initialization::vulkan_device_logical::InitializationVulkanDeviceLogical;
 use ::library_foundation_vulkan_cooked::initialization::vulkan_swapchain::InitializationVulkanSwapchain;
-use ::library_foundation_vulkan_cooked::negotiation::vulkan_swapchain::NegotiationVulkanSwapchain;
 
 use crate::error::foundation_application_guide::ErrorFoundationApplicationGuideOwn;
 use crate::error::foundation_application_guide::ErrorFoundationApplicationGuide;
@@ -392,18 +393,18 @@ impl ApplicationInitialization {
             config.path_directory_shader.join(config.file_name_shader_triangle_red_vertex.clone());
         let red_triangle_fragment_shader_file_path =
             config.path_directory_shader.join(config.file_name_shader_triangle_red_fragment.clone());
-        let colored_triangle_vertex_shader_file_path =
-            config.path_directory_shader.join(config.file_name_shader_triangle_colored_vertex.clone());
-        let colored_triangle_fragment_shader_file_path =
-            config.path_directory_shader.join(config.file_name_shader_triangle_colored_fragment.clone());
+        let color_triangle_vertex_shader_file_path =
+            config.path_directory_shader.join(config.file_name_shader_triangle_color_vertex.clone());
+        let color_triangle_fragment_shader_file_path =
+            config.path_directory_shader.join(config.file_name_shader_triangle_color_fragment.clone());
         let red_triangle_vertex_shader_module =
             Self::create_shader_module_from_file_path(vulkan_logical_device, &red_triangle_vertex_shader_file_path)?;
         let red_triangle_fragment_shader_module =
             Self::create_shader_module_from_file_path(vulkan_logical_device, &red_triangle_fragment_shader_file_path)?;
-        let colored_triangle_vertex_shader_module =
-            Self::create_shader_module_from_file_path(vulkan_logical_device, &colored_triangle_vertex_shader_file_path)?;
-        let colored_triangle_fragment_shader_module =
-            Self::create_shader_module_from_file_path(vulkan_logical_device, &colored_triangle_fragment_shader_file_path)?;
+        let color_triangle_vertex_shader_module =
+            Self::create_shader_module_from_file_path(vulkan_logical_device, &color_triangle_vertex_shader_file_path)?;
+        let color_triangle_fragment_shader_module =
+            Self::create_shader_module_from_file_path(vulkan_logical_device, &color_triangle_fragment_shader_file_path)?;
         let red_triangle_vertex_shader_stage_create_information =
             VulkanPipelineShaderStageCreateInformation::builder()
             .stage(VulkanShaderStageFlagS::VERTEX)
@@ -416,28 +417,28 @@ impl ApplicationInitialization {
             .module(red_triangle_fragment_shader_module)
             .name(b"main\0")
             .build();
-        let colored_triangle_vertex_shader_stage_create_information =
+        let color_triangle_vertex_shader_stage_create_information =
             VulkanPipelineShaderStageCreateInformation::builder()
             .stage(VulkanShaderStageFlagS::VERTEX)
-            .module(colored_triangle_vertex_shader_module)
+            .module(color_triangle_vertex_shader_module)
             .name(b"main\0")
             .build();
-        let colored_triangle_fragment_shader_stage_create_information =
+        let color_triangle_fragment_shader_stage_create_information =
             VulkanPipelineShaderStageCreateInformation::builder()
             .stage(VulkanShaderStageFlagS::FRAGMENT)
-            .module(colored_triangle_fragment_shader_module)
+            .module(color_triangle_fragment_shader_module)
             .name(b"main\0")
             .build();
         let destroy_shader_module_s = move || unsafe {
             vulkan_logical_device.destroy_shader_module(red_triangle_vertex_shader_module, None);
             vulkan_logical_device.destroy_shader_module(red_triangle_fragment_shader_module, None);
-            vulkan_logical_device.destroy_shader_module(colored_triangle_vertex_shader_module, None);
-            vulkan_logical_device.destroy_shader_module(colored_triangle_fragment_shader_module, None);
+            vulkan_logical_device.destroy_shader_module(color_triangle_vertex_shader_module, None);
+            vulkan_logical_device.destroy_shader_module(color_triangle_fragment_shader_module, None);
         };
         Ok((red_triangle_vertex_shader_stage_create_information,
             red_triangle_fragment_shader_stage_create_information,
-            colored_triangle_vertex_shader_stage_create_information,
-            colored_triangle_fragment_shader_stage_create_information,
+            color_triangle_vertex_shader_stage_create_information,
+            color_triangle_fragment_shader_stage_create_information,
             Box::new(destroy_shader_module_s)))
     }
 
@@ -453,17 +454,17 @@ impl ApplicationInitialization {
         type DD = ApplicationGraphicResourceDestroyDirective;
         let (red_triangle_vertex_shader_stage_create_information,
              red_triangle_fragment_shader_stage_create_information,
-             colored_triangle_vertex_shader_stage_create_information,
-             colored_triangle_fragment_shader_stage_create_information,
+             color_triangle_vertex_shader_stage_create_information,
+             color_triangle_fragment_shader_stage_create_information,
              destroy_shader_module_s)
             =
             Self::create_shader_module_s(vulkan_logical_device, config)?;
         let red_triangle_shader_stage_create_information_s =
             &[red_triangle_vertex_shader_stage_create_information,
               red_triangle_fragment_shader_stage_create_information];
-        let colored_triangle_shader_stage_create_information_s =
-            &[colored_triangle_vertex_shader_stage_create_information,
-              colored_triangle_fragment_shader_stage_create_information];
+        let color_triangle_shader_stage_create_information_s =
+            &[color_triangle_vertex_shader_stage_create_information,
+              color_triangle_fragment_shader_stage_create_information];
         //
         let vulkan_descriptor_set_layout_s: &[VulkanDescriptorSetLayout] = &[];
         let vulkan_push_constant_range_s: &[VulkanPushConstantRange] = &[];
@@ -528,8 +529,6 @@ impl ApplicationInitialization {
             .alpha_to_coverage_enable(false)
             .alpha_to_one_enable(false)
             .build();
-        use ::library_foundation_reintroduction::vulkan::VulkanSampleCountFlagS;
-        use ::library_foundation_reintroduction::vulkan::VulkanColorComponentFlagS;
         let vulkan_pipeline_color_blend_attachment_state =
             VulkanPipelineColorBlendAttachmentState::builder()
             .blend_enable(false)
@@ -558,21 +557,21 @@ impl ApplicationInitialization {
             .clone()
             .stages(red_triangle_shader_stage_create_information_s)
             .build();
-        let colored_triangle_vulkan_graphics_pipeline_create_information =
+        let color_triangle_vulkan_graphics_pipeline_create_information =
             partial_vulkan_graphics_pipeline_create_information
             .clone()
-            .stages(colored_triangle_shader_stage_create_information_s)
+            .stages(color_triangle_shader_stage_create_information_s)
             .build();
         let (vulkan_graphics_pipeline_s, _) =
             unsafe { vulkan_logical_device.create_graphics_pipelines(
                 VulkanPipelineCache::null(),
                 &[red_triangle_vulkan_graphics_pipeline_create_information,
-                 colored_triangle_vulkan_graphics_pipeline_create_information],
+                 color_triangle_vulkan_graphics_pipeline_create_information],
                 None) }
             .or(Err(ErrorFoundationApplicationGuideOwn::VulkanPipelineCreateFail))?;
         assert!(vulkan_graphics_pipeline_s.len() == 2);
         graphic_resource_destroy_stack.push(DD::DestroyVulkanPipelineTriangleRed);
-        graphic_resource_destroy_stack.push(DD::DestroyVulkanPipelineTriangleColored);
+        graphic_resource_destroy_stack.push(DD::DestroyVulkanPipelineTriangleColor);
         destroy_shader_module_s();
         Ok((vulkan_pipeline_layout, vulkan_graphics_pipeline_s[0], vulkan_graphics_pipeline_s[1]))
     }
@@ -656,7 +655,7 @@ impl ApplicationInitialization {
         let (render_finished_vulkan_fence, render_finished_vulkan_semaphore, image_available_vulkan_semaphore) =
             Self::initialize_synchronization_primitive_set(
                 &vulkan_logical_device, &mut graphic_resource_destroy_stack)?;
-        let (vulkan_pipeline_layout, red_triangle_vulkan_pipeline, colored_triangle_vulkan_pipeline) =
+        let (vulkan_pipeline_layout, red_triangle_vulkan_pipeline, color_triangle_vulkan_pipeline) =
             Self::initialize_pipeline_s(
                 &vulkan_logical_device, vulkan_2d_extent, vulkan_render_pass,
                 &config, &mut graphic_resource_destroy_stack)?;
@@ -674,7 +673,7 @@ impl ApplicationInitialization {
                 vulkan_render_pass, vulkan_swapchain_frame_buffer_s,
                 main_vulkan_command_pool, main_vulkan_command_buffer,
                 render_finished_vulkan_fence, render_finished_vulkan_semaphore, image_available_vulkan_semaphore,
-                vulkan_pipeline_layout, red_triangle_vulkan_pipeline, colored_triangle_vulkan_pipeline,
+                vulkan_pipeline_layout, red_triangle_vulkan_pipeline, color_triangle_vulkan_pipeline,
                 graphic_resource_destroy_stack
             );
         Ok(Application::<'t>::new(wp_application, mp_application))

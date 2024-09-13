@@ -89,6 +89,7 @@ pub struct ApplicationPartMain<'t> {
     config: ApplicationConfig<'t>,
     vulkan_entry: VulkanEntry,
     vulkan_instance: VulkanInstance,
+    vulkan_debug_utility_messenger_o: Option<VulkanExtensionDebugUtilityMessenger>,
     vulkan_surface: VulkanSurfaceKhr,
     vulkan_device_physical: VulkanDevicePhysical,
     vulkan_queue_family_index_graphic: VulkanQueueFamilyIndexGraphic,
@@ -116,7 +117,6 @@ pub struct ApplicationPartMain<'t> {
     vulkan_fence_render_finished: VulkanFence,
     vulkan_semaphore_render_finished: VulkanSemaphore,
     vulkan_semaphore_image_available: VulkanSemaphore,
-    vulkan_debug_utility_messenger_o: Option<VulkanExtensionDebugUtilityMessenger>,
     //
     number_frame_rendered: u32,
     //
@@ -130,6 +130,7 @@ impl<'t> ApplicationPartMain<'t> {
         config: ApplicationConfig<'t>,
         vulkan_entry: VulkanEntry,
         vulkan_instance: VulkanInstance,
+        vulkan_debug_utility_messenger_o: Option<VulkanExtensionDebugUtilityMessenger>,
         vulkan_surface: VulkanSurfaceKhr,
         vulkan_physical_device: VulkanDevicePhysical,
         vulkan_graphic_queue_family_index: VulkanQueueFamilyIndexGraphic,
@@ -156,14 +157,14 @@ impl<'t> ApplicationPartMain<'t> {
         main_vulkan_command_buffer: VulkanCommandBuffer,
         render_finished_vulkan_fence: VulkanFence,
         render_finished_vulkan_semaphore: VulkanSemaphore,
-        image_available_vulkan_semaphore: VulkanSemaphore,
-        vulkan_debug_utility_messenger_o: Option<VulkanExtensionDebugUtilityMessenger>)
+        image_available_vulkan_semaphore: VulkanSemaphore)
     -> Self
     {
         Self {
             config: config,
             vulkan_entry: vulkan_entry,
             vulkan_instance: vulkan_instance,
+            vulkan_debug_utility_messenger_o: vulkan_debug_utility_messenger_o,
             vulkan_surface: vulkan_surface,
             vulkan_device_physical: vulkan_physical_device,
             vulkan_queue_family_index_graphic: vulkan_graphic_queue_family_index,
@@ -191,7 +192,6 @@ impl<'t> ApplicationPartMain<'t> {
             vulkan_fence_render_finished: render_finished_vulkan_fence,
             vulkan_semaphore_render_finished: render_finished_vulkan_semaphore,
             vulkan_semaphore_image_available: image_available_vulkan_semaphore,
-            vulkan_debug_utility_messenger_o: vulkan_debug_utility_messenger_o,
             //
             number_frame_rendered: 0,
             //
@@ -370,9 +370,6 @@ impl<'t> ApplicationPartMain<'t> {
         self.vulkan_debug_utility_messenger_o.map(|debug_messenger| unsafe {
             self.vulkan_instance.destroy_debug_utils_messenger_ext(debug_messenger, None);
         });
-        if let Some(vulkan_debug_utility_messenger) = self.vulkan_debug_utility_messenger_o {
-            unsafe { self.vulkan_instance.destroy_debug_utils_messenger_ext(vulkan_debug_utility_messenger, None) }
-        }
         unsafe { self.vulkan_instance.destroy_instance(None) };
         Ok(())
     }

@@ -22,7 +22,7 @@ impl<'t> ApplicationConfig<'t> {
         window_title: &'t str,
         window_inner_size: WindowUniformDpiLogicalSize<i32>,
         base_vulkan_config: ApplicationConfigVulkan<'t>,
-        base_rank_vulkan_config: ApplicationConfigVulkanRank,
+        rank_vulkan_config: ApplicationConfigVulkanRank,
         swapchain_vulkan_config: ApplicationConfigVulkanSwapchain)
     -> Self
     {
@@ -30,7 +30,7 @@ impl<'t> ApplicationConfig<'t> {
             window_title: window_title,
             window_inner_size: window_inner_size,
             vulkan: base_vulkan_config,
-            vulkan_rank: base_rank_vulkan_config,
+            vulkan_rank: rank_vulkan_config,
             vulkan_swapchain: swapchain_vulkan_config,
         }
     }
