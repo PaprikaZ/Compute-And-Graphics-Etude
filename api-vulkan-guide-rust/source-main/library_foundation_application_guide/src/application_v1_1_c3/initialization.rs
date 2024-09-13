@@ -812,7 +812,7 @@ impl ApplicationInitialization {
         let wp_application = ApplicationPartWindow::new(window, window_event_loop);
         let partial_initialized_mp_application =
             ApplicationPartMain::create_with_memory_allocator_uninitialized(
-                config, vulkan_entry, vulkan_instance, None,
+                config, vulkan_entry, vulkan_instance, vulkan_debug_utility_messenger_o,
                 vulkan_surface, vulkan_physical_device,
                 vulkan_graphic_queue_family_index, vulkan_present_queue_family_index,
                 matched_vulkan_extension_name_s, matched_vulkan_physical_device_feature_name_s,
