@@ -1,5 +1,8 @@
 use std::vec::IntoIter;
 
+use ::library_foundation_reintroduction::vulkan::VulkanBuffer;
+use ::library_foundation_reintroduction::vulkan::VulkanDeviceMemory;
+
 
 #[derive(Debug, Clone, Copy)]
 pub(super) enum ApplicationGraphicResourceDestroyDirective {
@@ -17,6 +20,8 @@ pub(super) enum ApplicationGraphicResourceDestroyDirective {
     DestroyVulkanPipelineMesh,
     DestroyVulkanPipelineLayoutStatic,
     DestroyVulkanPipelineLayoutDynamic,
+    DestroyVulkanBuffer(VulkanBuffer),
+    FreeVulkanDeviceMemory(VulkanDeviceMemory),
 }
 
 impl ApplicationGraphicResourceDestroyDirective {

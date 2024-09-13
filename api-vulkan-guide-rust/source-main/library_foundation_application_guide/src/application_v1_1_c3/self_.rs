@@ -292,15 +292,20 @@ impl<'t> ApplicationPartMain<'t> {
     pub fn initialize_graphic_mesh_all_device_loaded(&mut self)
     -> Result<(), ErrorFoundationApplicationGuide>
     {
+        type DD = ApplicationGraphicResourceDestroyDirective;
         let triangle_graphic_mesh =
             ApplicationGraphicMeshLoader
             ::create_mesh_triangle()
             .load_to_device(&self.vulkan_memory_allocator)?;
+        self.graphic_resource_destroy_stack.push(DD::DestroyVulkanBuffer(triangle_graphic_mesh.vulkan_buffer));
+        self.graphic_resource_destroy_stack.push(DD::FreeVulkanDeviceMemory(triangle_graphic_mesh.vulkan_buffer_memory));
         self.graphic_mesh_table.insert(ApplicationGraphicMeshName::Triangle, triangle_graphic_mesh);
         let monkey_graphic_mesh =
             ApplicationGraphicMeshLoader
             ::load_mesh_monkey(&self.config)?
             .load_to_device(&self.vulkan_memory_allocator)?;
+        self.graphic_resource_destroy_stack.push(DD::DestroyVulkanBuffer(monkey_graphic_mesh.vulkan_buffer));
+        self.graphic_resource_destroy_stack.push(DD::FreeVulkanDeviceMemory(monkey_graphic_mesh.vulkan_buffer_memory));
         self.graphic_mesh_table.insert(ApplicationGraphicMeshName::Monkey, monkey_graphic_mesh);
         Ok(())
     }
@@ -515,6 +520,12 @@ impl<'t> ApplicationPartMain<'t> {
             },
             DD::DestroyVulkanPipelineLayoutDynamic => unsafe {
                 self.vulkan_device_logical.destroy_pipeline_layout(self.vulkan_pipeline_layout_mesh, None);
+            },
+            DD::DestroyVulkanBuffer(vulkan_buffer) => unsafe {
+                self.vulkan_device_logical.destroy_buffer(vulkan_buffer, None)
+            },
+            DD::FreeVulkanDeviceMemory(vulkan_device_memory) => unsafe {
+                self.vulkan_device_logical.free_memory(vulkan_device_memory, None)
             },
         }
         Ok(())
