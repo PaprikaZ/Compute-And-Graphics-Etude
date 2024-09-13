@@ -606,6 +606,11 @@ impl<'t> ApplicationPartMain<'t> {
                 VulkanPipelineBindPoint::GRAPHICS,
                 self.vulkan_pipeline_mesh)
         }
+        let monkey_graphic_mesh =
+            self.graphic_mesh_table.get(&ApplicationGraphicMeshName::Monkey)
+            .expect("ApplicationPartMain: monkey graphic mesh should be loaded already");
+        unsafe { self.vulkan_device_logical.cmd_bind_vertex_buffers(
+            self.vulkan_command_buffer_graphic, 0, &[monkey_graphic_mesh.vulkan_buffer], &[0]) };
         let vulkan_push_constant_data =
             ApplicationVulkanPushConstantData::create(self.number_frame_rendered);
         let (_, mvp_transform_byte_s, _) = unsafe { vulkan_push_constant_data.mvp_transform.as_slice().align_to::<u8>() };
@@ -617,9 +622,6 @@ impl<'t> ApplicationPartMain<'t> {
                 0,
                 mvp_transform_byte_s)
         };
-        let monkey_graphic_mesh =
-            self.graphic_mesh_table.get(&ApplicationGraphicMeshName::Monkey)
-            .expect("ApplicationPartMain: monkey graphic mesh should be loaded already");
         unsafe { self.vulkan_device_logical.cmd_draw(
             self.vulkan_command_buffer_graphic, monkey_graphic_mesh.vertex_s.len() as u32, 1, 0, 0); }
         //
