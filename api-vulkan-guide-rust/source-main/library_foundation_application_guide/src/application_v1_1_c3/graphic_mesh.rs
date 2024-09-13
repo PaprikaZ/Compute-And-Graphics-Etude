@@ -138,21 +138,21 @@ impl ApplicationGraphicMeshLoader {
             .binding(0)
             .location(0)
             .format(VulkanFormat::R32G32B32_SFLOAT)
-            .offset(0)
+            .offset(std::mem::offset_of!(GraphicMeshVertexNormalColor, position) as u32)
             .build();
         let normal_vulkan_vertex_input_attribute_description =
             VulkanVertexInputAttributeDescription::builder()
             .binding(0)
             .location(1)
             .format(VulkanFormat::R32G32B32_SFLOAT)
-            .offset(size_of::<glm::Vec3>() as u32)
+            .offset(std::mem::offset_of!(GraphicMeshVertexNormalColor, normal) as u32)
             .build();
         let color_vulkan_vertex_input_attribute_description =
             VulkanVertexInputAttributeDescription::builder()
             .binding(0)
             .location(2)
             .format(VulkanFormat::R32G32B32_SFLOAT)
-            .offset((size_of::<glm::Vec3>() + size_of::<glm::Vec3>()) as u32)
+            .offset(std::mem::offset_of!(GraphicMeshVertexNormalColor, color) as u32)
             .build();
         let vulkan_vertex_input_attribute_description_s =
             vec!(position_vulkan_vertex_input_attribute_description,
