@@ -145,7 +145,7 @@ pub struct ApplicationPartMain<'t> {
     vulkan_semaphore_image_available: VulkanSemaphore,
     vulkan_pipeline_layout_triangle: VulkanPipelineLayout,
     vulkan_pipeline_triangle_red: VulkanPipeline,
-    vulkan_pipeline_triangle_colored: VulkanPipeline,
+    vulkan_pipeline_triangle_color: VulkanPipeline,
     vulkan_pipeline_layout_mesh: VulkanPipelineLayout,
     vulkan_pipeline_mesh: VulkanPipeline,
     //
@@ -204,7 +204,7 @@ impl<'t> ApplicationPartMain<'t> {
         //
         triangle_vulkan_pipeline_layout: VulkanPipelineLayout,
         red_triangle_vulkan_pipeline: VulkanPipeline,
-        colored_triangle_vulkan_pipeline: VulkanPipeline,
+        color_triangle_vulkan_pipeline: VulkanPipeline,
         mesh_vulkan_pipeline_layout: VulkanPipelineLayout,
         mesh_vulkan_pipeline: VulkanPipeline,
         //
@@ -255,7 +255,7 @@ impl<'t> ApplicationPartMain<'t> {
         addr_of_mut!((*ptr).vulkan_semaphore_image_available).write(image_available_vulkan_semaphore);
         addr_of_mut!((*ptr).vulkan_pipeline_layout_triangle).write(triangle_vulkan_pipeline_layout);
         addr_of_mut!((*ptr).vulkan_pipeline_triangle_red).write(red_triangle_vulkan_pipeline);
-        addr_of_mut!((*ptr).vulkan_pipeline_triangle_colored).write(colored_triangle_vulkan_pipeline);
+        addr_of_mut!((*ptr).vulkan_pipeline_triangle_color).write(color_triangle_vulkan_pipeline);
         addr_of_mut!((*ptr).vulkan_pipeline_layout_mesh).write(mesh_vulkan_pipeline_layout);
         addr_of_mut!((*ptr).vulkan_pipeline_mesh).write(mesh_vulkan_pipeline);
         //
@@ -437,8 +437,8 @@ impl<'t> ApplicationPartMain<'t> {
         &self.vulkan_pipeline_triangle_red
     }
 
-    pub fn get_vulkan_pipeline_triangle_colored(&self) -> &VulkanPipeline {
-        &self.vulkan_pipeline_triangle_colored
+    pub fn get_vulkan_pipeline_triangle_color(&self) -> &VulkanPipeline {
+        &self.vulkan_pipeline_triangle_color
     }
 
     pub fn is_destroying(&self) -> bool {
@@ -504,8 +504,8 @@ impl<'t> ApplicationPartMain<'t> {
             DD::DestroyVulkanPipelineTriangleRed => unsafe {
                 self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline_triangle_red, None);
             }
-            DD::DestroyVulkanPipelineTriangleColored => unsafe {
-                self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline_triangle_colored, None);
+            DD::DestroyVulkanPipelineTriangleColor => unsafe {
+                self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline_triangle_color, None);
             },
             DD::DestroyVulkanPipelineMesh => unsafe {
                 self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline_mesh, None);
