@@ -24,6 +24,7 @@ impl EntryArgument {
     example-chapter-0   -- vulkan guide chapter 0 example
     example-chapter-1   -- vulkan guide chapter 1 example
     example-chapter-2   -- vulkan guide chapter 2 example
+    example-chapter-3   -- vulkan guide chapter 3 example
 "#;
         first_line_text.push('\n');
         first_line_text.push_str(&a_usage_line_text);
@@ -43,6 +44,7 @@ impl EntryArgument {
                 "example-chapter-0" => Some(ApplicationName::VulkanV1_1Chapter0),
                 "example-chapter-1" => Some(ApplicationName::VulkanV1_1Chapter1),
                 "example-chapter-2" => Some(ApplicationName::VulkanV1_1Chapter2),
+                "example-chapter-3" => Some(ApplicationName::VulkanV1_1Chapter3),
                 _ => None
             }
         })

@@ -84,12 +84,16 @@ impl ErrorEntryGuideHandler {
                     ("path file graphic mesh data corrupted", true),
                 ErrorFoundationVulkanCookedOwn::VulkanMemoryTypeNotSupport =>
                     ("vulkan memory type not support", true),
-                ErrorFoundationVulkanCookedOwn::VulkanBufferCreateFail =>
-                    ("vulkan buffer create fail", true),
                 ErrorFoundationVulkanCookedOwn::VulkanMemoryAllocateFail =>
                     ("vulkan memory allocate fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanBufferCreateFail =>
+                    ("vulkan buffer create fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanImageCreateFail =>
+                    ("vulkan image create fail", true),
                 ErrorFoundationVulkanCookedOwn::VulkanBufferMemoryBindFail =>
                     ("vulkan buffer memory bind fail", true),
+                ErrorFoundationVulkanCookedOwn::VulkanImageMemoryBindFail =>
+                    ("vulkan image memory bind fail", true),
                 ErrorFoundationVulkanCookedOwn::VulkanCommandBufferBeginFail =>
                     ("vulkan command buffer begin fail", true),
                 ErrorFoundationVulkanCookedOwn::VulkanCommandBufferEndFail =>
@@ -106,18 +110,6 @@ impl ErrorEntryGuideHandler {
                     ("vulkan fence reset fail", true),
                 ErrorFoundationVulkanCookedOwn::VulkanMemoryMapFail =>
                     ("vulkan memory map fail", true),
-                ErrorFoundationVulkanCookedOwn::VulkanImageCreateFail =>
-                    ("vulkan image create fail", true),
-                ErrorFoundationVulkanCookedOwn::VulkanImageMemoryBindFail =>
-                    ("vulkan image memory bind fail", true),
-                ErrorFoundationVulkanCookedOwn::VulkanImageDepthFormatFeatureNotSupport =>
-                    ("vulkan image depth format feature not support", true),
-                ErrorFoundationVulkanCookedOwn::VulkanMemoryMapFail =>
-                    ("vulkan memory map fail", true),
-                ErrorFoundationVulkanCookedOwn::VulkanImageCreateFail =>
-                    ("vulkan image create fail", true),
-                ErrorFoundationVulkanCookedOwn::VulkanImageMemoryBindFail =>
-                    ("vulkan image memory bind fail", true),
                 ErrorFoundationVulkanCookedOwn::VulkanImageDepthFormatFeatureNotSupport =>
                     ("vulkan image depth format feature not support", true),
             };
