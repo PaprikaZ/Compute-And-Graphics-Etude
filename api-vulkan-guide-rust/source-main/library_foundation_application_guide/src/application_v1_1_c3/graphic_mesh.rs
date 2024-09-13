@@ -62,7 +62,7 @@ impl ApplicationGraphicMeshDeviceLoadedN {
         let graphic_mesh_vertex_s =
             graphic_mesh_vertex_s
             .into_iter()
-            .map(|vertex| GraphicMeshVertexNormalColor::new(vertex.position, vertex.normal, glm::vec3(1.0, 1.0, 1.0)))
+            .map(|vertex| GraphicMeshVertexNormalColor::new(vertex.position, vertex.normal, vertex.normal.clone()))
             .collect::<Vec<_>>();
         Ok(Self::new(graphic_mesh_vertex_s))
     }
