@@ -145,7 +145,7 @@ pub struct ApplicationPartMain<'t> {
     vulkan_semaphore_image_available: VulkanSemaphore,
     vulkan_pipeline_layout_triangle: VulkanPipelineLayout,
     vulkan_pipeline_triangle_red: VulkanPipeline,
-    vulkan_pipeline_triangle_colored: VulkanPipeline,
+    vulkan_pipeline_triangle_color: VulkanPipeline,
     vulkan_pipeline_layout_mesh: VulkanPipelineLayout,
     vulkan_pipeline_mesh: VulkanPipeline,
     //
@@ -204,7 +204,7 @@ impl<'t> ApplicationPartMain<'t> {
         //
         triangle_vulkan_pipeline_layout: VulkanPipelineLayout,
         red_triangle_vulkan_pipeline: VulkanPipeline,
-        colored_triangle_vulkan_pipeline: VulkanPipeline,
+        color_triangle_vulkan_pipeline: VulkanPipeline,
         mesh_vulkan_pipeline_layout: VulkanPipelineLayout,
         mesh_vulkan_pipeline: VulkanPipeline,
         //
@@ -255,7 +255,7 @@ impl<'t> ApplicationPartMain<'t> {
         addr_of_mut!((*ptr).vulkan_semaphore_image_available).write(image_available_vulkan_semaphore);
         addr_of_mut!((*ptr).vulkan_pipeline_layout_triangle).write(triangle_vulkan_pipeline_layout);
         addr_of_mut!((*ptr).vulkan_pipeline_triangle_red).write(red_triangle_vulkan_pipeline);
-        addr_of_mut!((*ptr).vulkan_pipeline_triangle_colored).write(colored_triangle_vulkan_pipeline);
+        addr_of_mut!((*ptr).vulkan_pipeline_triangle_color).write(color_triangle_vulkan_pipeline);
         addr_of_mut!((*ptr).vulkan_pipeline_layout_mesh).write(mesh_vulkan_pipeline_layout);
         addr_of_mut!((*ptr).vulkan_pipeline_mesh).write(mesh_vulkan_pipeline);
         //
@@ -292,15 +292,20 @@ impl<'t> ApplicationPartMain<'t> {
     pub fn initialize_graphic_mesh_all_device_loaded(&mut self)
     -> Result<(), ErrorFoundationApplicationGuide>
     {
+        type DD = ApplicationGraphicResourceDestroyDirective;
         let triangle_graphic_mesh =
             ApplicationGraphicMeshLoader
             ::create_mesh_triangle()
             .load_to_device(&self.vulkan_memory_allocator)?;
+        self.graphic_resource_destroy_stack.push(DD::DestroyVulkanBuffer(triangle_graphic_mesh.vulkan_buffer));
+        self.graphic_resource_destroy_stack.push(DD::FreeVulkanDeviceMemory(triangle_graphic_mesh.vulkan_buffer_memory));
         self.graphic_mesh_table.insert(ApplicationGraphicMeshName::Triangle, triangle_graphic_mesh);
         let monkey_graphic_mesh =
             ApplicationGraphicMeshLoader
             ::load_mesh_monkey(&self.config)?
             .load_to_device(&self.vulkan_memory_allocator)?;
+        self.graphic_resource_destroy_stack.push(DD::DestroyVulkanBuffer(monkey_graphic_mesh.vulkan_buffer));
+        self.graphic_resource_destroy_stack.push(DD::FreeVulkanDeviceMemory(monkey_graphic_mesh.vulkan_buffer_memory));
         self.graphic_mesh_table.insert(ApplicationGraphicMeshName::Monkey, monkey_graphic_mesh);
         Ok(())
     }
@@ -437,8 +442,8 @@ impl<'t> ApplicationPartMain<'t> {
         &self.vulkan_pipeline_triangle_red
     }
 
-    pub fn get_vulkan_pipeline_triangle_colored(&self) -> &VulkanPipeline {
-        &self.vulkan_pipeline_triangle_colored
+    pub fn get_vulkan_pipeline_triangle_color(&self) -> &VulkanPipeline {
+        &self.vulkan_pipeline_triangle_color
     }
 
     pub fn is_destroying(&self) -> bool {
@@ -504,8 +509,8 @@ impl<'t> ApplicationPartMain<'t> {
             DD::DestroyVulkanPipelineTriangleRed => unsafe {
                 self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline_triangle_red, None);
             }
-            DD::DestroyVulkanPipelineTriangleColored => unsafe {
-                self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline_triangle_colored, None);
+            DD::DestroyVulkanPipelineTriangleColor => unsafe {
+                self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline_triangle_color, None);
             },
             DD::DestroyVulkanPipelineMesh => unsafe {
                 self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline_mesh, None);
@@ -515,6 +520,12 @@ impl<'t> ApplicationPartMain<'t> {
             },
             DD::DestroyVulkanPipelineLayoutDynamic => unsafe {
                 self.vulkan_device_logical.destroy_pipeline_layout(self.vulkan_pipeline_layout_mesh, None);
+            },
+            DD::DestroyVulkanBuffer(vulkan_buffer) => unsafe {
+                self.vulkan_device_logical.destroy_buffer(vulkan_buffer, None)
+            },
+            DD::FreeVulkanDeviceMemory(vulkan_device_memory) => unsafe {
+                self.vulkan_device_logical.free_memory(vulkan_device_memory, None)
             },
         }
         Ok(())
@@ -595,6 +606,11 @@ impl<'t> ApplicationPartMain<'t> {
                 VulkanPipelineBindPoint::GRAPHICS,
                 self.vulkan_pipeline_mesh)
         }
+        let monkey_graphic_mesh =
+            self.graphic_mesh_table.get(&ApplicationGraphicMeshName::Monkey)
+            .expect("ApplicationPartMain: monkey graphic mesh should be loaded already");
+        unsafe { self.vulkan_device_logical.cmd_bind_vertex_buffers(
+            self.vulkan_command_buffer_graphic, 0, &[monkey_graphic_mesh.vulkan_buffer], &[0]) };
         let vulkan_push_constant_data =
             ApplicationVulkanPushConstantData::create(self.number_frame_rendered);
         let (_, mvp_transform_byte_s, _) = unsafe { vulkan_push_constant_data.mvp_transform.as_slice().align_to::<u8>() };
@@ -606,9 +622,6 @@ impl<'t> ApplicationPartMain<'t> {
                 0,
                 mvp_transform_byte_s)
         };
-        let monkey_graphic_mesh =
-            self.graphic_mesh_table.get(&ApplicationGraphicMeshName::Monkey)
-            .expect("ApplicationPartMain: monkey graphic mesh should be loaded already");
         unsafe { self.vulkan_device_logical.cmd_draw(
             self.vulkan_command_buffer_graphic, monkey_graphic_mesh.vertex_s.len() as u32, 1, 0, 0); }
         //

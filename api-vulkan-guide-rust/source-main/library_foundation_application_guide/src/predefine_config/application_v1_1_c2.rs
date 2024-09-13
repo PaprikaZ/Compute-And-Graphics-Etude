@@ -61,7 +61,7 @@ impl PredefineConfigApplicationV1_1Chapter2 {
                 VulkanColorSpaceKhr::SRGB_NONLINEAR,
                 VulkanPresentModeKhr::MAILBOX,
                 VulkanPresentModeKhr::FIFO);
-        let library_directory_path: PathBuf =
+        let shader_source_directory_path: PathBuf =
             [env!("CARGO_MANIFEST_DIR"), r"..\..\", r"source-shader\"].iter().collect();
         ApplicationConfig::new(
             "Vulkan Guide Example Chapter 1",
@@ -69,10 +69,10 @@ impl PredefineConfigApplicationV1_1Chapter2 {
             base_vulkan_config,
             rank_vulkan_config,
             swapchain_vulkan_config,
-            library_directory_path,
-            PathBuf::from("application-v1.1-c2.triangle-red.vert.spv"),
-            PathBuf::from("application-v1.1-c2.triangle-red.frag.spv"),
-            PathBuf::from("application-v1.1-c2.triangle-colored.vert.spv"),
-            PathBuf::from("application-v1.1-c2.triangle-colored.frag.spv"))
+            shader_source_directory_path,
+            PathBuf::from("triangle-red.vert.spv"),
+            PathBuf::from("triangle-red.frag.spv"),
+            PathBuf::from("triangle-color.vert.spv"),
+            PathBuf::from("triangle-color.frag.spv"))
     }
 }

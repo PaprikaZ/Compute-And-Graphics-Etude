@@ -74,11 +74,11 @@ impl PredefineConfigApplicationV1_1Chapter3 {
             shader_source_directory_path,
             PathBuf::from("triangle-red.vert.spv"),
             PathBuf::from("triangle-red.frag.spv"),
-            PathBuf::from("triangle-colored.vert.spv"),
-            PathBuf::from("triangle-colored-dynamic.frag.spv"),
-            PathBuf::from("triangle-colored.frag.spv"),
+            PathBuf::from("triangle-color.vert.spv"),
+            PathBuf::from("triangle-color.frag.spv"),
+            PathBuf::from("triangle-dynamic.vert.spv"),
             resource_directory_path,
-            PathBuf::from("monkey_flat.obj"),
+            PathBuf::from("monkey_smooth.obj"),
         )
     }
 }
