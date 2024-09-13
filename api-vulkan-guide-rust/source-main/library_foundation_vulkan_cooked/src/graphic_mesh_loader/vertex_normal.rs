@@ -28,39 +28,25 @@ impl GraphicMeshLoader<GraphicMeshVertexNormal> {
                 |_| Ok(Default::default()))
             .or(Err(ErrorFoundationVulkanCookedOwn::PathFileGraphicMeshDataCorrupted))?;
         //
-        let mut vertex_table: HashMap<GraphicMeshVertexNormal, usize> = HashMap::new();
         let mut vertex_s: Vec<GraphicMeshVertexNormal> = Vec::new();
         let mut vertex_index_s: Vec<T> = Vec::new();
-        model_s
-        .iter()
-        .map(|model| {
-            model.mesh.indices
-            .iter()
-            .map(move |index| (model, index))
-        })
-        .flatten()
-        .for_each(|(model, index)| {
-            let position_offset = (index * 3) as usize;
-            let normal_offset = (index * 3) as usize;
+        assert_eq!(model_s.len(), 1);
+        let mesh_model = &model_s[0];
+        (0..mesh_model.mesh.indices.len())
+        .into_iter()
+        .for_each(|index_offset| {
+            let vertex_index = mesh_model.mesh.indices[index_offset] as usize;
             let vertex_position = glm::vec3(
-                model.mesh.positions[position_offset + 0],
-                model.mesh.positions[position_offset + 1],
-                model.mesh.positions[position_offset + 2]);
+                mesh_model.mesh.positions[vertex_index * 3 + 0],
+                mesh_model.mesh.positions[vertex_index * 3 + 1],
+                mesh_model.mesh.positions[vertex_index * 3 + 2]);
             let vertex_normal = glm::vec3(
-                model.mesh.normals[normal_offset + 0],
-                model.mesh.normals[normal_offset + 1],
-                model.mesh.normals[normal_offset + 2]);
-            let vertex = GraphicMeshVertexNormal::new(vertex_position, vertex_normal);
-            match vertex_table.get(&vertex) {
-                //Some(idx) => vertex_index_s.push(GraphicMeshVertexIndexU16::new(*idx as u16)),
-                Some(idx) => vertex_index_s.push(new_graphic_mesh_vertex_index(*idx)),
-                None => {
-                    let idx = vertex_s.len();
-                    vertex_table.insert(vertex, idx);
-                    vertex_s.push(vertex);
-                    vertex_index_s.push(new_graphic_mesh_vertex_index(idx));
-                },
-            }
+                mesh_model.mesh.normals[vertex_index * 3 + 0],
+                mesh_model.mesh.normals[vertex_index * 3 + 1],
+                mesh_model.mesh.normals[vertex_index * 3 + 2]);
+            let new_vertex = GraphicMeshVertexNormal::new(vertex_position, vertex_normal);
+            vertex_s.push(new_vertex);
+            vertex_index_s.push(new_graphic_mesh_vertex_index(vertex_index));
         });
         Ok((vertex_s, vertex_index_s))
     }
