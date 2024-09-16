@@ -30,7 +30,8 @@ Supported Platform: Windows
 - [x] Api vulkan guide rust, legacy v1.1, chapter 0
 - [x] Api vulkan guide rust, legacy v1.1, chapter 1
 - [x] Api vulkan guide rust, legacy v1.1, chapter 2
-- [ ] Api vulkan guide rust, legacy v1.1, chapter 3
+- [x] Api vulkan guide rust, legacy v1.1, chapter 3
+- [ ] Api vulkan guide rust, legacy v1.1, chapter 3 scene
 - [ ] Api vulkan guide rust, legacy v1.1, chapter 4
 - [ ] Api vulkan guide rust, legacy v1.1, chapter 5
 
