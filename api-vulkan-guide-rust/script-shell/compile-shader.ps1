@@ -21,10 +21,11 @@ param (
 )
 
 [string[]] $predefinedShaderScriptAndByteCodeFileNameS = @(
-    "application-v1.1-c2.triangle-red.vert", "application-v1.1-c2.triangle-red.vert.spv",
-    "application-v1.1-c2.triangle-red.frag", "application-v1.1-c2.triangle-red.frag.spv",
-    "application-v1.1-c2.triangle-colored.vert", "application-v1.1-c2.triangle-colored.vert.spv",
-    "application-v1.1-c2.triangle-colored.frag", "application-v1.1-c2.triangle-colored.frag.spv"
+    "triangle-red.vert", "triangle-red.vert.spv",
+    "triangle-red.frag", "triangle-red.frag.spv",
+    "triangle-color.vert", "triangle-color.vert.spv",
+    "triangle-color.frag", "triangle-color.frag.spv",
+    "triangle-dynamic.vert", "triangle-dynamic.vert.spv"
 )
 
 $thisScriptFilePath = $MyInvocation.MyCommand.Path

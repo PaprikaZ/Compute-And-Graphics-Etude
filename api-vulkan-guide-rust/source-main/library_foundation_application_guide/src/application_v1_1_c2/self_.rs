@@ -46,7 +46,6 @@ use ::library_foundation_reintroduction::vulkan::VulkanErrorCode_;
 use ::library_foundation_reintroduction::vulkan::VulkanSuccessCode_;
 use ::library_foundation_reintroduction::vulkan::VulkanPipelineLayout;
 use ::library_foundation_reintroduction::vulkan::VulkanPipeline;
-
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexGraphic;
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexPresent;
 use ::library_foundation_reintroduction::vulkan::swapchain::VulkanSwapchainImageNumber;
@@ -125,7 +124,7 @@ pub struct ApplicationPartMain<'t> {
     vulkan_semaphore_image_available: VulkanSemaphore,
     vulkan_pipeline_layout: VulkanPipelineLayout,
     vulkan_pipeline_triangle_red: VulkanPipeline,
-    vulkan_pipeline_triangle_colored: VulkanPipeline,
+    vulkan_pipeline_triangle_color: VulkanPipeline,
     //
     graphic_resource_destroy_stack: ApplicationGraphicResourceDestroyStack,
     //
@@ -173,7 +172,7 @@ impl<'t> ApplicationPartMain<'t> {
         image_available_vulkan_semaphore: VulkanSemaphore,
         vulkan_pipeline_layout: VulkanPipelineLayout,
         red_triangle_vulkan_pipeline: VulkanPipeline,
-        colored_triangle_vulkan_pipeline: VulkanPipeline,
+        color_triangle_vulkan_pipeline: VulkanPipeline,
         graphic_resource_destroy_stack: ApplicationGraphicResourceDestroyStack)
     -> Self
     {
@@ -211,11 +210,11 @@ impl<'t> ApplicationPartMain<'t> {
             vulkan_semaphore_image_available: image_available_vulkan_semaphore,
             vulkan_pipeline_layout: vulkan_pipeline_layout,
             vulkan_pipeline_triangle_red: red_triangle_vulkan_pipeline,
-            vulkan_pipeline_triangle_colored: colored_triangle_vulkan_pipeline,
+            vulkan_pipeline_triangle_color: color_triangle_vulkan_pipeline,
             //
             graphic_resource_destroy_stack: graphic_resource_destroy_stack,
             //
-            scene_name_current: ApplicationSceneName::TriangleColored,
+            scene_name_current: ApplicationSceneName::TriangleColor,
             //
             number_frame_rendered: 0,
             //
@@ -357,8 +356,8 @@ impl<'t> ApplicationPartMain<'t> {
         &self.vulkan_pipeline_triangle_red
     }
 
-    pub fn get_vulkan_pipeline_triangle_colored(&self) -> &VulkanPipeline {
-        &self.vulkan_pipeline_triangle_colored
+    pub fn get_vulkan_pipeline_triangle_color(&self) -> &VulkanPipeline {
+        &self.vulkan_pipeline_triangle_color
     }
 
     pub fn get_scene_name_current(&self) -> ApplicationSceneName {
@@ -368,15 +367,15 @@ impl<'t> ApplicationPartMain<'t> {
     pub fn set_scene_name_next(&mut self) {
         self.scene_name_current =
             match self.scene_name_current {
-                ApplicationSceneName::TriangleColored => ApplicationSceneName::TriangleRed,
-                ApplicationSceneName::TriangleRed => ApplicationSceneName::TriangleColored,
+                ApplicationSceneName::TriangleColor => ApplicationSceneName::TriangleRed,
+                ApplicationSceneName::TriangleRed => ApplicationSceneName::TriangleColor,
             };
     }
 
     pub fn get_vulkan_pipeline_scene_current(&self) -> VulkanPipeline {
         match self.scene_name_current {
             ApplicationSceneName::TriangleRed => self.vulkan_pipeline_triangle_red,
-            ApplicationSceneName::TriangleColored => self.vulkan_pipeline_triangle_colored,
+            ApplicationSceneName::TriangleColor => self.vulkan_pipeline_triangle_color,
         }
     }
 
@@ -438,8 +437,8 @@ impl<'t> ApplicationPartMain<'t> {
             DD::DestroyVulkanPipelineTriangleRed => unsafe {
                 self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline_triangle_red, None);
             }
-            DD::DestroyVulkanPipelineTriangleColored => unsafe {
-                self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline_triangle_colored, None);
+            DD::DestroyVulkanPipelineTriangleColor => unsafe {
+                self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline_triangle_color, None);
             },
             DD::DestroyVulkanPipelineLayout => unsafe {
                 self.vulkan_device_logical.destroy_pipeline_layout(self.vulkan_pipeline_layout, None);

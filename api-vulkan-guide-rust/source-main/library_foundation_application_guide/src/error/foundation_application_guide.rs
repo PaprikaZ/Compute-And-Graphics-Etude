@@ -36,6 +36,7 @@ pub enum ErrorFoundationApplicationGuideOwn {
     VulkanShaderModuleCreateFail,
     VulkanPipelineLayoutCreateFail,
     VulkanPipelineCreateFail,
+    VulkanImageViewDepthCreateFail,
 }
 
 
