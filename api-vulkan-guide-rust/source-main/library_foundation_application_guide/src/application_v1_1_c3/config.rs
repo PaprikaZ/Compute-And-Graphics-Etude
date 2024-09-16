@@ -23,6 +23,10 @@ pub struct ApplicationConfig<'t> {
     pub file_name_shader_triangle_red_fragment: PathBuf,
     pub file_name_shader_triangle_color_vertex: PathBuf,
     pub file_name_shader_triangle_color_fragment: PathBuf,
+    pub file_name_shader_triangle_dynamic_vertex: PathBuf,
+    //
+    pub path_directory_graphic_mesh: PathBuf,
+    pub file_name_graphic_mesh_monkey: PathBuf,
 }
 
 impl<'t> ApplicationConfig<'t> {
@@ -32,11 +36,16 @@ impl<'t> ApplicationConfig<'t> {
         base_vulkan_config: ApplicationConfigVulkan<'t>,
         rank_vulkan_config: ApplicationConfigVulkanRank,
         swapchain_vulkan_config: ApplicationConfigVulkanSwapchain,
+        //
         shader_source_directory_path: PathBuf,
         red_triangle_vertex_shader_file_name: PathBuf,
         red_triangle_fragment_shader_file_name: PathBuf,
         color_triangle_vertex_shader_file_name: PathBuf,
-        color_triangle_fragment_shader_file_name: PathBuf)
+        color_triangle_fragment_shader_file_name: PathBuf,
+        dynamic_triangle_vertex_shader_file_name: PathBuf,
+        //
+        graphic_mesh_directory_path: PathBuf,
+        monkey_graphic_mesh_file_name: PathBuf)
     -> Self
     {
         Self {
@@ -51,6 +60,10 @@ impl<'t> ApplicationConfig<'t> {
             file_name_shader_triangle_red_fragment: red_triangle_fragment_shader_file_name,
             file_name_shader_triangle_color_vertex: color_triangle_vertex_shader_file_name,
             file_name_shader_triangle_color_fragment: color_triangle_fragment_shader_file_name,
+            file_name_shader_triangle_dynamic_vertex: dynamic_triangle_vertex_shader_file_name,
+            //
+            path_directory_graphic_mesh: graphic_mesh_directory_path,
+            file_name_graphic_mesh_monkey: monkey_graphic_mesh_file_name,
         }
     }
 }

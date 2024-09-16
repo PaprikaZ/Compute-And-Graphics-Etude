@@ -19,14 +19,14 @@ use ::library_foundation_vulkan_cooked::config_vulkan::base::ConfigVulkanBase;
 use ::library_foundation_vulkan_cooked::config_vulkan::rank::ConfigVulkanRank;
 use ::library_foundation_vulkan_cooked::config_vulkan::swapchain::ConfigVulkanSwapchain;
 
-use crate::application_v1_1_c2::config::ApplicationConfig;
+use crate::application_v1_1_c3::config::ApplicationConfig;
 
 
-pub struct PredefineConfigApplicationV1_1Chapter2 {}
+pub struct PredefineConfigApplicationV1_1Chapter3 {}
 
-impl PredefineConfigApplicationV1_1Chapter2 {
+impl PredefineConfigApplicationV1_1Chapter3 {
     pub fn get<'t>() -> ApplicationConfig<'t> {
-        let expect_message = "PredefineConfigApplicationV1_1Chapter2: predefine hold";
+        let expect_message = "PredefineConfigApplicationV1_1Chapter3: predefine hold";
         let vulkan_physical_device_extension_name_s = {
             let mut s = HashSet::new();
             s.insert(VULKAN_EXTENSION_SWAPCHAIN_KHR.name);
@@ -63,6 +63,8 @@ impl PredefineConfigApplicationV1_1Chapter2 {
                 VulkanPresentModeKhr::FIFO);
         let shader_source_directory_path: PathBuf =
             [env!("CARGO_MANIFEST_DIR"), r"..\..\", r"source-shader\"].iter().collect();
+        let resource_directory_path: PathBuf =
+            [env!("CARGO_MANIFEST_DIR"), r"..\..\", r"resource\"].iter().collect();
         ApplicationConfig::new(
             "Vulkan Guide Example Chapter 1",
             WindowUniformDpiLogicalSize::new(1280, 720),
@@ -73,6 +75,10 @@ impl PredefineConfigApplicationV1_1Chapter2 {
             PathBuf::from("triangle-red.vert.spv"),
             PathBuf::from("triangle-red.frag.spv"),
             PathBuf::from("triangle-color.vert.spv"),
-            PathBuf::from("triangle-color.frag.spv"))
+            PathBuf::from("triangle-color.frag.spv"),
+            PathBuf::from("triangle-dynamic.vert.spv"),
+            resource_directory_path,
+            PathBuf::from("monkey_smooth.obj"),
+        )
     }
 }
