@@ -180,6 +180,8 @@ impl ErrorEntryGuideHandler {
                     ("vulkan pipeline create fail", true),
                 ErrorFoundationApplicationGuideOwn::VulkanImageViewDepthCreateFail =>
                     ("vulkan image view depth create fail", true),
+                ErrorFoundationApplicationGuideOwn::ApplicationSceneVulkanPipelineAlreadyAdded =>
+                    ("application scene vulkan pipeline already added", true),
             };
         println!("{error_message}");
         if be_bypass { Some(error) } else { None }

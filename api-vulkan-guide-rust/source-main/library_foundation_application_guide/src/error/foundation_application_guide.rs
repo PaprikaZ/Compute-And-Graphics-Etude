@@ -37,6 +37,7 @@ pub enum ErrorFoundationApplicationGuideOwn {
     VulkanPipelineLayoutCreateFail,
     VulkanPipelineCreateFail,
     VulkanImageViewDepthCreateFail,
+    ApplicationSceneVulkanPipelineAlreadyAdded,
 }
 
 

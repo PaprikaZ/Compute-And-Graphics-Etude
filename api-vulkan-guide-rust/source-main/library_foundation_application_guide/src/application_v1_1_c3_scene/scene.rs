@@ -5,6 +5,8 @@ use ::library_foundation_reintroduction::nalgebra_glm as glm;
 use ::library_foundation_reintroduction::vulkan::VulkanPipeline;
 use ::library_foundation_reintroduction::vulkan::VulkanPipelineLayout;
 
+use crate::error::foundation_application_guide::ErrorFoundationApplicationGuideOwn;
+use crate::error::foundation_application_guide::ErrorFoundationApplicationGuide;
 use crate::application_v1_1_c3_scene::graphic_mesh::ApplicationGraphicMeshName;
 use crate::application_v1_1_c3_scene::graphic_mesh::ApplicationGraphicMeshDeviceLoadedY;
 
@@ -88,5 +90,25 @@ impl ApplicationScene {
             entity_renderable_s: Vec::new(),
             entity_renderable_name_s: HashSet::new(),
         }
+    }
+
+    pub fn add_pipeline(
+        &mut self,
+        new_vulkan_pipeline_name: ApplicationScenePipelineName,
+        new_vulkan_pipeline: ApplicationScenePipeline)
+    -> Result<(), ErrorFoundationApplicationGuide>
+    {
+        if self.pipeline_table.get(&new_vulkan_pipeline_name).is_some() {
+            return Err(ErrorFoundationApplicationGuideOwn::ApplicationSceneVulkanPipelineAlreadyAdded)?
+        }
+        let old_vulkan_pipeline_o = self.pipeline_table.insert(new_vulkan_pipeline_name, new_vulkan_pipeline);
+        assert!(old_vulkan_pipeline_o.is_none());
+        Ok(())
+    }
+
+    pub fn lookup_pipeline(&self, pipeline_name: &ApplicationScenePipelineName)
+    -> Option<&ApplicationScenePipeline>
+    {
+        self.pipeline_table.get(pipeline_name)
     }
 }
