@@ -111,4 +111,24 @@ impl ApplicationScene {
     {
         self.pipeline_table.get(pipeline_name)
     }
+
+    pub fn add_graphic_mesh(
+        &mut self,
+        new_graphic_mesh_name: ApplicationGraphicMeshName,
+        new_graphic_mesh: ApplicationGraphicMeshDeviceLoadedY)
+    -> Result<(), ErrorFoundationApplicationGuide>
+    {
+        if self.graphic_mesh_table.get(&new_graphic_mesh_name).is_some() {
+            return Err(ErrorFoundationApplicationGuideOwn::ApplicationSceneGraphicMeshAlreadyAdded)?
+        }
+        let old_graphic_mesh_o = self.graphic_mesh_table.insert(new_graphic_mesh_name, new_graphic_mesh);
+        assert!(old_graphic_mesh_o.is_none());
+        Ok(())
+    }
+
+    pub fn lookup_graphic_mesh(&self, graphic_mesh_name: &ApplicationGraphicMeshName)
+    -> Option<&ApplicationGraphicMeshDeviceLoadedY>
+    {
+        self.graphic_mesh_table.get(graphic_mesh_name)
+    }
 }
