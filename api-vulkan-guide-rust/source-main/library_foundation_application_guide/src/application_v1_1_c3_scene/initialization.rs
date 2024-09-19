@@ -114,7 +114,7 @@ use crate::application_v1_1_c3_scene::negotiation_vulkan_device_physical::Applic
 use crate::application_v1_1_c3_scene::negotiation_vulkan_swapchain::ApplicationNegotiationVulkanSwapchain;
 use crate::application_v1_1_c3_scene::graphic_resource::ApplicationGraphicResourceDestroyDirective;
 use crate::application_v1_1_c3_scene::graphic_resource::ApplicationGraphicResourceDestroyStack;
-use crate::application_v1_1_c3_scene::graphic_mesh::ApplicationGraphicMeshLoader;
+use crate::application_v1_1_c3_scene::loader_graphic::ApplicationLoaderGraphic;
 use crate::application_v1_1_c3_scene::vulkan_push_constant::ApplicationVulkanPushConstantData;
 use crate::application_v1_1_c3_scene::self_::ApplicationPartWindow;
 use crate::application_v1_1_c3_scene::self_::ApplicationPartMain;
@@ -595,7 +595,7 @@ impl ApplicationInitialization {
             .build();
         //
         let mesh_vulkan_vertex_input_description_s =
-            ApplicationGraphicMeshLoader::create_vulkan_vertex_input_description_s();
+            ApplicationLoaderGraphic::create_vulkan_vertex_input_description_s();
         let mesh_vulkan_pipeline_vertex_input_information =
             VulkanPipelineVertexInputStateCreateInformation::builder()
             .vertex_binding_descriptions(mesh_vulkan_vertex_input_description_s.get_binding_s())
