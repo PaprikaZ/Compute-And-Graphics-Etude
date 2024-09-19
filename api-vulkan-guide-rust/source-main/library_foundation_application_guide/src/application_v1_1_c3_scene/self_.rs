@@ -450,26 +450,20 @@ impl<'t> ApplicationPartMain<'t> {
                 self.vulkan_device_logical.free_memory(self.vulkan_image_depth_memory, None);
                 self.vulkan_device_logical.destroy_image(self.vulkan_image_depth, None);
             },
-            DD::DestroyVulkanPipelineTriangleRed => unsafe {
-                self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline_triangle_red, None);
-            }
-            DD::DestroyVulkanPipelineTriangleColor => unsafe {
-                self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline_triangle_color, None);
+            DD::DestroyVulkanPipelineLayout(pipeline_layout) => unsafe {
+                self.vulkan_device_logical.destroy_pipeline_layout(pipeline_layout, None);
             },
-            DD::DestroyVulkanPipelineMesh => unsafe {
-                self.vulkan_device_logical.destroy_pipeline(self.vulkan_pipeline_mesh, None);
+            DD::DestroyVulkanPipeline(pipeline) => unsafe {
+                self.vulkan_device_logical.destroy_pipeline(pipeline, None);
             },
-            DD::DestroyVulkanPipelineLayoutStatic => unsafe {
-                self.vulkan_device_logical.destroy_pipeline_layout(self.vulkan_pipeline_layout_triangle, None);
+            DD::DestroyVulkanImage(image) => unsafe {
+                self.vulkan_device_logical.destroy_image(image, None);
             },
-            DD::DestroyVulkanPipelineLayoutDynamic => unsafe {
-                self.vulkan_device_logical.destroy_pipeline_layout(self.vulkan_pipeline_layout_mesh, None);
+            DD::DestroyVulkanBuffer(buffer) => unsafe {
+                self.vulkan_device_logical.destroy_buffer(buffer, None);
             },
-            DD::DestroyVulkanBuffer(vulkan_buffer) => unsafe {
-                self.vulkan_device_logical.destroy_buffer(vulkan_buffer, None)
-            },
-            DD::FreeVulkanDeviceMemory(vulkan_device_memory) => unsafe {
-                self.vulkan_device_logical.free_memory(vulkan_device_memory, None)
+            DD::FreeVulkanDeviceMemory(device_memory) => unsafe {
+                self.vulkan_device_logical.free_memory(device_memory, None);
             },
         }
         Ok(())
