@@ -63,6 +63,7 @@ use crate::error::foundation_application_guide::ErrorFoundationApplicationGuide;
 use crate::application_v1_1_c3_scene::config::ApplicationConfig;
 use crate::application_v1_1_c3_scene::graphic_resource::ApplicationGraphicResourceDestroyDirective;
 use crate::application_v1_1_c3_scene::graphic_resource::ApplicationGraphicResourceDestroyStack;
+use crate::application_v1_1_c3_scene::scene::ApplicationSceneEntityRenderable;
 use crate::application_v1_1_c3_scene::scene::ApplicationScene;
 use crate::application_v1_1_c3_scene::vulkan_push_constant::ApplicationVulkanPushConstantData;
 
@@ -538,30 +539,45 @@ impl<'t> ApplicationPartMain<'t> {
         unsafe { self.vulkan_device_logical.cmd_begin_render_pass(
             self.vulkan_command_buffer_graphic, &vulkan_render_pass_begin_information, VulkanSubpassContents::INLINE) };
         //
-        unsafe {
-            self.vulkan_device_logical.cmd_bind_pipeline(
+        self.scene.iter_entity_renderable_s()
+        .fold(None, |previous_renderable_entity_o: Option<&ApplicationSceneEntityRenderable>, current_renderable_entity| {
+            let (be_bind_pipeline_needed, be_bind_vertex_buffer_needed) =
+                match previous_renderable_entity_o {
+                    None => (true, true),
+                    Some(e) =>
+                        (e.pipeline_name != current_renderable_entity.pipeline_name,
+                         e.graphic_mesh_name != current_renderable_entity.graphic_mesh_name),
+                };
+            let scene_pipeline =
+                self.scene.lookup_pipeline(&current_renderable_entity.pipeline_name)
+                .expect("ApplicationPartMain: scene pipeline name should be used");
+            let vulkan_pipeline = scene_pipeline.vulkan_pipeline;
+            let vulkan_pipeline_layout = scene_pipeline.vulkan_pipeline_layout;
+            let graphic_mesh =
+                self.scene.lookup_graphic_mesh(&current_renderable_entity.graphic_mesh_name)
+                .expect("ApplicationPartMain: scene graphic mesh");
+            let vulkan_buffer = graphic_mesh.vulkan_buffer;
+            if be_bind_pipeline_needed { unsafe {
+                self.vulkan_device_logical.cmd_bind_pipeline(
+                    self.vulkan_command_buffer_graphic, VulkanPipelineBindPoint::GRAPHICS, vulkan_pipeline);
+            } }
+            let vulkan_push_constant_data =
+                ApplicationVulkanPushConstantData::create(&current_renderable_entity.graphic_transform);
+            let (_, mvp_transform_byte_s, _) = unsafe { vulkan_push_constant_data.mvp_transform.as_slice().align_to::<u8>() };
+            unsafe { self.vulkan_device_logical.cmd_push_constants(
                 self.vulkan_command_buffer_graphic,
-                VulkanPipelineBindPoint::GRAPHICS,
-                self.vulkan_pipeline_mesh)
-        }
-        let monkey_graphic_mesh =
-            self.graphic_mesh_table.get(&ApplicationGraphicMeshName::Monkey)
-            .expect("ApplicationPartMain: monkey graphic mesh should be loaded already");
-        unsafe { self.vulkan_device_logical.cmd_bind_vertex_buffers(
-            self.vulkan_command_buffer_graphic, 0, &[monkey_graphic_mesh.vulkan_buffer], &[0]) };
-        let vulkan_push_constant_data =
-            ApplicationVulkanPushConstantData::create(self.number_frame_rendered);
-        let (_, mvp_transform_byte_s, _) = unsafe { vulkan_push_constant_data.mvp_transform.as_slice().align_to::<u8>() };
-        unsafe {
-            self.vulkan_device_logical.cmd_push_constants(
-                self.vulkan_command_buffer_graphic,
-                self.vulkan_pipeline_layout_mesh,
+                vulkan_pipeline_layout,
                 VulkanShaderStageFlagS::VERTEX,
                 0,
-                mvp_transform_byte_s)
-        };
-        unsafe { self.vulkan_device_logical.cmd_draw(
-            self.vulkan_command_buffer_graphic, monkey_graphic_mesh.vertex_s.len() as u32, 1, 0, 0); }
+                mvp_transform_byte_s) };
+            if be_bind_vertex_buffer_needed { unsafe {
+                self.vulkan_device_logical.cmd_bind_vertex_buffers(
+                    self.vulkan_command_buffer_graphic, 0, &[vulkan_buffer], &[0]);
+            } }
+            unsafe { self.vulkan_device_logical.cmd_draw(
+                self.vulkan_command_buffer_graphic, graphic_mesh.vertex_s.len() as u32, 1, 0, 0) }
+            Some(current_renderable_entity)
+        });
         //
         unsafe { self.vulkan_device_logical.cmd_end_render_pass(self.vulkan_command_buffer_graphic) };
         unsafe { self.vulkan_device_logical.end_command_buffer(self.vulkan_command_buffer_graphic) }
