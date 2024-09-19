@@ -1,8 +1,12 @@
+use std::collections::HashMap;
+use std::collections::HashSet;
+
 use ::library_foundation_reintroduction::nalgebra_glm as glm;
 use ::library_foundation_reintroduction::vulkan::VulkanPipeline;
 use ::library_foundation_reintroduction::vulkan::VulkanPipelineLayout;
 
 use crate::application_v1_1_c3_scene::graphic_mesh::ApplicationGraphicMeshName;
+use crate::application_v1_1_c3_scene::graphic_mesh::ApplicationGraphicMeshDeviceLoadedY;
 
 
 #[derive(Debug)]
@@ -62,6 +66,27 @@ impl ApplicationSceneEntityRenderable {
             pipeline_name: pipeline_name,
             graphic_mesh_name,
             graphic_transform: graphic_transform,
+        }
+    }
+}
+
+
+#[derive(Debug)]
+pub struct ApplicationScene {
+    pipeline_table: HashMap<ApplicationScenePipelineName, ApplicationScenePipeline>,
+    graphic_mesh_table: HashMap<ApplicationGraphicMeshName, ApplicationGraphicMeshDeviceLoadedY>,
+    entity_renderable_s: Vec<ApplicationSceneEntityRenderable>,
+    entity_renderable_name_s: HashSet<ApplicationSceneEntityRenderableName>,
+}
+
+impl ApplicationScene {
+    pub fn new() -> Self
+    {
+        Self {
+            pipeline_table: HashMap::new(),
+            graphic_mesh_table: HashMap::new(),
+            entity_renderable_s: Vec::new(),
+            entity_renderable_name_s: HashSet::new(),
         }
     }
 }
