@@ -39,6 +39,9 @@ pub enum ErrorFoundationApplicationGuideOwn {
     VulkanImageViewDepthCreateFail,
     ApplicationSceneVulkanPipelineAlreadyAdded,
     ApplicationSceneGraphicMeshAlreadyAdded,
+    ApplicationSceneEntityRenderablePipelineNotExist,
+    ApplicationSceneEntityRenderableGraphicMeshNotExist,
+    ApplicationSceneEntityRenderableAlreadyAdded,
 }
 
 

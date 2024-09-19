@@ -1,3 +1,4 @@
+use std::slice::Iter;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
@@ -130,5 +131,29 @@ impl ApplicationScene {
     -> Option<&ApplicationGraphicMeshDeviceLoadedY>
     {
         self.graphic_mesh_table.get(graphic_mesh_name)
+    }
+
+    pub fn add_entity_renderable(
+        &mut self, new_renderable_entity: ApplicationSceneEntityRenderable)
+    -> Result<(), ErrorFoundationApplicationGuide>
+    {
+        if self.pipeline_table.get(&new_renderable_entity.pipeline_name).is_none() {
+            return Err(ErrorFoundationApplicationGuideOwn::ApplicationSceneEntityRenderablePipelineNotExist)?
+        }
+        if self.graphic_mesh_table.get(&new_renderable_entity.graphic_mesh_name).is_none() {
+            return Err(ErrorFoundationApplicationGuideOwn::ApplicationSceneEntityRenderableGraphicMeshNotExist)?
+        }
+        if self.entity_renderable_name_s.get(&new_renderable_entity.name).is_some() {
+            return Err(ErrorFoundationApplicationGuideOwn::ApplicationSceneEntityRenderableAlreadyAdded)?
+        }
+        let be_inserted = self.entity_renderable_name_s.insert(new_renderable_entity.name);
+        assert!(be_inserted);
+        self.entity_renderable_s.push(new_renderable_entity);
+        Ok(())
+    }
+
+    pub fn iter_entity_renderable_s(&self) -> Iter<ApplicationSceneEntityRenderable>
+    {
+        self.entity_renderable_s.iter()
     }
 }
