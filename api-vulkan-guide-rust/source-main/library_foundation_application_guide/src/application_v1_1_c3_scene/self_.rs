@@ -1,6 +1,5 @@
 use std::mem::MaybeUninit;
 use std::ptr::addr_of_mut;
-use std::collections::HashMap;
 
 use ::library_foundation_reintroduction::window_uniform::WindowUniformEventLoop;
 use ::library_foundation_reintroduction::window_uniform::WindowUniformWindow;
@@ -50,8 +49,6 @@ use ::library_foundation_reintroduction::vulkan::VulkanSubmitInformation;
 use ::library_foundation_reintroduction::vulkan::VulkanPresentInformationKhr;
 use ::library_foundation_reintroduction::vulkan::VulkanErrorCode_;
 use ::library_foundation_reintroduction::vulkan::VulkanSuccessCode_;
-use ::library_foundation_reintroduction::vulkan::VulkanPipelineLayout;
-use ::library_foundation_reintroduction::vulkan::VulkanPipeline;
 use ::library_foundation_reintroduction::vulkan::VulkanDeviceMemory;
 use ::library_foundation_reintroduction::vulkan::VulkanShaderStageFlagS;
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexGraphic;
@@ -66,9 +63,7 @@ use crate::error::foundation_application_guide::ErrorFoundationApplicationGuide;
 use crate::application_v1_1_c3_scene::config::ApplicationConfig;
 use crate::application_v1_1_c3_scene::graphic_resource::ApplicationGraphicResourceDestroyDirective;
 use crate::application_v1_1_c3_scene::graphic_resource::ApplicationGraphicResourceDestroyStack;
-use crate::application_v1_1_c3_scene::graphic_mesh::ApplicationGraphicMeshDeviceLoadedY;
-use crate::application_v1_1_c3_scene::graphic_mesh::ApplicationGraphicMeshName;
-use crate::application_v1_1_c3_scene::graphic_mesh::ApplicationGraphicMeshLoader;
+use crate::application_v1_1_c3_scene::scene::ApplicationScene;
 use crate::application_v1_1_c3_scene::vulkan_push_constant::ApplicationVulkanPushConstantData;
 
 
@@ -143,15 +138,9 @@ pub struct ApplicationPartMain<'t> {
     vulkan_fence_render_finished: VulkanFence,
     vulkan_semaphore_render_finished: VulkanSemaphore,
     vulkan_semaphore_image_available: VulkanSemaphore,
-    vulkan_pipeline_layout_triangle: VulkanPipelineLayout,
-    vulkan_pipeline_triangle_red: VulkanPipeline,
-    vulkan_pipeline_triangle_color: VulkanPipeline,
-    vulkan_pipeline_layout_mesh: VulkanPipelineLayout,
-    vulkan_pipeline_mesh: VulkanPipeline,
     //
+    scene: ApplicationScene,
     graphic_resource_destroy_stack: ApplicationGraphicResourceDestroyStack,
-    //
-    graphic_mesh_table: HashMap<ApplicationGraphicMeshName, ApplicationGraphicMeshDeviceLoadedY>,
     //
     number_frame_rendered: u32,
     //
@@ -202,12 +191,7 @@ impl<'t> ApplicationPartMain<'t> {
         render_finished_vulkan_semaphore: VulkanSemaphore,
         image_available_vulkan_semaphore: VulkanSemaphore,
         //
-        triangle_vulkan_pipeline_layout: VulkanPipelineLayout,
-        red_triangle_vulkan_pipeline: VulkanPipeline,
-        color_triangle_vulkan_pipeline: VulkanPipeline,
-        mesh_vulkan_pipeline_layout: VulkanPipelineLayout,
-        mesh_vulkan_pipeline: VulkanPipeline,
-        //
+        application_scene: ApplicationScene,
         graphic_resource_destroy_stack: ApplicationGraphicResourceDestroyStack)
     -> MaybeUninit<Self>
     {
@@ -218,7 +202,6 @@ impl<'t> ApplicationPartMain<'t> {
         addr_of_mut!((*ptr).vulkan_entry).write(vulkan_entry);
         addr_of_mut!((*ptr).vulkan_instance).write(vulkan_instance);
         addr_of_mut!((*ptr).vulkan_debug_utility_messenger_o).write(vulkan_debug_utility_messenger_o);
-        //addr_of_mut!((*ptr).vulkan_memory_allocator).write(raw_prefab_vulkan_memory_allocator);
         //
         addr_of_mut!((*ptr).vulkan_surface).write(vulkan_surface);
         addr_of_mut!((*ptr).vulkan_device_physical).write(vulkan_physical_device);
@@ -253,15 +236,9 @@ impl<'t> ApplicationPartMain<'t> {
         addr_of_mut!((*ptr).vulkan_fence_render_finished).write(render_finished_vulkan_fence);
         addr_of_mut!((*ptr).vulkan_semaphore_render_finished).write(render_finished_vulkan_semaphore);
         addr_of_mut!((*ptr).vulkan_semaphore_image_available).write(image_available_vulkan_semaphore);
-        addr_of_mut!((*ptr).vulkan_pipeline_layout_triangle).write(triangle_vulkan_pipeline_layout);
-        addr_of_mut!((*ptr).vulkan_pipeline_triangle_red).write(red_triangle_vulkan_pipeline);
-        addr_of_mut!((*ptr).vulkan_pipeline_triangle_color).write(color_triangle_vulkan_pipeline);
-        addr_of_mut!((*ptr).vulkan_pipeline_layout_mesh).write(mesh_vulkan_pipeline_layout);
-        addr_of_mut!((*ptr).vulkan_pipeline_mesh).write(mesh_vulkan_pipeline);
         //
+        addr_of_mut!((*ptr).scene).write(application_scene);
         addr_of_mut!((*ptr).graphic_resource_destroy_stack).write(graphic_resource_destroy_stack);
-        //
-        addr_of_mut!((*ptr).graphic_mesh_table).write(HashMap::new());
         //
         addr_of_mut!((*ptr).number_frame_rendered).write(0);
         //
@@ -287,27 +264,6 @@ impl<'t> ApplicationPartMain<'t> {
             MaybeUninit::assume_init(memory_allocator_uninitialized_application)
         };
         application
-    }
-
-    pub fn initialize_graphic_mesh_all_device_loaded(&mut self)
-    -> Result<(), ErrorFoundationApplicationGuide>
-    {
-        type DD = ApplicationGraphicResourceDestroyDirective;
-        let triangle_graphic_mesh =
-            ApplicationGraphicMeshLoader
-            ::create_mesh_triangle()
-            .load_to_device(&self.vulkan_memory_allocator)?;
-        self.graphic_resource_destroy_stack.push(DD::DestroyVulkanBuffer(triangle_graphic_mesh.vulkan_buffer));
-        self.graphic_resource_destroy_stack.push(DD::FreeVulkanDeviceMemory(triangle_graphic_mesh.vulkan_buffer_memory));
-        self.graphic_mesh_table.insert(ApplicationGraphicMeshName::Triangle, triangle_graphic_mesh);
-        let monkey_graphic_mesh =
-            ApplicationGraphicMeshLoader
-            ::load_mesh_monkey(&self.config)?
-            .load_to_device(&self.vulkan_memory_allocator)?;
-        self.graphic_resource_destroy_stack.push(DD::DestroyVulkanBuffer(monkey_graphic_mesh.vulkan_buffer));
-        self.graphic_resource_destroy_stack.push(DD::FreeVulkanDeviceMemory(monkey_graphic_mesh.vulkan_buffer_memory));
-        self.graphic_mesh_table.insert(ApplicationGraphicMeshName::Monkey, monkey_graphic_mesh);
-        Ok(())
     }
 
     pub fn get_config(&self) -> &ApplicationConfig {
@@ -432,18 +388,6 @@ impl<'t> ApplicationPartMain<'t> {
 
     pub fn get_vulkan_semaphore_image_available(&self) -> &VulkanSemaphore {
         &self.vulkan_semaphore_image_available
-    }
-
-    pub fn get_vulkan_pipeline_layout(&self) -> &VulkanPipelineLayout {
-        &self.vulkan_pipeline_layout_triangle
-    }
-
-    pub fn get_vulkan_pipeline_triangle_red(&self) -> &VulkanPipeline {
-        &self.vulkan_pipeline_triangle_red
-    }
-
-    pub fn get_vulkan_pipeline_triangle_color(&self) -> &VulkanPipeline {
-        &self.vulkan_pipeline_triangle_color
     }
 
     pub fn is_destroying(&self) -> bool {
