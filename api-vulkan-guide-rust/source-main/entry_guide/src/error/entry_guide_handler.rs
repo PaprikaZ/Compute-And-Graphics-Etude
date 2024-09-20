@@ -180,6 +180,16 @@ impl ErrorEntryGuideHandler {
                     ("vulkan pipeline create fail", true),
                 ErrorFoundationApplicationGuideOwn::VulkanImageViewDepthCreateFail =>
                     ("vulkan image view depth create fail", true),
+                ErrorFoundationApplicationGuideOwn::ApplicationSceneVulkanPipelineAlreadyAdded =>
+                    ("application scene vulkan pipeline already added", true),
+                ErrorFoundationApplicationGuideOwn::ApplicationSceneGraphicMeshAlreadyAdded =>
+                    ("application scene graphic mesh already added", true),
+                ErrorFoundationApplicationGuideOwn::ApplicationSceneEntityRenderablePipelineNotExist =>
+                    ("application scene entity renderable pipeline not exist", true),
+                ErrorFoundationApplicationGuideOwn::ApplicationSceneEntityRenderableGraphicMeshNotExist =>
+                    ("application scene entity renderable graphic mesh not exist", true),
+                ErrorFoundationApplicationGuideOwn::ApplicationSceneEntityRenderableAlreadyAdded =>
+                    ("application scene entity renderable already added", true),
             };
         println!("{error_message}");
         if be_bypass { Some(error) } else { None }
