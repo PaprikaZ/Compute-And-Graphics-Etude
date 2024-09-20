@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use ::library_foundation_reintroduction::nalgebra_glm as glm;
 use ::library_foundation_reintroduction::window_uniform::WindowUniformWindow;
 use ::library_foundation_reintroduction::vulkan::VulkanAccessFlagS;
 use ::library_foundation_reintroduction::vulkan::VulkanAttachmentDescription;
@@ -84,16 +85,14 @@ use ::library_foundation_reintroduction::vulkan::VulkanSurfaceCapabilitySKhr;
 use ::library_foundation_reintroduction::vulkan::VulkanSurfaceFormatKhr;
 use ::library_foundation_reintroduction::vulkan::VulkanSurfaceKhr;
 use ::library_foundation_reintroduction::vulkan::VulkanSwapchainKhr;
-use ::library_foundation_reintroduction::vulkan::VulkanVertexInputAttributeDescription;
-use ::library_foundation_reintroduction::vulkan::VulkanVertexInputBindingDescription;
 use ::library_foundation_reintroduction::vulkan::VulkanViewport;
 use ::library_foundation_reintroduction::vulkan::VulkanWindow;
 use ::library_foundation_reintroduction::vulkan::VULKAN_EXTENSION_GET_PHYSICAL_DEVICE_PROPERTIES2_KHR;
 use ::library_foundation_reintroduction::vulkan::VULKAN_EXTENSION_PORTABILITY_ENUMERATION_KHR;
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndexGraphic;
 use ::library_foundation_reintroduction::vulkan::queue::VulkanQueueFamilyIndex;
-use ::library_foundation_reintroduction::vulkan::version::VulkanVersionEntry;
 use ::library_foundation_reintroduction::vulkan::version::VulkanVersionApi;
+use ::library_foundation_reintroduction::vulkan::version::VulkanVersionEntry;
 use ::library_foundation_reintroduction::vulkan::swapchain::VulkanSwapchainImageNumber;
 use ::library_foundation_reintroduction::vulkan::validation::VulkanValidationBeToEnable;
 use ::library_foundation_reintroduction::vulkan::portability::VULKAN_PORTABILITY_VERSION_ENTRY_MACOS_MIN;
@@ -114,7 +113,13 @@ use crate::application_v1_1_c3_scene::negotiation_vulkan_device_physical::Applic
 use crate::application_v1_1_c3_scene::negotiation_vulkan_swapchain::ApplicationNegotiationVulkanSwapchain;
 use crate::application_v1_1_c3_scene::graphic_resource::ApplicationGraphicResourceDestroyDirective;
 use crate::application_v1_1_c3_scene::graphic_resource::ApplicationGraphicResourceDestroyStack;
+use crate::application_v1_1_c3_scene::graphic_mesh::ApplicationGraphicMeshName;
 use crate::application_v1_1_c3_scene::loader_graphic::ApplicationLoaderGraphic;
+use crate::application_v1_1_c3_scene::scene::ApplicationScenePipeline;
+use crate::application_v1_1_c3_scene::scene::ApplicationScenePipelineName;
+use crate::application_v1_1_c3_scene::scene::ApplicationSceneEntityRenderableName;
+use crate::application_v1_1_c3_scene::scene::ApplicationSceneEntityRenderable;
+use crate::application_v1_1_c3_scene::scene::ApplicationScene;
 use crate::application_v1_1_c3_scene::vulkan_push_constant::ApplicationVulkanPushConstantData;
 use crate::application_v1_1_c3_scene::self_::ApplicationPartWindow;
 use crate::application_v1_1_c3_scene::self_::ApplicationPartMain;
@@ -622,6 +627,103 @@ impl ApplicationInitialization {
         Ok((dynamic_vulkan_pipeline_layout, vulkan_graphics_pipeline_s[0]))
     }
 
+    fn initialize_scene_pipeline_s<'t>(
+        vulkan_logical_device: &VulkanDeviceLogical,
+        vulkan_2d_extent: VulkanExtentD2,
+        vulkan_render_pass: VulkanRenderPass,
+        config: &ApplicationConfig<'t>,
+        application_scene: &mut ApplicationScene,
+        graphic_resource_destroy_stack: &mut ApplicationGraphicResourceDestroyStack)
+    -> Result<(), ErrorFoundationApplicationGuide>
+    {
+        let (main_vulkan_pipeline_layout, main_vulkan_pipeline) =
+            Self::initialize_pipeline_s(
+                vulkan_logical_device, vulkan_2d_extent, vulkan_render_pass,
+                config, graphic_resource_destroy_stack)?;
+        let main_application_scene_pipeline =
+            ApplicationScenePipeline::new(main_vulkan_pipeline, main_vulkan_pipeline_layout);
+        application_scene.add_pipeline(ApplicationScenePipelineName::Main, main_application_scene_pipeline)?;
+        Ok(())
+    }
+
+    fn initialize_scene_graphic_mesh_s<'t>(
+        config: &ApplicationConfig<'t>,
+        vulkan_memory_allocator: &VulkanMemoryRawPrefabAllocator,
+        application_scene: &mut ApplicationScene,
+        graphic_resource_destroy_stack: &mut ApplicationGraphicResourceDestroyStack)
+    -> Result<(), ErrorFoundationApplicationGuide>
+    {
+        let triangle_graphic_mesh =
+            ApplicationLoaderGraphic
+            ::create_mesh_triangle()
+            .load_to_device(vulkan_memory_allocator, graphic_resource_destroy_stack)?;
+        application_scene.add_graphic_mesh(ApplicationGraphicMeshName::Triangle, triangle_graphic_mesh)?;
+        let monkey_graphic_mesh =
+            ApplicationLoaderGraphic
+            ::load_mesh_monkey(config)?
+            .load_to_device(vulkan_memory_allocator, graphic_resource_destroy_stack)?;
+        application_scene.add_graphic_mesh(ApplicationGraphicMeshName::Monkey, monkey_graphic_mesh)?;
+        Ok(())
+    }
+
+    fn initialize_scene_entity_renderable_s<'t>(application_scene: &mut ApplicationScene)
+    -> Result<(), ErrorFoundationApplicationGuide>
+    {
+        let new_monkey_renderable_entity =
+            ApplicationSceneEntityRenderable::new(
+                ApplicationSceneEntityRenderableName::Monkey,
+                ApplicationScenePipelineName::Main,
+                ApplicationGraphicMeshName::Monkey,
+                glm::Mat4::identity());
+        application_scene.add_entity_renderable(new_monkey_renderable_entity)?;
+        //
+        (-32..=32)
+        .into_iter()
+        .enumerate()
+        .map(|(x_index, x_offset)| {
+            let y_range: std::ops::RangeInclusive<i32> = -32..=32;
+            let y_range_size = ((y_range.end() - y_range.start()) + 1) as u32;
+            y_range
+            .into_iter()
+            .enumerate()
+            .map(move |(y_index, y_offset)| {
+                let index = ((x_index as u32) * y_range_size) + (y_index as u32);
+                (index, x_offset, y_offset)
+            })
+        })
+        .flatten()
+        .try_fold((), |(), (index, x_offset, y_offset)| {
+            let new_triangle_renderable_entity =
+                ApplicationSceneEntityRenderable::new(
+                    ApplicationSceneEntityRenderableName::Triangle(index),
+                    ApplicationScenePipelineName::Main,
+                    ApplicationGraphicMeshName::Triangle,
+                    glm::translate(&glm::Mat4::identity(), &glm::vec3(x_offset as f32, 0.0, y_offset as f32)) *
+                    glm::scale(&glm::Mat4::identity(), &glm::vec3(0.2, 0.2, 0.2))
+                );
+            application_scene.add_entity_renderable(new_triangle_renderable_entity)
+        })
+    }
+
+    fn initialize_scene<'t>(
+        vulkan_logical_device: &VulkanDeviceLogical,
+        vulkan_2d_extent: VulkanExtentD2,
+        vulkan_render_pass: VulkanRenderPass,
+        config: &ApplicationConfig<'t>,
+        vulkan_memory_allocator: &VulkanMemoryRawPrefabAllocator,
+        graphic_resource_destroy_stack: &mut ApplicationGraphicResourceDestroyStack)
+    -> Result<ApplicationScene, ErrorFoundationApplicationGuide>
+    {
+        let mut application_scene = ApplicationScene::new();
+        Self::initialize_scene_pipeline_s(
+            vulkan_logical_device, vulkan_2d_extent, vulkan_render_pass, config,
+            &mut application_scene, graphic_resource_destroy_stack)?;
+        Self::initialize_scene_graphic_mesh_s(
+            config, vulkan_memory_allocator, &mut application_scene, graphic_resource_destroy_stack)?;
+        Self::initialize_scene_entity_renderable_s(&mut application_scene)?;
+        Ok(application_scene)
+    }
+
     //
     pub fn initialize<'t>(config: ApplicationConfig<'t>)
     -> Result<Application<'t>, ErrorFoundationApplicationGuide>
@@ -707,11 +809,12 @@ impl ApplicationInitialization {
         let (render_finished_vulkan_fence, render_finished_vulkan_semaphore, image_available_vulkan_semaphore) =
             Self::initialize_synchronization_primitive_set(
                 &vulkan_logical_device, &mut graphic_resource_destroy_stack)?;
-        let ((triangle_vulkan_pipeline_layout, red_triangle_vulkan_pipeline, color_triangle_vulkan_pipeline),
-             (mesh_vulkan_pipeline_layout, mesh_vulkan_pipeline)) =
-            Self::initialize_pipeline_s(
+        //
+        let application_scene =
+            Self::initialize_scene(
                 &vulkan_logical_device, vulkan_2d_extent, vulkan_render_pass,
-                &config, &mut graphic_resource_destroy_stack)?;
+                &config, &vulkan_memory_allocator, &mut graphic_resource_destroy_stack)?;
+        //
         let wp_application = ApplicationPartWindow::new(window, window_event_loop);
         let partial_initialized_mp_application =
             ApplicationPartMain::create_with_memory_allocator_uninitialized(
@@ -728,12 +831,9 @@ impl ApplicationInitialization {
                 vulkan_depth_image_view, vulkan_depth_image, vulkan_depth_image_memory, vulkan_depth_image_format,
                 main_vulkan_command_pool, graphic_vulkan_command_buffer, transfer_vulkan_command_buffer,
                 render_finished_vulkan_fence, render_finished_vulkan_semaphore, image_available_vulkan_semaphore,
-                triangle_vulkan_pipeline_layout, red_triangle_vulkan_pipeline, color_triangle_vulkan_pipeline,
-                mesh_vulkan_pipeline_layout, mesh_vulkan_pipeline,
-                graphic_resource_destroy_stack);
-        let mut mp_application =
+                application_scene, graphic_resource_destroy_stack);
+        let mp_application =
             ApplicationPartMain::initialize_memory_allocator(partial_initialized_mp_application);
-        mp_application.initialize_graphic_mesh_all_device_loaded()?;
         Ok(Application::new(wp_application, mp_application))
     }
 }
