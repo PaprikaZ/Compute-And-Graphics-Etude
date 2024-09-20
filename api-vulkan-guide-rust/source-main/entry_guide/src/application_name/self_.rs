@@ -4,4 +4,5 @@ pub enum ApplicationName {
     VulkanV1_1Chapter1,
     VulkanV1_1Chapter2,
     VulkanV1_1Chapter3,
+    VulkanV1_1Chapter3Scene,
 }
