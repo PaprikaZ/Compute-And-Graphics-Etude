@@ -454,74 +454,35 @@ impl ApplicationInitialization {
         vulkan_logical_device: &'tl VulkanDeviceLogical, config: &ApplicationConfig<'tc>)
     -> Result<(VulkanPipelineShaderStageCreateInformation,
                VulkanPipelineShaderStageCreateInformation,
-               VulkanPipelineShaderStageCreateInformation,
-               VulkanPipelineShaderStageCreateInformation,
-               VulkanPipelineShaderStageCreateInformation,
                Box<dyn FnOnce() -> () + 'tl>),
               ErrorFoundationApplicationGuide>
     {
-        let red_triangle_vertex_shader_file_path =
-            config.path_directory_shader.join(config.file_name_shader_triangle_red_vertex.clone());
-        let red_triangle_fragment_shader_file_path =
-            config.path_directory_shader.join(config.file_name_shader_triangle_red_fragment.clone());
-        let color_triangle_vertex_shader_file_path =
-            config.path_directory_shader.join(config.file_name_shader_triangle_color_vertex.clone());
-        let color_triangle_fragment_shader_file_path =
-            config.path_directory_shader.join(config.file_name_shader_triangle_color_fragment.clone());
-        let dynamic_triangle_vertex_shader_file_path =
-            config.path_directory_shader.join(config.file_name_shader_triangle_dynamic_vertex.clone());
-        let red_triangle_vertex_shader_module =
-            Self::create_shader_module_from_file_path(vulkan_logical_device, &red_triangle_vertex_shader_file_path)?;
-        let red_triangle_fragment_shader_module =
-            Self::create_shader_module_from_file_path(vulkan_logical_device, &red_triangle_fragment_shader_file_path)?;
-        let color_triangle_vertex_shader_module =
-            Self::create_shader_module_from_file_path(vulkan_logical_device, &color_triangle_vertex_shader_file_path)?;
-        let color_triangle_fragment_shader_module =
-            Self::create_shader_module_from_file_path(vulkan_logical_device, &color_triangle_fragment_shader_file_path)?;
-        let dynamic_triangle_vertex_shader_module =
-            Self::create_shader_module_from_file_path(vulkan_logical_device, &dynamic_triangle_vertex_shader_file_path)?;
-        let red_triangle_vertex_shader_stage_create_information =
+        let main_vertex_shader_file_path =
+            config.path_directory_shader.join(config.file_name_shader_main_vertex.clone());
+        let main_fragment_shader_file_path =
+            config.path_directory_shader.join(config.file_name_shader_main_fragment.clone());
+        let main_vertex_shader_module =
+            Self::create_shader_module_from_file_path(vulkan_logical_device, &main_vertex_shader_file_path)?;
+        let main_fragment_shader_module =
+            Self::create_shader_module_from_file_path(vulkan_logical_device, &main_fragment_shader_file_path)?;
+        let main_vertex_vulkan_pipeline_shader_stage_create_information =
             VulkanPipelineShaderStageCreateInformation::builder()
             .stage(VulkanShaderStageFlagS::VERTEX)
-            .module(red_triangle_vertex_shader_module)
+            .module(main_vertex_shader_module)
             .name(b"main\0")
             .build();
-        let red_triangle_fragment_vulkan_pipeline_shader_stage_create_information =
+        let main_fragment_vulkan_pipeline_shader_stage_create_information =
             VulkanPipelineShaderStageCreateInformation::builder()
             .stage(VulkanShaderStageFlagS::FRAGMENT)
-            .module(red_triangle_fragment_shader_module)
-            .name(b"main\0")
-            .build();
-        let color_triangle_vertex_vulkan_pipeline_shader_stage_create_information =
-            VulkanPipelineShaderStageCreateInformation::builder()
-            .stage(VulkanShaderStageFlagS::VERTEX)
-            .module(color_triangle_vertex_shader_module)
-            .name(b"main\0")
-            .build();
-        let color_triangle_fragment_vulkan_pipeline_shader_stage_create_information =
-            VulkanPipelineShaderStageCreateInformation::builder()
-            .stage(VulkanShaderStageFlagS::FRAGMENT)
-            .module(color_triangle_fragment_shader_module)
-            .name(b"main\0")
-            .build();
-        let dynamic_triangle_vertex_vulkan_pipeline_shader_stage_create_information =
-            VulkanPipelineShaderStageCreateInformation::builder()
-            .stage(VulkanShaderStageFlagS::VERTEX)
-            .module(dynamic_triangle_vertex_shader_module)
+            .module(main_fragment_shader_module)
             .name(b"main\0")
             .build();
         let destroy_shader_module_s = move || unsafe {
-            vulkan_logical_device.destroy_shader_module(red_triangle_vertex_shader_module, None);
-            vulkan_logical_device.destroy_shader_module(red_triangle_fragment_shader_module, None);
-            vulkan_logical_device.destroy_shader_module(color_triangle_vertex_shader_module, None);
-            vulkan_logical_device.destroy_shader_module(color_triangle_fragment_shader_module, None);
-            vulkan_logical_device.destroy_shader_module(dynamic_triangle_vertex_shader_module, None);
+            vulkan_logical_device.destroy_shader_module(main_vertex_shader_module, None);
+            vulkan_logical_device.destroy_shader_module(main_fragment_shader_module, None);
         };
-        Ok((red_triangle_vertex_shader_stage_create_information,
-            red_triangle_fragment_vulkan_pipeline_shader_stage_create_information,
-            color_triangle_vertex_vulkan_pipeline_shader_stage_create_information,
-            color_triangle_fragment_vulkan_pipeline_shader_stage_create_information,
-            dynamic_triangle_vertex_vulkan_pipeline_shader_stage_create_information,
+        Ok((main_vertex_vulkan_pipeline_shader_stage_create_information,
+            main_fragment_vulkan_pipeline_shader_stage_create_information,
             Box::new(destroy_shader_module_s)))
     }
 
@@ -536,11 +497,8 @@ impl ApplicationInitialization {
               ErrorFoundationApplicationGuide>
     {
         type DD = ApplicationGraphicResourceDestroyDirective;
-        let (red_triangle_vertex_vulkan_pipeline_shader_stage_create_information,
-             red_triangle_fragment_vulkan_pipeline_shader_stage_create_information,
-             color_triangle_vertex_vulkan_pipeline_shader_stage_create_information,
-             color_triangle_fragment_vulkan_pipeline_shader_stage_create_information,
-             dynamic_triangle_vertex_vulkan_pipeline_shader_stage_create_information,
+        let (main_vertex_vulkan_pipeline_shader_stage_create_information,
+             main_fragment_vulkan_pipeline_shader_stage_create_information,
              destroy_shader_module_s)
             =
             Self::create_shader_module_s(vulkan_logical_device, config)?;
