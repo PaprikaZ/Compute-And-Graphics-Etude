@@ -1,5 +1,8 @@
 use std::vec::IntoIter;
 
+use ::library_foundation_reintroduction::vulkan::VulkanPipelineLayout;
+use ::library_foundation_reintroduction::vulkan::VulkanPipeline;
+use ::library_foundation_reintroduction::vulkan::VulkanImage;
 use ::library_foundation_reintroduction::vulkan::VulkanBuffer;
 use ::library_foundation_reintroduction::vulkan::VulkanDeviceMemory;
 
@@ -15,11 +18,9 @@ pub(super) enum ApplicationGraphicResourceDestroyDirective {
     DestroyVulkanSwapchainFrameBufferS,
     DestroyVulkanSwapchainImageViewS,
     DestroyVulkanImageDepthView,
-    DestroyVulkanPipelineTriangleRed,
-    DestroyVulkanPipelineTriangleColor,
-    DestroyVulkanPipelineMesh,
-    DestroyVulkanPipelineLayoutStatic,
-    DestroyVulkanPipelineLayoutDynamic,
+    DestroyVulkanPipelineLayout(VulkanPipelineLayout),
+    DestroyVulkanPipeline(VulkanPipeline),
+    DestroyVulkanImage(VulkanImage),
     DestroyVulkanBuffer(VulkanBuffer),
     FreeVulkanDeviceMemory(VulkanDeviceMemory),
 }
